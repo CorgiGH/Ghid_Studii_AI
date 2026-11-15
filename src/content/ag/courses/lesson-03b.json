@@ -1,0 +1,2036 @@
+{
+ "meta": {
+  "id": "ag-l03b",
+  "title": {
+   "en": "Lecția 3b: Dag-uri, ordonare topologică, substituție",
+   "ro": "Lecția 3b: Dag-uri, ordonare topologică, substituție"
+  },
+  "shortTitle": {
+   "en": "L3b: Dag-uri",
+   "ro": "L3b: Dag-uri"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Algoritmica grafurilor, cursul 3, UAIC FII (agr3.pdf)",
+   "ro": "Algoritmica grafurilor, cursul 3, UAIC FII (agr3.pdf)"
+  }
+ },
+ "steps": [
+  {
+   "id": "ag-l03b-s1",
+   "title": {
+    "en": "Șapte sarcini cu săgeți",
+    "ro": "Șapte sarcini cu săgeți"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Șapte sarcini</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"45\" x2=\"108\" y2=\"45\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"40.5\" y1=\"142.9\" x2=\"113.9\" y2=\"57.9\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→4</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"155\" x2=\"108\" y2=\"155\" marker-end=\"url(#ah-muted)\"/></g><g><title>3→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"141\" y1=\"45\" x2=\"208\" y2=\"45\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"135.8\" y1=\"143.2\" x2=\"213.6\" y2=\"57.6\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→6</title><line class=\"muted\" stroke-width=\"2\" x1=\"141\" y1=\"155\" x2=\"208\" y2=\"155\" marker-end=\"url(#ah-muted)\"/></g><g><title>5→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"239.2\" y1=\"52.4\" x2=\"314.9\" y2=\"92.1\" marker-end=\"url(#ah-muted)\"/></g><g><title>6→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"239.2\" y1=\"147.6\" x2=\"314.9\" y2=\"107.9\" marker-end=\"url(#ah-muted)\"/></g><g><title>1</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"50.5\" text-anchor=\"middle\">1</text></g><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"160.5\" text-anchor=\"middle\">2</text></g><g><title>3</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"125\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"50.5\" text-anchor=\"middle\">3</text></g><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"125\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"160.5\" text-anchor=\"middle\">4</text></g><g><title>5</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"225\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"50.5\" text-anchor=\"middle\">5</text></g><g><title>6</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"225\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"160.5\" text-anchor=\"middle\">6</text></g><g><title>7</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"330\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"105.5\" text-anchor=\"middle\">7</text></g></svg>",
+        "alt": {
+         "en": "Digraful T1: nodurile 1 până la 7; arcuri 1→3, 2→3, 2→4, 3→5, 4→5, 4→6, 5→7, 6→7. O săgeată u→v înseamnă că sarcina u se face înainte de v.",
+         "ro": "Digraful T1: nodurile 1 până la 7; arcuri 1→3, 2→3, 2→4, 3→5, 4→5, 4→6, 5→7, 6→7. O săgeată u→v înseamnă că sarcina u se face înainte de v."
+        },
+        "caption": {
+         "en": "O săgeată $u\\rightarrow v$: sarcina $u$ se face înainte de $v$.",
+         "ro": "O săgeată $u\\rightarrow v$: sarcina $u$ se face înainte de $v$."
+        }
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q1",
+     "question": {
+      "en": "Care sarcini pot începe prima dată?",
+      "ro": "Care sarcini pot începe prima dată?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "7, pentru că e ultima",
+        "ro": "7, pentru că e ultima"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pe 7 trebuie să-l facem la sfârșit: în el intră două săgeți.",
+        "ro": "Pe 7 trebuie să-l facem la sfârșit: în el intră două săgeți."
+       },
+       "misconception": "primul-nod-in-ordine"
+      },
+      {
+       "text": {
+        "en": "1 și 2: nu intră nicio săgeată în ele",
+        "ro": "1 și 2: nu intră nicio săgeată în ele"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: nimic nu trebuie făcut înainte de ele.",
+        "ro": "Corect: nimic nu trebuie făcut înainte de ele."
+       }
+      },
+      {
+       "text": {
+        "en": "Toate, în orice ordine",
+        "ro": "Toate, în orice ordine"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Săgețile impun o ordine.",
+        "ro": "Săgețile impun o ordine."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s2",
+   "title": {
+    "en": "Circuit și dag",
+    "ro": "Circuit și dag"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Un **circuit** e un drum care se întoarce în nodul de unde a plecat. Un digraf fără niciun circuit se numește **digraf aciclic** sau **dag**. Dacă $5\\rightarrow3$ ar exista în T1, nodurile $3\\rightarrow5\\rightarrow3$ ar forma un circuit și nicio ordine a sarcinilor nu ar merge.",
+      "ro": "Un **circuit** e un drum care se întoarce în nodul de unde a plecat. Un digraf fără niciun circuit se numește **digraf aciclic** sau **dag**. Dacă $5\\rightarrow3$ ar exista în T1, nodurile $3\\rightarrow5\\rightarrow3$ ar forma un circuit și nicio ordine a sarcinilor nu ar merge."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q2",
+     "question": {
+      "en": "Care din aceste digrafuri e un dag?",
+      "ro": "Care din aceste digrafuri e un dag?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Arcurile $1\\rightarrow2$, $2\\rightarrow3$, $3\\rightarrow1$",
+        "ro": "Arcurile $1\\rightarrow2$, $2\\rightarrow3$, $3\\rightarrow1$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Drumul $1\\rightarrow2\\rightarrow3\\rightarrow1$ e un circuit.",
+        "ro": "Drumul $1\\rightarrow2\\rightarrow3\\rightarrow1$ e un circuit."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "Arcurile $1\\rightarrow2$ și $2\\rightarrow1$",
+        "ro": "Arcurile $1\\rightarrow2$ și $2\\rightarrow1$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Două arce în sens opus formează un circuit de lungime 2.",
+        "ro": "Două arce în sens opus formează un circuit de lungime 2."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "Arcurile $1\\rightarrow2$, $2\\rightarrow3$, $1\\rightarrow3$",
+        "ro": "Arcurile $1\\rightarrow2$, $2\\rightarrow3$, $1\\rightarrow3$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: toate merg „înainte”; nu există drum de întoarcere.",
+        "ro": "Corect: toate merg „înainte”; nu există drum de întoarcere."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s3",
+   "title": {
+    "en": "Ordonare topologică",
+    "ro": "Ordonare topologică"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>T1 pe o linie: toate arcurile merg spre dreapta</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→3</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M33.8 89.1 Q74 52 113.5 88.5\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"90\" y1=\"100\" x2=\"109\" y2=\"100\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→4</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M85.8 89.1 Q126 52 165.5 88.5\" marker-end=\"url(#ah-muted)\"/></g><g><title>3→5</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M137.8 110.9 Q178 148 217.5 111.5\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"194\" y1=\"100\" x2=\"213\" y2=\"100\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→6</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M189.8 110.9 Q230 148 269.5 111.5\" marker-end=\"url(#ah-muted)\"/></g><g><title>5→7</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M241.8 89.1 Q282 52 321.5 88.5\" marker-end=\"url(#ah-muted)\"/></g><g><title>6→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"298\" y1=\"100\" x2=\"317\" y2=\"100\" marker-end=\"url(#ah-muted)\"/></g><g><title>1</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"22\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"22\" y=\"105.5\" text-anchor=\"middle\">1</text></g><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"74\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"74\" y=\"105.5\" text-anchor=\"middle\">2</text></g><g><title>3</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"126\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"126\" y=\"105.5\" text-anchor=\"middle\">3</text></g><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"178\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"178\" y=\"105.5\" text-anchor=\"middle\">4</text></g><g><title>5</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"230\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"230\" y=\"105.5\" text-anchor=\"middle\">5</text></g><g><title>6</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"282\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"282\" y=\"105.5\" text-anchor=\"middle\">6</text></g><g><title>7</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"334\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"334\" y=\"105.5\" text-anchor=\"middle\">7</text></g></svg>",
+        "alt": {
+         "en": "T1 așezat pe o linie în ordinea 1, 2, 3, 4, 5, 6, 7; toate arcurile merg spre dreapta.",
+         "ro": "T1 așezat pe o linie în ordinea 1, 2, 3, 4, 5, 6, 7; toate arcurile merg spre dreapta."
+        },
+        "caption": {
+         "en": "Același digraf, nodurile pe o linie în ordinea numerelor.",
+         "ro": "Același digraf, nodurile pe o linie în ordinea numerelor."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "O **ordonare topologică** dă fiecărui nod un număr distinct `ord[u]` de la 1 la $n$.",
+       "ro": "O **ordonare topologică** dă fiecărui nod un număr distinct `ord[u]` de la 1 la $n$."
+      },
+      {
+       "en": "Pentru fiecare arc $uv$ trebuie `ord[u] < ord[v]`: arcurile merg de la numărul mic la cel mare.",
+       "ro": "Pentru fiecare arc $uv$ trebuie `ord[u] < ord[v]`: arcurile merg de la numărul mic la cel mare."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q3",
+     "question": {
+      "en": "Pentru T1, care numerotare (în ordinea nodurilor 1..7) e topologică?",
+      "ro": "Pentru T1, care numerotare (în ordinea nodurilor 1..7) e topologică?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "1, 2, 3, 4, 5, 6, 7",
+        "ro": "1, 2, 3, 4, 5, 6, 7"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: fiecare arc merge spre un număr mai mare.",
+        "ro": "Corect: fiecare arc merge spre un număr mai mare."
+       }
+      },
+      {
+       "text": {
+        "en": "3, 1, 2, 4, 5, 6, 7 (nodul 3 primește 1)",
+        "ro": "3, 1, 2, 4, 5, 6, 7 (nodul 3 primește 1)"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Arcul $1\\rightarrow3$ ar merge de la 2 la 1: spre un număr mai mic.",
+        "ro": "Arcul $1\\rightarrow3$ ar merge de la 2 la 1: spre un număr mai mic."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "7, 6, 5, 4, 3, 2, 1",
+        "ro": "7, 6, 5, 4, 3, 2, 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Aceasta le obligă să meargă invers: arcul $1\\rightarrow3$ ar merge de la 7 la 5.",
+        "ro": "Aceasta le obligă să meargă invers: arcul $1\\rightarrow3$ ar merge de la 7 la 5."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s4",
+   "title": {
+    "en": "Pot exista mai multe ordini",
+    "ro": "Pot exista mai multe ordini"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Ordinea sarcinilor $2,4,6,1,3,5,7$ este și ea bună pentru T1: fiecare sarcină vine după cele de care depinde. T1 are 14 ordini în total.",
+      "ro": "Ordinea sarcinilor $2,4,6,1,3,5,7$ este și ea bună pentru T1: fiecare sarcină vine după cele de care depinde. T1 are 14 ordini în total."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q4",
+     "question": {
+      "en": "Un dag poate avea mai multe ordonări topologice?",
+      "ro": "Un dag poate avea mai multe ordonări topologice?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Da: dacă două noduri nu depind unul de altul, pot fi puse în oricare ordine",
+        "ro": "Da: dacă două noduri nu depind unul de altul, pot fi puse în oricare ordine"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: de aceea nu vorbim despre „ordinea”, ci despre „o ordonare”.",
+        "ro": "Corect: de aceea nu vorbim despre „ordinea”, ci despre „o ordonare”."
+       }
+      },
+      {
+       "text": {
+        "en": "Nu: există exact una",
+        "ro": "Nu: există exact una"
+       },
+       "correct": false,
+       "explain": {
+        "en": "T1 are 14.",
+        "ro": "T1 are 14."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Doar dacă are circuite",
+        "ro": "Doar dacă are circuite"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Un digraf cu circuit nu are nicio ordonare.",
+        "ro": "Un digraf cu circuit nu are nicio ordonare."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s5",
+   "title": {
+    "en": "Lema 1",
+    "ro": "Lema 1"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Lema 1",
+      "ro": "Lema 1"
+     },
+     "content": {
+      "en": "Un digraf este aciclic (dag) **exact atunci** când are o ordonare topologică.",
+      "ro": "Un digraf este aciclic (dag) **exact atunci** când are o ordonare topologică."
+     }
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Două direcții de arătat: dacă există ordonare, nu există circuit; dacă nu există circuit, putem construi o ordonare.",
+      "ro": "Două direcții de arătat: dacă există ordonare, nu există circuit; dacă nu există circuit, putem construi o ordonare."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s6",
+   "title": {
+    "en": "Dacă există ordonare, nu există circuit",
+    "ro": "Dacă există ordonare, nu există circuit"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ag-l03b-p1",
+     "claim": {
+      "en": "Dacă un digraf are o ordonare topologică `ord`, atunci nu are circuite.",
+      "ro": "Dacă un digraf are o ordonare topologică `ord`, atunci nu are circuite."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Presupunem că există un circuit $u_1\\rightarrow u_2\\rightarrow\\dots\\rightarrow u_k\\rightarrow u_1$.",
+        "ro": "Presupunem că există un circuit $u_1\\rightarrow u_2\\rightarrow\\dots\\rightarrow u_k\\rightarrow u_1$."
+       }
+      },
+      {
+       "shown": {
+        "en": "Fiecare arc crește numărul: `ord[u_1] < ord[u_2] < ... < ord[u_k]`.",
+        "ro": "Fiecare arc crește numărul: `ord[u_1] < ord[u_2] < ... < ord[u_k]`."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce spune arcul de întoarcere $u_k\\rightarrow u_1$ despre `ord[u_k]` și `ord[u_1]`?",
+         "ro": "Ce spune arcul de întoarcere $u_k\\rightarrow u_1$ despre `ord[u_k]` și `ord[u_1]`?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "`ord[u_k] > ord[u_1]`",
+           "ro": "`ord[u_k] > ord[u_1]`"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Orice arc merge spre un număr mai mare: `ord[u_k] < ord[u_1]`.",
+           "ro": "Orice arc merge spre un număr mai mare: `ord[u_k] < ord[u_1]`."
+          },
+          "misconception": "afirmatie-adevarata-negata"
+         },
+         {
+          "text": {
+           "en": "`ord[u_k] < ord[u_1]`",
+           "ro": "`ord[u_k] < ord[u_1]`"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: orice arc crește numărul.",
+           "ro": "Corect: orice arc crește numărul."
+          }
+         },
+         {
+          "text": {
+           "en": "Nu spune nimic",
+           "ro": "Nu spune nimic"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Spune ceva: și acest arc crește numărul.",
+           "ro": "Spune ceva: și acest arc crește numărul."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Dar atunci `ord[u_1] < ord[u_k] < ord[u_1]`: un număr mai mic decât el însuși. Imposibil.",
+        "ro": "Dar atunci `ord[u_1] < ord[u_k] < ord[u_1]`: un număr mai mic decât el însuși. Imposibil."
+       }
+      }
+     ],
+     "end": {
+      "en": "Deci o ordonare topologică exclude circuitele.",
+      "ro": "Deci o ordonare topologică exclude circuitele."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s7",
+   "title": {
+    "en": "Dacă nu există circuit: mersul înapoi",
+    "ro": "Dacă nu există circuit: mersul înapoi"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Mers înapoi din 7</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"45\" x2=\"108\" y2=\"45\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"40.5\" y1=\"142.9\" x2=\"113.9\" y2=\"57.9\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→4</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"155\" x2=\"108\" y2=\"155\" marker-end=\"url(#ah-muted)\"/></g><g><title>3→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"141\" y1=\"45\" x2=\"208\" y2=\"45\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"135.8\" y1=\"143.2\" x2=\"213.6\" y2=\"57.6\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→6</title><line class=\"muted\" stroke-width=\"2\" x1=\"141\" y1=\"155\" x2=\"208\" y2=\"155\" marker-end=\"url(#ah-muted)\"/></g><g><title>5→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"239.2\" y1=\"52.4\" x2=\"314.9\" y2=\"92.1\" marker-end=\"url(#ah-muted)\"/></g><g><title>6→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"239.2\" y1=\"147.6\" x2=\"314.9\" y2=\"107.9\" marker-end=\"url(#ah-muted)\"/></g><g><title>1</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"30\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"50.5\" text-anchor=\"middle\">1</text></g><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"160.5\" text-anchor=\"middle\">2</text></g><g><title>3</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"125\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"50.5\" text-anchor=\"middle\">3</text></g><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"125\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"160.5\" text-anchor=\"middle\">4</text></g><g><title>5</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"225\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"50.5\" text-anchor=\"middle\">5</text></g><g><title>6</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"225\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"160.5\" text-anchor=\"middle\">6</text></g><g><title>7</title><circle class=\"fill-bg accent\" stroke-width=\"3\" cx=\"330\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"105.5\" text-anchor=\"middle\">7</text></g></svg>",
+        "alt": {
+         "en": "T1 cu drumul înapoi 7, 5, 3, 1 marcat.",
+         "ro": "T1 cu drumul înapoi 7, 5, 3, 1 marcat."
+        },
+        "caption": {
+         "en": "Din 7 mergem înapoi pe un arc care intră: 7, 5, 3, 1.",
+         "ro": "Din 7 mergem înapoi pe un arc care intră: 7, 5, 3, 1."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Pornești din orice nod, de exemplu 7, și mergi înapoi pe un arc care intră.",
+       "ro": "Pornești din orice nod, de exemplu 7, și mergi înapoi pe un arc care intră."
+      },
+      {
+       "en": "Din 7: spre 5; din 5: spre 3; din 3: spre 1.",
+       "ro": "Din 7: spre 5; din 5: spre 3; din 3: spre 1."
+      },
+      {
+       "en": "În 1 nu intră niciun arc: s-ai oprit.",
+       "ro": "În 1 nu intră niciun arc: s-ai oprit."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q5",
+     "question": {
+      "en": "De ce se oprește mersul înapoi mereu, într-un dag?",
+      "ro": "De ce se oprește mersul înapoi mereu, într-un dag?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Pentru că toate nodurile au gradul de intrare 1",
+        "ro": "Pentru că toate nodurile au gradul de intrare 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Au grade diferite: în 1 și 2 nu intră nimic.",
+        "ro": "Au grade diferite: în 1 și 2 nu intră nimic."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Nu poate repeta un nod (ar fi circuit) și nodurile sunt puține",
+        "ro": "Nu poate repeta un nod (ar fi circuit) și nodurile sunt puține"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: într-un dag, un nod repetat ar închide un circuit. Deci ajunge la un nod fără arc care intră.",
+        "ro": "Corect: într-un dag, un nod repetat ar închide un circuit. Deci ajunge la un nod fără arc care intră."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că se oprește când a trecut prin 7 noduri",
+        "ro": "Pentru că se oprește când a trecut prin 7 noduri"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se oprește când ajunge într-un nod fără predecesori.",
+        "ro": "Se oprește când ajunge într-un nod fără predecesori."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s8",
+   "title": {
+    "en": "Inducția: nodul fără arce de intrare primește 1",
+    "ro": "Inducția: nodul fără arce de intrare primește 1"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Fie $v_0$ un nod fără arce care intră (gradul de intrare 0). Îi dăm numărul 1. Din digraf scoatem $v_0$: rămâne tot un dag, cu $n-1$ noduri, deci are o ordonare `ord`'. Punem `ord[v] = 1` pentru $v_0$ și `ord[v] = ord'[v] + 1` pentru celelalte.",
+      "ro": "Fie $v_0$ un nod fără arce care intră (gradul de intrare 0). Îi dăm numărul 1. Din digraf scoatem $v_0$: rămâne tot un dag, cu $n-1$ noduri, deci are o ordonare `ord`'. Punem `ord[v] = 1` pentru $v_0$ și `ord[v] = ord'[v] + 1` pentru celelalte."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q6",
+     "question": {
+      "en": "Cum știm că arcele care ies din $v_0$ respectă ordinea?",
+      "ro": "Cum știm că arcele care ies din $v_0$ respectă ordinea?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$v_0$ are numărul 1, cel mai mic: orice arc din $v_0$ merge spre un număr mai mare",
+        "ro": "$v_0$ are numărul 1, cel mai mic: orice arc din $v_0$ merge spre un număr mai mare"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect. Iar arcele dintre celelalte noduri păstrează ordinea lui `ord'`, mărită cu 1.",
+        "ro": "Corect. Iar arcele dintre celelalte noduri păstrează ordinea lui `ord'`, mărită cu 1."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că le scoatem din digraf",
+        "ro": "Pentru că le scoatem din digraf"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Le scoatem doar pentru a construi `ord'`; în ordinea finală contează și ele.",
+        "ro": "Le scoatem doar pentru a construi `ord'`; în ordinea finală contează și ele."
+       },
+       "misconception": "nod-lasat-in-afara"
+      },
+      {
+       "text": {
+        "en": "Pentru că $v_0$ e ultimul",
+        "ro": "Pentru că $v_0$ e ultimul"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Primește numărul 1, nu ultimul.",
+        "ro": "Primește numărul 1, nu ultimul."
+       },
+       "misconception": "primul-nod-in-ordine"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s9",
+   "title": {
+    "en": "Algoritmul de recunoaștere",
+    "ro": "Algoritmul de recunoaștere"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Gradele de intrare</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"45\" x2=\"108\" y2=\"45\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"40.5\" y1=\"142.9\" x2=\"113.9\" y2=\"57.9\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→4</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"155\" x2=\"108\" y2=\"155\" marker-end=\"url(#ah-muted)\"/></g><g><title>3→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"141\" y1=\"45\" x2=\"208\" y2=\"45\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"135.8\" y1=\"143.2\" x2=\"213.6\" y2=\"57.6\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→6</title><line class=\"muted\" stroke-width=\"2\" x1=\"141\" y1=\"155\" x2=\"208\" y2=\"155\" marker-end=\"url(#ah-muted)\"/></g><g><title>5→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"239.2\" y1=\"52.4\" x2=\"314.9\" y2=\"92.1\" marker-end=\"url(#ah-muted)\"/></g><g><title>6→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"239.2\" y1=\"147.6\" x2=\"314.9\" y2=\"107.9\" marker-end=\"url(#ah-muted)\"/></g><g><title>1</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"50.5\" text-anchor=\"middle\">1</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"24\" text-anchor=\"middle\">0</text><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"160.5\" text-anchor=\"middle\">2</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"187\" text-anchor=\"middle\">0</text><g><title>3</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"125\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"50.5\" text-anchor=\"middle\">3</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"24\" text-anchor=\"middle\">2</text><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"125\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"160.5\" text-anchor=\"middle\">4</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"187\" text-anchor=\"middle\">1</text><g><title>5</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"225\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"50.5\" text-anchor=\"middle\">5</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"24\" text-anchor=\"middle\">2</text><g><title>6</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"225\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"160.5\" text-anchor=\"middle\">6</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"187\" text-anchor=\"middle\">1</text><g><title>7</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"330\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"105.5\" text-anchor=\"middle\">7</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"132\" text-anchor=\"middle\">2</text></svg>",
+        "alt": {
+         "en": "T1 cu gradele de intrare sub noduri: 1:0, 2:0, 3:2, 4:1, 5:2, 6:1, 7:2.",
+         "ro": "T1 cu gradele de intrare sub noduri: 1:0, 2:0, 3:2, 4:1, 5:2, 6:1, 7:2."
+        },
+        "caption": {
+         "en": "Numărul de sub nod: gradul de intrare $d^-$.",
+         "ro": "Numărul de sub nod: gradul de intrare $d^-$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "**Gradul de intrare** $d^-[u]$ e numărul arcelor care intră în $u$. Ținem vectorul $d^-[u]$, un contor `count`=0 și mulțimea $S$ a nodurilor cu $d^-=0$ (coadă sau stivă).",
+       "ro": "**Gradul de intrare** $d^-[u]$ e numărul arcelor care intră în $u$. Ținem vectorul $d^-[u]$, un contor `count`=0 și mulțimea $S$ a nodurilor cu $d^-=0$ (coadă sau stivă)."
+      },
+      {
+       "en": "Cât timp $S$ nu e goală: scoți un nod $v$, `count` crește cu 1, `ord[v] = count`.",
+       "ro": "Cât timp $S$ nu e goală: scoți un nod $v$, `count` crește cu 1, `ord[v] = count`."
+      },
+      {
+       "en": "Pentru fiecare arc $vw$: scazi $d^-[w]$ cu 1; dacă ajunge la 0, pui $w$ în $S$.",
+       "ro": "Pentru fiecare arc $vw$: scazi $d^-[w]$ cu 1; dacă ajunge la 0, pui $w$ în $S$."
+      }
+     ],
+     "result": {
+      "en": "La final: dacă `count = n`, răspunsul e „da” și `ord` e ordonarea; altfel „nu”.",
+      "ro": "La final: dacă `count = n`, răspunsul e „da” și `ord` e ordonarea; altfel „nu”."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s10",
+   "title": {
+    "en": "Algoritmul pe T1, prima parte",
+    "ro": "Algoritmul pe T1, prima parte"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ag-l03b-p2",
+     "claim": {
+      "en": "Rulăm algoritmul pe T1 cu $S$ coadă. La început $d^-=(0,0,2,1,2,1,2)$ și $S=(1,2)$.",
+      "ro": "Rulăm algoritmul pe T1 cu $S$ coadă. La început $d^-=(0,0,2,1,2,1,2)$ și $S=(1,2)$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Scoatem 1: `ord[1]=1`, `count=1`. Arcul $1\\rightarrow3$: $d^-[3]$ scade de la 2 la 1.",
+        "ro": "Scoatem 1: `ord[1]=1`, `count=1`. Arcul $1\\rightarrow3$: $d^-[3]$ scade de la 2 la 1."
+       },
+       "predict": {
+        "question": {
+         "en": "Intră vreun nod nou în $S$ după scoaterea lui 1?",
+         "ro": "Intră vreun nod nou în $S$ după scoaterea lui 1?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Nu: $d^-[3]=1$, nu 0",
+           "ro": "Nu: $d^-[3]=1$, nu 0"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: 3 mai are un predecesor, 2.",
+           "ro": "Corect: 3 mai are un predecesor, 2."
+          }
+         },
+         {
+          "text": {
+           "en": "Da, nodul 3",
+           "ro": "Da, nodul 3"
+          },
+          "correct": false,
+          "explain": {
+           "en": "$d^-[3]$ e 1, mai așteaptă nodul 2.",
+           "ro": "$d^-[3]$ e 1, mai așteaptă nodul 2."
+          },
+          "misconception": "schimbare-fara-scadere"
+         },
+         {
+          "text": {
+           "en": "Da, nodul 4",
+           "ro": "Da, nodul 4"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Din 1 nu pleacă arc spre 4.",
+           "ro": "Din 1 nu pleacă arc spre 4."
+          },
+          "misconception": "caz-particular"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Scoatem 2: `ord[2]=2`. Arcele $2\\rightarrow3$ și $2\\rightarrow4$: $d^-[3]=0$, $d^-[4]=0$; intră 3 și 4 în $S$.",
+        "ro": "Scoatem 2: `ord[2]=2`. Arcele $2\\rightarrow3$ și $2\\rightarrow4$: $d^-[3]=0$, $d^-[4]=0$; intră 3 și 4 în $S$."
+       },
+       "predict": {
+        "question": {
+         "en": "După 2, ce conține $S$?",
+         "ro": "După 2, ce conține $S$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "doar 3",
+           "ro": "doar 3"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Și $d^-[4]$ a ajuns la 0 (avea doar predecesorul 2).",
+           "ro": "Și $d^-[4]$ a ajuns la 0 (avea doar predecesorul 2)."
+          },
+          "misconception": "un-singur-termen"
+         },
+         {
+          "text": {
+           "en": "3, 4, 5",
+           "ro": "3, 4, 5"
+          },
+          "correct": false,
+          "explain": {
+           "en": "5 mai are predecesori (3 și 4).",
+           "ro": "5 mai are predecesori (3 și 4)."
+          },
+          "misconception": "schimbare-fara-scadere"
+         },
+         {
+          "text": {
+           "en": "3, 4",
+           "ro": "3, 4"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Scoatem 3: `ord[3]=3`; $5\\rightarrow$ $d^-[5]$ scade de la 2 la 1. Scoatem 4: `ord[4]=4`; $d^-[5]=0$ și $d^-[6]=0$: intră 5 și 6.",
+        "ro": "Scoatem 3: `ord[3]=3`; $5\\rightarrow$ $d^-[5]$ scade de la 2 la 1. Scoatem 4: `ord[4]=4`; $d^-[5]=0$ și $d^-[6]=0$: intră 5 și 6."
+       }
+      }
+     ],
+     "end": {
+      "en": "După patru scoateri: `count=4`, `S=(5,6)`.",
+      "ro": "După patru scoateri: `count=4`, `S=(5,6)`."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s11",
+   "title": {
+    "en": "Algoritmul pe T1, sfârșitul",
+    "ro": "Algoritmul pe T1, sfârșitul"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "Scoatem 5: `ord[5]=5`; $d^-[7]$ scade de la 2 la 1.",
+       "ro": "Scoatem 5: `ord[5]=5`; $d^-[7]$ scade de la 2 la 1."
+      },
+      {
+       "en": "Scoatem 6: `ord[6]=6`; $d^-[7]=0$: intră 7.",
+       "ro": "Scoatem 6: `ord[6]=6`; $d^-[7]=0$: intră 7."
+      },
+      {
+       "en": "Scoatem 7: `ord[7]=7`. `count=7=n`: răspunsul este „da”.",
+       "ro": "Scoatem 7: `ord[7]=7`. `count=7=n`: răspunsul este „da”."
+      }
+     ],
+     "result": {
+      "en": "Ordonarea: `ord = (1,2,3,4,5,6,7)`.",
+      "ro": "Ordonarea: `ord = (1,2,3,4,5,6,7)`."
+     }
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03b-q7",
+     "status": "ruled",
+     "statement": {
+      "en": "După ce au fost scoase nodurile 3 și 4 (și 1, 2): cât este $d^-[5]$?",
+      "ro": "După ce au fost scoase nodurile 3 și 4 (și 1, 2): cât este $d^-[5]$?"
+     },
+     "fields": [
+      {
+       "id": "d5",
+       "kind": "num",
+       "label": {
+        "en": "gradul de intrare cerut",
+        "ro": "gradul de intrare cerut"
+       },
+       "formula": "0",
+       "expected": 0
+      },
+      {
+       "id": "cnt",
+       "kind": "num",
+       "label": {
+        "en": "`count`",
+        "ro": "`count`"
+       },
+       "formula": "4",
+       "expected": 4
+      }
+     ],
+     "hints": [
+      {
+       "en": "Nodul 5 primește arce din 3 și din 4.",
+       "ro": "Nodul 5 primește arce din 3 și din 4."
+      },
+      {
+       "en": "Fiecare scoatere scade $d^-[5]$ cu 1; de la 2.",
+       "ro": "Fiecare scoatere scade $d^-[5]$ cu 1; de la 2."
+      },
+      {
+       "en": "$2-1-1=0$ și au fost scoase 4 noduri.",
+       "ro": "$2-1-1=0$ și au fost scoase 4 noduri."
+      }
+     ],
+     "solution": {
+      "en": "Gradul 2 a scăzut la 1 (după 3) și la 0 (după 4). Au fost scoase 4 noduri: `count=4`.",
+      "ro": "Gradul 2 a scăzut la 1 (după 3) și la 0 (după 4). Au fost scoase 4 noduri: `count=4`."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe digraful 1→2, 1→3, 2→4, 3→4: după scoaterea lui 1 și 2, cât e $d^-[4]$ și cât e `count`?",
+        "ro": "Pe digraful 1→2, 1→3, 2→4, 3→4: după scoaterea lui 1 și 2, cât e $d^-[4]$ și cât e `count`?"
+       },
+       "solution": {
+        "en": "$d^-[4]$ începe la 2; scoaterea lui 2 îl scade la 1 (nodul 3 nu a fost încă scos). `count=2`.",
+        "ro": "$d^-[4]$ începe la 2; scoaterea lui 2 îl scade la 1 (nodul 3 nu a fost încă scos). `count=2`."
+       },
+       "fields": [
+        {
+         "id": "d5",
+         "formula": "1",
+         "expected": 1
+        },
+        {
+         "id": "cnt",
+         "formula": "2",
+         "expected": 2
+        }
+       ]
+      }
+     ],
+     "detectors": [
+      {
+       "field": "d5",
+       "formula": "1",
+       "message": {
+        "en": "Ai scăzut doar pentru un predecesor. 5 are doi: 3 și 4.",
+        "ro": "Ai scăzut doar pentru un predecesor. 5 are doi: 3 și 4."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s12",
+   "title": {
+    "en": "Stivă în loc de coadă",
+    "ro": "Stivă în loc de coadă"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "$S$ poate fi coadă sau stivă. Cu stiva scoți ultimul nod pus: pe T1 apare ordinea $2,4,6,1,3,5,7$. E tot o ordonare topologică.",
+      "ro": "$S$ poate fi coadă sau stivă. Cu stiva scoți ultimul nod pus: pe T1 apare ordinea $2,4,6,1,3,5,7$. E tot o ordonare topologică."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q8",
+     "question": {
+      "en": "Cu $S$ stivă pe T1 (încep 1 și 2 în $S$, se scoate ultimul pus), prima scoatere e 2. Este ordinea obținută corectă?",
+      "ro": "Cu $S$ stivă pe T1 (încep 1 și 2 în $S$, se scoate ultimul pus), prima scoatere e 2. Este ordinea obținută corectă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Nu: doar coada e corectă",
+        "ro": "Nu: doar coada e corectă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Slide-ul spune „coadă sau stivă”.",
+        "ro": "Slide-ul spune „coadă sau stivă”."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Nu: 2 nu poate fi înaintea lui 1",
+        "ro": "Nu: 2 nu poate fi înaintea lui 1"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu depind unul de altul.",
+        "ro": "Nu depind unul de altul."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "Da: orice ordine de scoatere a nodurilor cu $d^-=0$ dă o ordonare topologică",
+        "ro": "Da: orice ordine de scoatere a nodurilor cu $d^-=0$ dă o ordonare topologică"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect.",
+        "ro": "Corect."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s13",
+   "title": {
+    "en": "Când algoritmul spune „nu”",
+    "ro": "Când algoritmul spune „nu”"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>T1 cu arcul 5 spre 3</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"45\" x2=\"108\" y2=\"45\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"40.5\" y1=\"142.9\" x2=\"113.9\" y2=\"57.9\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→4</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"155\" x2=\"108\" y2=\"155\" marker-end=\"url(#ah-muted)\"/></g><g><title>3→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"141\" y1=\"45\" x2=\"208\" y2=\"45\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→5</title><line class=\"muted\" stroke-width=\"2\" x1=\"135.8\" y1=\"143.2\" x2=\"213.6\" y2=\"57.6\" marker-end=\"url(#ah-muted)\"/></g><g><title>4→6</title><line class=\"muted\" stroke-width=\"2\" x1=\"141\" y1=\"155\" x2=\"208\" y2=\"155\" marker-end=\"url(#ah-muted)\"/></g><g><title>5→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"239.2\" y1=\"52.4\" x2=\"314.9\" y2=\"92.1\" marker-end=\"url(#ah-muted)\"/></g><g><title>6→7</title><line class=\"muted\" stroke-width=\"2\" x1=\"239.2\" y1=\"147.6\" x2=\"314.9\" y2=\"107.9\" marker-end=\"url(#ah-muted)\"/></g><g><title>5→3</title><line class=\"bad\" stroke-width=\"3\" x1=\"209\" y1=\"45\" x2=\"142\" y2=\"45\" marker-end=\"url(#ah-bad)\"/></g><g><title>1</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"50.5\" text-anchor=\"middle\">1</text></g><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"160.5\" text-anchor=\"middle\">2</text></g><g><title>3</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"125\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"50.5\" text-anchor=\"middle\">3</text></g><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"125\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"125\" y=\"160.5\" text-anchor=\"middle\">4</text></g><g><title>5</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"225\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"50.5\" text-anchor=\"middle\">5</text></g><g><title>6</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"225\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"225\" y=\"160.5\" text-anchor=\"middle\">6</text></g><g><title>7</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"330\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"105.5\" text-anchor=\"middle\">7</text></g></svg>",
+        "alt": {
+         "en": "T1 cu arcul adăugat 5→3 (roșu): circuitul 3→5→3.",
+         "ro": "T1 cu arcul adăugat 5→3 (roșu): circuitul 3→5→3."
+        },
+        "caption": {
+         "en": "Arcul roșu $5\\rightarrow3$ închide circuitul $3\\rightarrow5\\rightarrow3$.",
+         "ro": "Arcul roșu $5\\rightarrow3$ închide circuitul $3\\rightarrow5\\rightarrow3$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Acum $d^-[3]=3$. Nodurile 3, 5, 7 nu ajung niciodată la grad 0.",
+       "ro": "Acum $d^-[3]=3$. Nodurile 3, 5, 7 nu ajung niciodată la grad 0."
+      },
+      {
+       "en": "Se scot doar 1, 2, 4, 6: `count=4<7`: răspunsul „nu”.",
+       "ro": "Se scot doar 1, 2, 4, 6: `count=4<7`: răspunsul „nu”."
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03b-q9",
+     "status": "ruled",
+     "statement": {
+      "en": "Cu arcul $5\\rightarrow3$ adăugat, algoritmul se oprește. Cât este `count` atunci?",
+      "ro": "Cu arcul $5\\rightarrow3$ adăugat, algoritmul se oprește. Cât este `count` atunci?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "`count`",
+        "ro": "`count`"
+       },
+       "formula": "4",
+       "expected": 4
+      }
+     ],
+     "hints": [
+      {
+       "en": "Care noduri mai pot fi scoase?",
+       "ro": "Care noduri mai pot fi scoase?"
+      },
+      {
+       "en": "Doar cele din afara circuitului și ale căror predecesori au ieșit: 1, 2, 4, 6.",
+       "ro": "Doar cele din afara circuitului și ale căror predecesori au ieșit: 1, 2, 4, 6."
+      },
+      {
+       "en": "Sunt 4 noduri.",
+       "ro": "Sunt 4 noduri."
+      }
+     ],
+     "solution": {
+      "en": "Se scot 1, 2, 4 și 6. Nodurile 3, 5, 7 rămân: `count=4`.",
+      "ro": "Se scot 1, 2, 4 și 6. Nodurile 3, 5, 7 rămân: `count=4`."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe digraful 1→2, 2→3, 3→2 (circuit între 2 și 3), cât este `count` la oprire?",
+        "ro": "Pe digraful 1→2, 2→3, 3→2 (circuit între 2 și 3), cât este `count` la oprire?"
+       },
+       "solution": {
+        "en": "Se scoate doar 1; apoi 2 și 3 așteaptă unul pe altul: `count=1`.",
+        "ro": "Se scoate doar 1; apoi 2 și 3 așteaptă unul pe altul: `count=1`."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "1",
+         "expected": 1
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s14",
+   "title": {
+    "en": "Cât durează",
+    "ro": "Cât durează"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Fiecare nod intră o dată în $S$ și iese o dată; fiecare arc e privit o dată, când iese nodul din care pleacă. Total: $O(n+m)$. Pe T1: $n=7$, $m=8$.",
+      "ro": "Fiecare nod intră o dată în $S$ și iese o dată; fiecare arc e privit o dată, când iese nodul din care pleacă. Total: $O(n+m)$. Pe T1: $n=7$, $m=8$."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q10",
+     "question": {
+      "en": "Câte arce sunt privite în total?",
+      "ro": "Câte arce sunt privite în total?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Fiecare arc de $n$ ori",
+        "ro": "Fiecare arc de $n$ ori"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Un arc e privit doar când iese nodul din care pleacă.",
+        "ro": "Un arc e privit doar când iese nodul din care pleacă."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Doar arcele din ordonare",
+        "ro": "Doar arcele din ordonare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Toate arcele sunt privite.",
+        "ro": "Toate arcele sunt privite."
+       },
+       "misconception": "nod-lasat-in-afara"
+      },
+      {
+       "text": {
+        "en": "Fiecare arc o dată: $m$",
+        "ro": "Fiecare arc o dată: $m$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: de aceea timpul e liniar, $O(n+m)$.",
+        "ro": "Corect: de aceea timpul e liniar, $O(n+m)$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s15",
+   "title": {
+    "en": "Costuri pe un dag: nodurile pe o linie",
+    "ro": "Costuri pe un dag: nodurile pe o linie"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>D pe o linie</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→c: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"44\" y1=\"100\" x2=\"72\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"51.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"58.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>s→a: 7</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M40.2 89.6 Q89 48 137.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"81.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"88.8\" y=\"73.6\" text-anchor=\"middle\">7</text></g><g><title>c→a: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"105\" y1=\"100\" x2=\"133\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"112.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"119.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>c→e: 6</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M101.2 110.4 Q150 152 198.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"142.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"149.8\" y=\"136.4\" text-anchor=\"middle\">6</text></g><g><title>a→e: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"166\" y1=\"100\" x2=\"194\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180.5\" y=\"116\" text-anchor=\"middle\">1</text></g><g><title>a→b: 5</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M162.2 89.6 Q211 48 259.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"203.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210.8\" y=\"73.6\" text-anchor=\"middle\">5</text></g><g><title>e→b: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"227\" y1=\"100\" x2=\"255\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"234.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"241.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>e→d: 8</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M223.2 110.4 Q272 152 320.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"264.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"271.8\" y=\"136.4\" text-anchor=\"middle\">8</text></g><g><title>b→d: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"288\" y1=\"100\" x2=\"316\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"295.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"302.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"28\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"105.5\" text-anchor=\"middle\">s</text></g><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"89\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"105.5\" text-anchor=\"middle\">c</text></g><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"105.5\" text-anchor=\"middle\">a</text></g><g><title>e</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"211\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"211\" y=\"105.5\" text-anchor=\"middle\">e</text></g><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"272\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"272\" y=\"105.5\" text-anchor=\"middle\">b</text></g><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"333\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"333\" y=\"105.5\" text-anchor=\"middle\">d</text></g></svg>",
+        "alt": {
+         "en": "Dag-ul D cu nodurile în ordinea s, c, a, e, b, d; arcuri: s→c 2, s→a 7, c→a 3, c→e 6, a→e 1, a→b 5, e→b 2, e→d 8, b→d 3.",
+         "ro": "Dag-ul D cu nodurile în ordinea s, c, a, e, b, d; arcuri: s→c 2, s→a 7, c→a 3, c→e 6, a→e 1, a→b 5, e→b 2, e→d 8, b→d 3."
+        },
+        "caption": {
+         "en": "Dag-ul D, nodurile în ordine topologică: $s,c,a,e,b,d$.",
+         "ro": "Dag-ul D, nodurile în ordine topologică: $s,c,a,e,b,d$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Pornim din $s$: costul minim spre fiecare nod. Nodurile sunt deja în ordine topologică.",
+       "ro": "Pornim din $s$: costul minim spre fiecare nod. Nodurile sunt deja în ordine topologică."
+      },
+      {
+       "en": "Când ajungem la un nod $i$, toate arcele care intră în $i$ pleacă din noduri deja rezolvate.",
+       "ro": "Când ajungem la un nod $i$, toate arcele care intră în $i$ pleacă din noduri deja rezolvate."
+      },
+      {
+       "en": "Deci $u_i=\\min$ peste arcele $ji$ din $u_j+a_{ji}$: **substituție**, fără alegeri.",
+       "ro": "Deci $u_i=\\min$ peste arcele $ji$ din $u_j+a_{ji}$: **substituție**, fără alegeri."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q11",
+     "question": {
+      "en": "De ce nu e nevoie să alegem un „cel mai mic $u$” ca la Dijkstra?",
+      "ro": "De ce nu e nevoie să alegem un „cel mai mic $u$” ca la Dijkstra?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Ordinea topologică garantează că predecesorii sunt gata",
+        "ro": "Ordinea topologică garantează că predecesorii sunt gata"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: nici costurile negative nu strică.",
+        "ro": "Corect: nici costurile negative nu strică."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că nu există costuri",
+        "ro": "Pentru că nu există costuri"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Costurile există; ordinea ține locul alegerii.",
+        "ro": "Costurile există; ordinea ține locul alegerii."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Pentru că dag-ul are un singur drum",
+        "ro": "Pentru că dag-ul are un singur drum"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pot fi mai multe drumuri.",
+        "ro": "Pot fi mai multe drumuri."
+       },
+       "misconception": "caz-particular"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s16",
+   "title": {
+    "en": "Substituția pe D, pas cu pas",
+    "ro": "Substituția pe D, pas cu pas"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ag-l03b-p3",
+     "claim": {
+      "en": "Substituție pe D: $u_s=0$, `before[s]=0`, apoi nodurile în ordinea $c,a,e,b,d$.",
+      "ro": "Substituție pe D: $u_s=0$, `before[s]=0`, apoi nodurile în ordinea $c,a,e,b,d$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$c$: intră doar $s\\rightarrow c$. $u_c=0+2=2$, `before[c]=s`.",
+        "ro": "$c$: intră doar $s\\rightarrow c$. $u_c=0+2=2$, `before[c]=s`."
+       },
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>u_c=2</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→c: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"44\" y1=\"100\" x2=\"72\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"51.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"58.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>s→a: 7</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M40.2 89.6 Q89 48 137.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"81.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"88.8\" y=\"73.6\" text-anchor=\"middle\">7</text></g><g><title>c→a: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"105\" y1=\"100\" x2=\"133\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"112.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"119.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>c→e: 6</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M101.2 110.4 Q150 152 198.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"142.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"149.8\" y=\"136.4\" text-anchor=\"middle\">6</text></g><g><title>a→e: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"166\" y1=\"100\" x2=\"194\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180.5\" y=\"116\" text-anchor=\"middle\">1</text></g><g><title>a→b: 5</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M162.2 89.6 Q211 48 259.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"203.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210.8\" y=\"73.6\" text-anchor=\"middle\">5</text></g><g><title>e→b: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"227\" y1=\"100\" x2=\"255\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"234.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"241.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>e→d: 8</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M223.2 110.4 Q272 152 320.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"264.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"271.8\" y=\"136.4\" text-anchor=\"middle\">8</text></g><g><title>b→d: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"288\" y1=\"100\" x2=\"316\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"295.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"302.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"28\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"105.5\" text-anchor=\"middle\">s</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"132\" text-anchor=\"middle\">0</text><g><title>c</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"89\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"105.5\" text-anchor=\"middle\">c</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"132\" text-anchor=\"middle\">2</text><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"105.5\" text-anchor=\"middle\">a</text></g><g><title>e</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"211\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"211\" y=\"105.5\" text-anchor=\"middle\">e</text></g><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"272\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"272\" y=\"105.5\" text-anchor=\"middle\">b</text></g><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"333\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"333\" y=\"105.5\" text-anchor=\"middle\">d</text></g></svg>",
+        "alt": {
+         "en": "D cu u_s=0 și u_c=2.",
+         "ro": "D cu u_s=0 și u_c=2."
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "$a$: intră $s\\rightarrow a$ (7) și $c\\rightarrow a$ ($2+3$). $u_a=\\min(7,5)=5$, `before[a]=c`.",
+        "ro": "$a$: intră $s\\rightarrow a$ (7) și $c\\rightarrow a$ ($2+3$). $u_a=\\min(7,5)=5$, `before[a]=c`."
+       },
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>u_a=5</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→c: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"44\" y1=\"100\" x2=\"72\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"51.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"58.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>s→a: 7</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M40.2 89.6 Q89 48 137.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"81.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"88.8\" y=\"73.6\" text-anchor=\"middle\">7</text></g><g><title>c→a: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"105\" y1=\"100\" x2=\"133\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"112.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"119.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>c→e: 6</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M101.2 110.4 Q150 152 198.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"142.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"149.8\" y=\"136.4\" text-anchor=\"middle\">6</text></g><g><title>a→e: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"166\" y1=\"100\" x2=\"194\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180.5\" y=\"116\" text-anchor=\"middle\">1</text></g><g><title>a→b: 5</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M162.2 89.6 Q211 48 259.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"203.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210.8\" y=\"73.6\" text-anchor=\"middle\">5</text></g><g><title>e→b: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"227\" y1=\"100\" x2=\"255\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"234.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"241.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>e→d: 8</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M223.2 110.4 Q272 152 320.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"264.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"271.8\" y=\"136.4\" text-anchor=\"middle\">8</text></g><g><title>b→d: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"288\" y1=\"100\" x2=\"316\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"295.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"302.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"28\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"105.5\" text-anchor=\"middle\">s</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"132\" text-anchor=\"middle\">0</text><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"89\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"105.5\" text-anchor=\"middle\">c</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"132\" text-anchor=\"middle\">2</text><g><title>a</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"150\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"105.5\" text-anchor=\"middle\">a</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"132\" text-anchor=\"middle\">5</text><g><title>e</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"211\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"211\" y=\"105.5\" text-anchor=\"middle\">e</text></g><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"272\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"272\" y=\"105.5\" text-anchor=\"middle\">b</text></g><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"333\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"333\" y=\"105.5\" text-anchor=\"middle\">d</text></g></svg>",
+        "alt": {
+         "en": "D cu u_a=5.",
+         "ro": "D cu u_a=5."
+        }
+       },
+       "predict": {
+        "question": {
+         "en": "Cât este $u_a$?",
+         "ro": "Cât este $u_a$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "7, arcul direct",
+           "ro": "7, arcul direct"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Verifică și drumul prin $c$: $2+3=5$.",
+           "ro": "Verifică și drumul prin $c$: $2+3=5$."
+          },
+          "misconception": "arc-direct-ajunge"
+         },
+         {
+          "text": {
+           "en": "3",
+           "ro": "3"
+          },
+          "correct": false,
+          "explain": {
+           "en": "3 e costul arcului $c\\rightarrow a$ fără $u_c$.",
+           "ro": "3 e costul arcului $c\\rightarrow a$ fără $u_c$."
+          },
+          "misconception": "cost-arc-fara-u"
+         },
+         {
+          "text": {
+           "en": "5, prin $c$",
+           "ro": "5, prin $c$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $\\min(0+7,\\;2+3)=5$.",
+           "ro": "Corect: $\\min(0+7,\\;2+3)=5$."
+          }
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "$e$: din $c$: $2+6=8$; din $a$: $5+1=6$. $u_e=6$, `before[e]=a`.",
+        "ro": "$e$: din $c$: $2+6=8$; din $a$: $5+1=6$. $u_e=6$, `before[e]=a`."
+       },
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>u_e=6</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→c: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"44\" y1=\"100\" x2=\"72\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"51.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"58.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>s→a: 7</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M40.2 89.6 Q89 48 137.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"81.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"88.8\" y=\"73.6\" text-anchor=\"middle\">7</text></g><g><title>c→a: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"105\" y1=\"100\" x2=\"133\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"112.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"119.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>c→e: 6</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M101.2 110.4 Q150 152 198.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"142.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"149.8\" y=\"136.4\" text-anchor=\"middle\">6</text></g><g><title>a→e: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"166\" y1=\"100\" x2=\"194\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180.5\" y=\"116\" text-anchor=\"middle\">1</text></g><g><title>a→b: 5</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M162.2 89.6 Q211 48 259.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"203.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210.8\" y=\"73.6\" text-anchor=\"middle\">5</text></g><g><title>e→b: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"227\" y1=\"100\" x2=\"255\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"234.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"241.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>e→d: 8</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M223.2 110.4 Q272 152 320.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"264.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"271.8\" y=\"136.4\" text-anchor=\"middle\">8</text></g><g><title>b→d: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"288\" y1=\"100\" x2=\"316\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"295.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"302.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"28\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"105.5\" text-anchor=\"middle\">s</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"132\" text-anchor=\"middle\">0</text><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"89\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"105.5\" text-anchor=\"middle\">c</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"132\" text-anchor=\"middle\">2</text><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"105.5\" text-anchor=\"middle\">a</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"132\" text-anchor=\"middle\">5</text><g><title>e</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"211\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"211\" y=\"105.5\" text-anchor=\"middle\">e</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"211\" y=\"132\" text-anchor=\"middle\">6</text><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"272\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"272\" y=\"105.5\" text-anchor=\"middle\">b</text></g><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"333\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"333\" y=\"105.5\" text-anchor=\"middle\">d</text></g></svg>",
+        "alt": {
+         "en": "D cu u_e=6.",
+         "ro": "D cu u_e=6."
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "$b$: din $a$: $5+5=10$; din $e$: $6+2=8$. $u_b=8$, `before[b]=e`.",
+        "ro": "$b$: din $a$: $5+5=10$; din $e$: $6+2=8$. $u_b=8$, `before[b]=e`."
+       },
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>u_b=8</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→c: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"44\" y1=\"100\" x2=\"72\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"51.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"58.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>s→a: 7</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M40.2 89.6 Q89 48 137.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"81.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"88.8\" y=\"73.6\" text-anchor=\"middle\">7</text></g><g><title>c→a: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"105\" y1=\"100\" x2=\"133\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"112.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"119.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>c→e: 6</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M101.2 110.4 Q150 152 198.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"142.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"149.8\" y=\"136.4\" text-anchor=\"middle\">6</text></g><g><title>a→e: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"166\" y1=\"100\" x2=\"194\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180.5\" y=\"116\" text-anchor=\"middle\">1</text></g><g><title>a→b: 5</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M162.2 89.6 Q211 48 259.1 89\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"203.8\" y=\"59.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210.8\" y=\"73.6\" text-anchor=\"middle\">5</text></g><g><title>e→b: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"227\" y1=\"100\" x2=\"255\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"234.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"241.5\" y=\"116\" text-anchor=\"middle\">2</text></g><g><title>e→d: 8</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M223.2 110.4 Q272 152 320.1 111\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"264.8\" y=\"122.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"271.8\" y=\"136.4\" text-anchor=\"middle\">8</text></g><g><title>b→d: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"288\" y1=\"100\" x2=\"316\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"295.5\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"302.5\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"28\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"105.5\" text-anchor=\"middle\">s</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"28\" y=\"132\" text-anchor=\"middle\">0</text><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"89\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"105.5\" text-anchor=\"middle\">c</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"89\" y=\"132\" text-anchor=\"middle\">2</text><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"105.5\" text-anchor=\"middle\">a</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"132\" text-anchor=\"middle\">5</text><g><title>e</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"211\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"211\" y=\"105.5\" text-anchor=\"middle\">e</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"211\" y=\"132\" text-anchor=\"middle\">6</text><g><title>b</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"272\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"272\" y=\"105.5\" text-anchor=\"middle\">b</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"272\" y=\"132\" text-anchor=\"middle\">8</text><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"333\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"333\" y=\"105.5\" text-anchor=\"middle\">d</text></g></svg>",
+        "alt": {
+         "en": "D cu u_b=8.",
+         "ro": "D cu u_b=8."
+        }
+       }
+      }
+     ],
+     "end": {
+      "en": "Rămâne $d$: din $e$ $6+8$, din $b$ $8+3$.",
+      "ro": "Rămâne $d$: din $e$ $6+8$, din $b$ $8+3$."
+     }
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03b-q12",
+     "status": "ruled",
+     "statement": {
+      "en": "Termină: cât este $u_d$ și cine e `before[d]`?",
+      "ro": "Termină: cât este $u_d$ și cine e `before[d]`?"
+     },
+     "fields": [
+      {
+       "id": "ud",
+       "kind": "num",
+       "label": {
+        "en": "costul $u$ al ultimului nod",
+        "ro": "costul $u$ al ultimului nod"
+       },
+       "formula": "11",
+       "expected": 11
+      },
+      {
+       "id": "bd",
+       "kind": "choice",
+       "label": {
+        "en": "`before` al ultimului nod",
+        "ro": "`before` al ultimului nod"
+       },
+       "formula": "'b'",
+       "expected": "b",
+       "options": [
+        {
+         "en": "b",
+         "ro": "b"
+        },
+        {
+         "en": "e",
+         "ro": "e"
+        },
+        {
+         "en": "a",
+         "ro": "a"
+        },
+        {
+         "en": "s",
+         "ro": "s"
+        }
+       ]
+      }
+     ],
+     "hints": [
+      {
+       "en": "Arcele care intră în $d$: $e\\rightarrow d$ (8) și $b\\rightarrow d$ (3).",
+       "ro": "Arcele care intră în $d$: $e\\rightarrow d$ (8) și $b\\rightarrow d$ (3)."
+      },
+      {
+       "en": "$u_e+8=14$ și $u_b+3=11$.",
+       "ro": "$u_e+8=14$ și $u_b+3=11$."
+      },
+      {
+       "en": "$u_d=11$, `before[d]=b`.",
+       "ro": "$u_d=11$, `before[d]=b`."
+      }
+     ],
+     "solution": {
+      "en": "$\\min(6+8,\\,8+3)=11$ prin $b$. Drumul înapoi: $d,b,e,a,c,s$.",
+      "ro": "$\\min(6+8,\\,8+3)=11$ prin $b$. Drumul înapoi: $d,b,e,a,c,s$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe dag-ul s→a 4, s→e 1, e→a 2, a→b 1, e→b 6 în ordinea $s,e,a,b$: cât e $u_b$ (ultimul nod) și cine e `before[b]`?",
+        "ro": "Pe dag-ul s→a 4, s→e 1, e→a 2, a→b 1, e→b 6 în ordinea $s,e,a,b$: cât e $u_b$ (ultimul nod) și cine e `before[b]`?"
+       },
+       "solution": {
+        "en": "$u_e=1$; $u_a=\\min(4,\\,1+2)=3$; $u_b=\\min(3+1,\\,1+6)=4$ prin $a$.",
+        "ro": "$u_e=1$; $u_a=\\min(4,\\,1+2)=3$; $u_b=\\min(3+1,\\,1+6)=4$ prin $a$."
+       },
+       "fields": [
+        {
+         "id": "ud",
+         "formula": "4",
+         "expected": 4
+        },
+        {
+         "id": "bd",
+         "formula": "'a'",
+         "expected": "a"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s17",
+   "title": {
+    "en": "Aceeași metodă cu un arc negativ",
+    "ro": "Aceeași metodă cu un arc negativ"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Dag cu arc negativ</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→d: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"100\" x2=\"103\" y2=\"100\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"68\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"75\" y=\"116\" text-anchor=\"middle\">3</text></g><g><title>d→a: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"133.7\" y1=\"91.7\" x2=\"195.5\" y2=\"53.9\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"163.7\" y=\"72.9\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"170.7\" y=\"86.9\" text-anchor=\"middle\">1</text></g><g><title>d→e: -2</title><line class=\"muted\" stroke-width=\"2\" x1=\"133.7\" y1=\"108.3\" x2=\"195.5\" y2=\"146.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"147.8\" y=\"127.9\" width=\"23\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"159.3\" y=\"141.9\" text-anchor=\"middle\">-2</text></g><g><title>e→c: 0</title><line class=\"muted\" stroke-width=\"2\" x1=\"223.7\" y1=\"146.7\" x2=\"285.5\" y2=\"108.9\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"253.7\" y=\"127.9\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"260.7\" y=\"141.9\" text-anchor=\"middle\">0</text></g><g><title>a→c: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"223.7\" y1=\"53.3\" x2=\"285.5\" y2=\"91.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"242.3\" y=\"72.9\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"249.3\" y=\"86.9\" text-anchor=\"middle\">5</text></g><g><title>s→c: 2</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M44.6 93.5 Q165 40 284.5 93.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"157.8\" y=\"57.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"164.8\" y=\"71.6\" text-anchor=\"middle\">2</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"105.5\" text-anchor=\"middle\">s</text></g><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"120\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"120\" y=\"105.5\" text-anchor=\"middle\">d</text></g><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"210\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210\" y=\"50.5\" text-anchor=\"middle\">a</text></g><g><title>e</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"210\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210\" y=\"160.5\" text-anchor=\"middle\">e</text></g><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"300\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"300\" y=\"105.5\" text-anchor=\"middle\">c</text></g></svg>",
+        "alt": {
+         "en": "Dag cu arc negativ: s→d 3, d→a 1, d→e -2, e→c 0, a→c 5, s→c 2.",
+         "ro": "Dag cu arc negativ: s→d 3, d→a 1, d→e -2, e→c 0, a→c 5, s→c 2."
+        },
+        "caption": {
+         "en": "Un dag cu un arc negativ, $d\\rightarrow e$ costă $-2$.",
+         "ro": "Un dag cu un arc negativ, $d\\rightarrow e$ costă $-2$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Ordinea: $s,d,a,e,c$.",
+       "ro": "Ordinea: $s,d,a,e,c$."
+      },
+      {
+       "en": "$u_d=3$, $u_a=4$, $u_e=1$, $u_c=\\min(2,\\,1+0,\\,4+5)=1$.",
+       "ro": "$u_d=3$, $u_a=4$, $u_e=1$, $u_c=\\min(2,\\,1+0,\\,4+5)=1$."
+      },
+      {
+       "en": "Dijkstra l-ar fi fixat pe $c$ cu 2 înaintea lui $e$ și ar fi greșit.",
+       "ro": "Dijkstra l-ar fi fixat pe $c$ cu 2 înaintea lui $e$ și ar fi greșit."
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03b-q13",
+     "status": "ruled",
+     "statement": {
+      "en": "Pe dag-ul din figură: cât e $u_c$?",
+      "ro": "Pe dag-ul din figură: cât e $u_c$?"
+     },
+     "fields": [
+      {
+       "id": "uc",
+       "kind": "num",
+       "label": {
+        "en": "$u_c$",
+        "ro": "$u_c$"
+       },
+       "formula": "1",
+       "expected": 1
+      }
+     ],
+     "hints": [
+      {
+       "en": "Intră trei arce în $c$.",
+       "ro": "Intră trei arce în $c$."
+      },
+      {
+       "en": "$s\\rightarrow c$: 2; $e\\rightarrow c$: $u_e+0$; $a\\rightarrow c$: $u_a+5$.",
+       "ro": "$s\\rightarrow c$: 2; $e\\rightarrow c$: $u_e+0$; $a\\rightarrow c$: $u_a+5$."
+      },
+      {
+       "en": "$u_e=3-2=1$, deci $\\min(2,1,9)=1$.",
+       "ro": "$u_e=3-2=1$, deci $\\min(2,1,9)=1$."
+      }
+     ],
+     "solution": {
+      "en": "$u_e=3+(-2)=1$; $u_c=\\min(0+2,\\,1+0,\\,4+5)=1$.",
+      "ro": "$u_e=3+(-2)=1$; $u_c=\\min(0+2,\\,1+0,\\,4+5)=1$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "La fel, dar cu $d\\rightarrow e$ de cost $-1$: cât e $u_c$?",
+        "ro": "La fel, dar cu $d\\rightarrow e$ de cost $-1$: cât e $u_c$?"
+       },
+       "solution": {
+        "en": "$u_e=3-1=2$; $u_c=\\min(2,\\,2+0,\\,9)=2$.",
+        "ro": "$u_e=3-1=2$; $u_c=\\min(2,\\,2+0,\\,9)=2$."
+       },
+       "fields": [
+        {
+         "id": "uc",
+         "formula": "2",
+         "expected": 2
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s18",
+   "title": {
+    "en": "Complexitate și un detaliu",
+    "ro": "Complexitate și un detaliu"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Cu matrice de costuri, substituția e $O(n^2)$; cu liste de adiacență, $O(n+m)$. Slide-ul ia $s=1$, primul în ordine: un nod care vine înaintea lui $s$ în ordine nu poate fi atins din $s$ (rămâne $\\infty$).",
+      "ro": "Cu matrice de costuri, substituția e $O(n^2)$; cu liste de adiacență, $O(n+m)$. Slide-ul ia $s=1$, primul în ordine: un nod care vine înaintea lui $s$ în ordine nu poate fi atins din $s$ (rămâne $\\infty$)."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q14",
+     "question": {
+      "en": "În ordinea topologică $a, s, b$, ce valoare are $u_a$ pentru sursa $s$?",
+      "ro": "În ordinea topologică $a, s, b$, ce valoare are $u_a$ pentru sursa $s$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$\\infty$: $a$ e înaintea lui $s$, nu se poate ajunge la el din $s$",
+        "ro": "$\\infty$: $a$ e înaintea lui $s$, nu se poate ajunge la el din $s$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: toate arcele merg spre dreapta în ordine.",
+        "ro": "Corect: toate arcele merg spre dreapta în ordine."
+       }
+      },
+      {
+       "text": {
+        "en": "0",
+        "ro": "0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$u_s=0$, nu $u_a$.",
+        "ro": "$u_s=0$, nu $u_a$."
+       },
+       "misconception": "cost-arc-fara-u"
+      },
+      {
+       "text": {
+        "en": "Cost negativ",
+        "ro": "Cost negativ"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu există niciun drum.",
+        "ro": "Nu există niciun drum."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s19",
+   "title": {
+    "en": "Exercițiul 2 din seminar: dag-ul",
+    "ro": "Exercițiul 2 din seminar: dag-ul"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 240\"><title>Exercițiul 2</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→t: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"187.3\" y1=\"186\" x2=\"113.1\" y2=\"49.9\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"152.7\" y=\"103.2\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"159.7\" y=\"117.2\" text-anchor=\"middle\">2</text></g><g><title>s→z: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"205.5\" y1=\"188\" x2=\"253.8\" y2=\"132.8\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"231.3\" y=\"158.2\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"238.3\" y=\"172.2\" text-anchor=\"middle\">2</text></g><g><title>s→w: 2</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M199.6 184.7 Q225.9 96.3 301 44.6\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"231.1\" y=\"96.5\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"238.1\" y=\"110.5\" text-anchor=\"middle\">2</text></g><g><title>z→w: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"273.1\" y1=\"106.2\" x2=\"306.4\" y2=\"49.7\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"292.5\" y=\"74.1\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"299.5\" y=\"88.1\" text-anchor=\"middle\">1</text></g><g><title>z→y: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"254.8\" y1=\"107.6\" x2=\"205.8\" y2=\"48.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"231.5\" y=\"61.5\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"238.5\" y=\"75.5\" text-anchor=\"middle\">3</text></g><g><title>y→t: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"179\" y1=\"35\" x2=\"122\" y2=\"35\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"143\" y=\"15\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"29\" text-anchor=\"middle\">1</text></g><g><title>y→u: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"180.8\" y1=\"42.3\" x2=\"55.1\" y2=\"107.2\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"105.5\" y=\"56.2\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"112.5\" y=\"70.2\" text-anchor=\"middle\">3</text></g><g><title>y→v: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"187.3\" y1=\"49\" x2=\"113.1\" y2=\"185.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"133.3\" y=\"103.2\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"140.3\" y=\"117.2\" text-anchor=\"middle\">1</text></g><g><title>t→u: 0</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M99 49.9 Q84.9 85.1 54.1 105.6\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"73.8\" y=\"72.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"80.8\" y=\"86.4\" text-anchor=\"middle\">0</text></g><g><title>u→v: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"49.7\" y1=\"127.7\" x2=\"94.7\" y2=\"186.5\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"56.8\" y=\"155.2\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"63.8\" y=\"169.2\" text-anchor=\"middle\">2</text></g><g><title>w→v: 4</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M307.6 49.2 Q247.1 164.7 121.5 195.9\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"223.8\" y=\"134.6\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"230.8\" y=\"148.6\" text-anchor=\"middle\">4</text></g><g><title>t</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"105\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"105\" y=\"40.5\" text-anchor=\"middle\">t</text></g><g><title>y</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"195\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"195\" y=\"40.5\" text-anchor=\"middle\">y</text></g><g><title>w</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"315\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"315\" y=\"40.5\" text-anchor=\"middle\">w</text></g><g><title>u</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"40\" cy=\"115\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"40\" y=\"120.5\" text-anchor=\"middle\">u</text></g><g><title>z</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"265\" cy=\"120\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"265\" y=\"125.5\" text-anchor=\"middle\">z</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"195\" cy=\"200\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"195\" y=\"205.5\" text-anchor=\"middle\">s</text></g><g><title>v</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"105\" cy=\"200\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"105\" y=\"205.5\" text-anchor=\"middle\">v</text></g></svg>",
+        "alt": {
+         "en": "Dag cu nodurile t, y, w, u, z, s, v: s→t 2, s→z 2, s→w 2, z→w 1, z→y 3, y→t 1, y→u 3, y→v 1, t→u 0, u→v 2, w→v 4.",
+         "ro": "Dag cu nodurile t, y, w, u, z, s, v: s→t 2, s→z 2, s→w 2, z→w 1, z→y 3, y→t 1, y→u 3, y→v 1, t→u 0, u→v 2, w→v 4."
+        },
+        "caption": {
+         "en": "Exercițiul 2 din seminar.",
+         "ro": "Exercițiul 2 din seminar."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Pe slide, arcul de cost 4 între $w$ și $v$ are vârfuri la ambele capete; îl citim ca $w\\rightarrow v$. Cu $v\\rightarrow w$ rezultatul e același.",
+       "ro": "Pe slide, arcul de cost 4 între $w$ și $v$ are vârfuri la ambele capete; îl citim ca $w\\rightarrow v$. Cu $v\\rightarrow w$ rezultatul e același."
+      },
+      {
+       "en": "Nodul $s$ nu are arce care intră: e primul. O ordonare: $s,z,w,y,t,u,v$.",
+       "ro": "Nodul $s$ nu are arce care intră: e primul. O ordonare: $s,z,w,y,t,u,v$."
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03b-q15",
+     "status": "ruled",
+     "statement": {
+      "en": "Rezolvă prin substituție în ordinea $s,z,w,y,t,u,v$: cât este $u_v$ și cine e `before[v]`?",
+      "ro": "Rezolvă prin substituție în ordinea $s,z,w,y,t,u,v$: cât este $u_v$ și cine e `before[v]`?"
+     },
+     "fields": [
+      {
+       "id": "uv",
+       "kind": "num",
+       "label": {
+        "en": "$u_v$",
+        "ro": "$u_v$"
+       },
+       "formula": "4",
+       "expected": 4
+      },
+      {
+       "id": "bv",
+       "kind": "choice",
+       "label": {
+        "en": "`before[v]`",
+        "ro": "`before[v]`"
+       },
+       "formula": "'u'",
+       "expected": "u",
+       "options": [
+        {
+         "en": "u",
+         "ro": "u"
+        },
+        {
+         "en": "w",
+         "ro": "w"
+        },
+        {
+         "en": "y",
+         "ro": "y"
+        },
+        {
+         "en": "s",
+         "ro": "s"
+        }
+       ]
+      }
+     ],
+     "hints": [
+      {
+       "en": "$u_z=2$, $u_w=2$, $u_y=5$, $u_t=2$, $u_u=\\min(u_y+3,\\,u_t+0)=2$.",
+       "ro": "$u_z=2$, $u_w=2$, $u_y=5$, $u_t=2$, $u_u=\\min(u_y+3,\\,u_t+0)=2$."
+      },
+      {
+       "en": "În $v$ intră $y\\rightarrow v$ ($5+1$), $u\\rightarrow v$ ($2+2$), $w\\rightarrow v$ ($2+4$).",
+       "ro": "În $v$ intră $y\\rightarrow v$ ($5+1$), $u\\rightarrow v$ ($2+2$), $w\\rightarrow v$ ($2+4$)."
+      },
+      {
+       "en": "$\\min(6,4,6)=4$ prin $u$.",
+       "ro": "$\\min(6,4,6)=4$ prin $u$."
+      }
+     ],
+     "solution": {
+      "en": "$u_z=2$, $u_w=\\min(2,\\,2+1)=2$, $u_y=5$, $u_t=\\min(2,\\,5+1)=2$, $u_u=2$, $u_v=\\min(6,4,6)=4$ prin $u$.",
+      "ro": "$u_z=2$, $u_w=\\min(2,\\,2+1)=2$, $u_y=5$, $u_t=\\min(2,\\,5+1)=2$, $u_u=2$, $u_v=\\min(6,4,6)=4$ prin $u$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "La exercițiul 2, dacă $w\\rightarrow v$ ar costa 1 (nu 4): cât e $u_v$ și cine e `before[v]`?",
+        "ro": "La exercițiul 2, dacă $w\\rightarrow v$ ar costa 1 (nu 4): cât e $u_v$ și cine e `before[v]`?"
+       },
+       "solution": {
+        "en": "$u_v=\\min(5+1,\\,2+2,\\,2+1)=3$ prin $w$.",
+        "ro": "$u_v=\\min(5+1,\\,2+2,\\,2+1)=3$ prin $w$."
+       },
+       "fields": [
+        {
+         "id": "uv",
+         "formula": "3",
+         "expected": 3
+        },
+        {
+         "id": "bv",
+         "formula": "'w'",
+         "expected": "w"
+        }
+       ]
+      }
+     ],
+     "detectors": [
+      {
+       "field": "uv",
+       "formula": "6",
+       "message": {
+        "en": "Ai luat $u_y+1$ sau $u_w+4$. Verifică și drumul prin $u$: $2+2$.",
+        "ro": "Ai luat $u_y+1$ sau $u_w+4$. Verifică și drumul prin $u$: $2+2$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s20",
+   "title": {
+    "en": "Exercițiul 14: o singură ordonare",
+    "ro": "Exercițiul 14: o singură ordonare"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Drum hamiltonian și arce înainte</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→2</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"100\" x2=\"103\" y2=\"100\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→3</title><line class=\"muted\" stroke-width=\"2\" x1=\"136\" y1=\"100\" x2=\"193\" y2=\"100\" marker-end=\"url(#ah-muted)\"/></g><g><title>3→4</title><line class=\"muted\" stroke-width=\"2\" x1=\"226\" y1=\"100\" x2=\"283\" y2=\"100\" marker-end=\"url(#ah-muted)\"/></g><g><title>1→3</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M43.3 91.1 Q120 40 195.9 90.6\" marker-end=\"url(#ah-muted)\"/></g><g><title>2→4</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M133.3 108.9 Q210 160 285.9 109.4\" marker-end=\"url(#ah-muted)\"/></g><g><title>1</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"105.5\" text-anchor=\"middle\">1</text></g><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"120\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"120\" y=\"105.5\" text-anchor=\"middle\">2</text></g><g><title>3</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"210\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210\" y=\"105.5\" text-anchor=\"middle\">3</text></g><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"300\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"300\" y=\"105.5\" text-anchor=\"middle\">4</text></g></svg>",
+        "alt": {
+         "en": "Digraful 1→2, 2→3, 3→4 și arcele 1→3, 2→4 care merg înainte.",
+         "ro": "Digraful 1→2, 2→3, 3→4 și arcele 1→3, 2→4 care merg înainte."
+        },
+        "caption": {
+         "en": "Drumul $1\\rightarrow2\\rightarrow3\\rightarrow4$ plus arce care merg înainte.",
+         "ro": "Drumul $1\\rightarrow2\\rightarrow3\\rightarrow4$ plus arce care merg înainte."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Un dag are o singură ordonare topologică exact când are un drum hamiltonian (trece prin toate nodurile) și toate celelalte arce merg înainte pe el.",
+       "ro": "Un dag are o singură ordonare topologică exact când are un drum hamiltonian (trece prin toate nodurile) și toate celelalte arce merg înainte pe el."
+      },
+      {
+       "en": "Aici $1\\rightarrow2\\rightarrow3\\rightarrow4$ e drum hamiltonian: ordinea 1,2,3,4 e singura.",
+       "ro": "Aici $1\\rightarrow2\\rightarrow3\\rightarrow4$ e drum hamiltonian: ordinea 1,2,3,4 e singura."
+      },
+      {
+       "en": "Dacă ștergi $2\\rightarrow3$, nodurile 2 și 3 nu mai depind unul de altul: și $1,3,2,4$ merge.",
+       "ro": "Dacă ștergi $2\\rightarrow3$, nodurile 2 și 3 nu mai depind unul de altul: și $1,3,2,4$ merge."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q16",
+     "question": {
+      "en": "După ștergerea arcului $2\\rightarrow3$, câte ordonări topologice are digraful 1→2, 3→4, 1→3, 2→4?",
+      "ro": "După ștergerea arcului $2\\rightarrow3$, câte ordonări topologice are digraful 1→2, 3→4, 1→3, 2→4?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Una",
+        "ro": "Una"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Fără $2\\rightarrow3$, nodurile 2 și 3 nu mai sunt legate.",
+        "ro": "Fără $2\\rightarrow3$, nodurile 2 și 3 nu mai sunt legate."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Nicio",
+        "ro": "Nicio"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Fără circuit, există cel puțin una.",
+        "ro": "Fără circuit, există cel puțin una."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "Două: $1,2,3,4$ și $1,3,2,4$",
+        "ro": "Două: $1,2,3,4$ și $1,3,2,4$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: 2 și 3 pot veni în oricare ordine.",
+        "ro": "Corect: 2 și 3 pot veni în oricare ordine."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s21",
+   "title": {
+    "en": "Pe scurt",
+    "ro": "Pe scurt"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "Dag = digraf fără circuite; ordonare topologică = numerotare în care toate arcele merg spre numere mai mari.",
+       "ro": "Dag = digraf fără circuite; ordonare topologică = numerotare în care toate arcele merg spre numere mai mari."
+      },
+      {
+       "en": "Lema 1: dag exact când există o ordonare.",
+       "ro": "Lema 1: dag exact când există o ordonare."
+      },
+      {
+       "en": "Algoritmul: $d^-$, $S$, `count`; „da” dacă `count=n`; $O(n+m)$.",
+       "ro": "Algoritmul: $d^-$, $S$, `count`; „da” dacă `count=n`; $O(n+m)$."
+      },
+      {
+       "en": "Costuri minime pe dag: substituție în ordine topologică, fără alegeri, merge și cu arce negative.",
+       "ro": "Costuri minime pe dag: substituție în ordine topologică, fără alegeri, merge și cu arce negative."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s22",
+   "title": {
+    "en": "Verificare: o ordonare",
+    "ro": "Verificare: o ordonare"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q17",
+     "question": {
+      "en": "Pentru arcurile $1\\rightarrow2$, $1\\rightarrow3$, $3\\rightarrow2$: care ordine e topologică?",
+      "ro": "Pentru arcurile $1\\rightarrow2$, $1\\rightarrow3$, $3\\rightarrow2$: care ordine e topologică?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "1, 2, 3",
+        "ro": "1, 2, 3"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Arcul $3\\rightarrow2$ ar merge înapoi.",
+        "ro": "Arcul $3\\rightarrow2$ ar merge înapoi."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "1, 3, 2",
+        "ro": "1, 3, 2"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: 1 înaintea lui 2 și 3, iar 3 înaintea lui 2.",
+        "ro": "Corect: 1 înaintea lui 2 și 3, iar 3 înaintea lui 2."
+       }
+      },
+      {
+       "text": {
+        "en": "3, 1, 2",
+        "ro": "3, 1, 2"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Arcul $1\\rightarrow3$ ar merge înapoi.",
+        "ro": "Arcul $1\\rightarrow3$ ar merge înapoi."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s23",
+   "title": {
+    "en": "Verificare: substituție pe un dag nou",
+    "ro": "Verificare: substituție pe un dag nou"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03b-q18",
+     "status": "ruled",
+     "statement": {
+      "en": "Dag cu ordinea $s,a,b,c$: $s\\rightarrow a$ 2, $s\\rightarrow b$ 9, $a\\rightarrow b$ 3, $a\\rightarrow c$ 8, $b\\rightarrow c$ 1. Cât este $u_c$?",
+      "ro": "Dag cu ordinea $s,a,b,c$: $s\\rightarrow a$ 2, $s\\rightarrow b$ 9, $a\\rightarrow b$ 3, $a\\rightarrow c$ 8, $b\\rightarrow c$ 1. Cât este $u_c$?"
+     },
+     "fields": [
+      {
+       "id": "uc",
+       "kind": "num",
+       "label": {
+        "en": "$u_c$",
+        "ro": "$u_c$"
+       },
+       "formula": "6",
+       "expected": 6
+      }
+     ],
+     "hints": [
+      {
+       "en": "Întâi $u_a$ și $u_b$.",
+       "ro": "Întâi $u_a$ și $u_b$."
+      },
+      {
+       "en": "$u_a=2$; $u_b=\\min(9,\\,2+3)=5$.",
+       "ro": "$u_a=2$; $u_b=\\min(9,\\,2+3)=5$."
+      },
+      {
+       "en": "$u_c=\\min(2+8,\\,5+1)=6$.",
+       "ro": "$u_c=\\min(2+8,\\,5+1)=6$."
+      }
+     ],
+     "solution": {
+      "en": "$u_a=2$, $u_b=5$, $u_c=\\min(10,6)=6$.",
+      "ro": "$u_a=2$, $u_b=5$, $u_c=\\min(10,6)=6$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Același dag, dar $b\\rightarrow c$ costă 7: cât este $u_c$?",
+        "ro": "Același dag, dar $b\\rightarrow c$ costă 7: cât este $u_c$?"
+       },
+       "solution": {
+        "en": "$u_b=5$; $u_c=\\min(2+8,\\,5+7)=10$.",
+        "ro": "$u_b=5$; $u_c=\\min(2+8,\\,5+7)=10$."
+       },
+       "fields": [
+        {
+         "id": "uc",
+         "formula": "10",
+         "expected": 10
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03b-s24",
+   "title": {
+    "en": "Verificare: ce înseamnă count mai mic decât n",
+    "ro": "Verificare: ce înseamnă count mai mic decât n"
+   },
+   "kicker": {
+    "en": "Lecția 3b",
+    "ro": "Lecția 3b"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03b-q19",
+     "question": {
+      "en": "Algoritmul se oprește cu `count < n`. Ce înseamnă?",
+      "ro": "Algoritmul se oprește cu `count < n`. Ce înseamnă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Există mai multe ordonări",
+        "ro": "Există mai multe ordonări"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Asta e o altă situație; aici nu există nicio ordonare.",
+        "ro": "Asta e o altă situație; aici nu există nicio ordonare."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "Algoritmul a greșit",
+        "ro": "Algoritmul a greșit"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Răspunsul „nu” e cel corect.",
+        "ro": "Răspunsul „nu” e cel corect."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Digraful are un circuit: nu e dag",
+        "ro": "Digraful are un circuit: nu e dag"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: nodurile din circuit nu ajung niciodată la grad de intrare 0.",
+        "ro": "Corect: nodurile din circuit nu ajung niciodată la grad de intrare 0."
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

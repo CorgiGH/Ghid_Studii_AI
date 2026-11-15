@@ -1,0 +1,1292 @@
+{
+ "meta": {
+  "id": "ag-l03e",
+  "title": {
+   "en": "Lecția 3e: P1, estimator, A* și Dijkstra bidirecțional",
+   "ro": "Lecția 3e: P1, estimator, A* și Dijkstra bidirecțional"
+  },
+  "shortTitle": {
+   "en": "L3e: P1 și A*",
+   "ro": "L3e: P1 și A*"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Algoritmica grafurilor, cursul 3, UAIC FII (agr3.pdf)",
+   "ro": "Algoritmica grafurilor, cursul 3, UAIC FII (agr3.pdf)"
+  }
+ },
+ "steps": [
+  {
+   "id": "ag-l03e-s1",
+   "title": {
+    "en": "Un singur oraș țintă",
+    "ro": "Un singur oraș țintă"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 215\"><title>Harta M</title><g><title>s→p: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"45.3\" y1=\"119.3\" x2=\"167.7\" y2=\"81.4\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"102.2\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"109.2\" y=\"116\" text-anchor=\"middle\">5</text></g><g><title>s→q: 6</title><line class=\"muted\" stroke-width=\"2\" x1=\"45.3\" y1=\"128.6\" x2=\"167.6\" y2=\"165.7\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"95.8\" y=\"148.5\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"102.8\" y=\"162.5\" text-anchor=\"middle\">6</text></g><g><title>s→u: 6</title><line class=\"muted\" stroke-width=\"2\" x1=\"30\" y1=\"108\" x2=\"30\" y2=\"45\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"34\" y=\"68\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"41\" y=\"82\" text-anchor=\"middle\">6</text></g><g><title>u→p: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"45.3\" y1=\"34.7\" x2=\"167.7\" y2=\"72.6\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"95.8\" y=\"55\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"102.8\" y=\"69\" text-anchor=\"middle\">5</text></g><g><title>u→v: 8</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"30\" x2=\"319\" y2=\"30\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"175\" y=\"32\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"182\" y=\"46\" text-anchor=\"middle\">8</text></g><g><title>p→v: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"197.3\" y1=\"72.3\" x2=\"319.7\" y2=\"34.4\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"254.2\" y=\"55\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"261.2\" y=\"69\" text-anchor=\"middle\">5</text></g><g><title>p→t: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"197.3\" y1=\"81.7\" x2=\"319.7\" y2=\"119.6\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"247.8\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"254.8\" y=\"116\" text-anchor=\"middle\">5</text></g><g><title>q→t: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"197.3\" y1=\"165.4\" x2=\"319.6\" y2=\"128.3\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"254.2\" y=\"148.5\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"261.2\" y=\"162.5\" text-anchor=\"middle\">5</text></g><g><title>v→t: 6</title><line class=\"muted\" stroke-width=\"2\" x1=\"334\" y1=\"46\" x2=\"334\" y2=\"109\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"316\" y=\"68\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"323\" y=\"82\" text-anchor=\"middle\">6</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"124\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"129.5\" text-anchor=\"middle\">s</text></g><g><title>p</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"182\" cy=\"77\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"182\" y=\"82.5\" text-anchor=\"middle\">p</text></g><g><title>q</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"182\" cy=\"170\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"182\" y=\"175.5\" text-anchor=\"middle\">q</text></g><g><title>u</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"30\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"35.5\" text-anchor=\"middle\">u</text></g><g><title>v</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"334\" cy=\"30\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"334\" y=\"35.5\" text-anchor=\"middle\">v</text></g><g><title>t</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"334\" cy=\"124\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"334\" y=\"129.5\" text-anchor=\"middle\">t</text></g></svg>",
+        "alt": {
+         "en": "Harta M: noduri s, p, q, u, v, t; muchii s–p 5, s–q 6, s–u 6, u–p 5, u–v 8, p–v 5, p–t 5, q–t 5, v–t 6.",
+         "ro": "Harta M: noduri s, p, q, u, v, t; muchii s–p 5, s–q 6, s–u 6, u–p 5, u–v 8, p–v 5, p–t 5, q–t 5, v–t 6."
+        },
+        "caption": {
+         "en": "Drumuri în ambele sensuri, cu cost cel puțin distanța în linie dreaptă.",
+         "ro": "Drumuri în ambele sensuri, cu cost cel puțin distanța în linie dreaptă."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Vrem doar costul de la $s$ la $t$: problema P1.",
+       "ro": "Vrem doar costul de la $s$ la $t$: problema P1."
+      },
+      {
+       "en": "Dijkstra poate fi oprit când $t$ intră în $S$ (slide-ul 15).",
+       "ro": "Dijkstra poate fi oprit când $t$ intră în $S$ (slide-ul 15)."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03e-q1",
+     "question": {
+      "en": "Dijkstra pornit din $s$ se oprește când fixează $t$. Câte noduri (cu $s$ și $t$) crezi că a fixat?",
+      "ro": "Dijkstra pornit din $s$ se oprește când fixează $t$. Câte noduri (cu $s$ și $t$) crezi că a fixat?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "5: $s,p,q,u,t$",
+        "ro": "5: $s,p,q,u,t$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $q$ și $u$ au $u=6$, mai puțin decât $t=10$, deci sunt fixate înainte.",
+        "ro": "Corect: $q$ și $u$ au $u=6$, mai puțin decât $t=10$, deci sunt fixate înainte."
+       }
+      },
+      {
+       "text": {
+        "en": "2: $s$ și $t$",
+        "ro": "2: $s$ și $t$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Ar fi dacă $t$ era vecin direct cu cel mai mic $u$; aici nu.",
+        "ro": "Ar fi dacă $t$ era vecin direct cu cel mai mic $u$; aici nu."
+       },
+       "misconception": "primul-arc-ieftin"
+      },
+      {
+       "text": {
+        "en": "6: toate",
+        "ro": "6: toate"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se oprește când $t$ intră în $S$; $v$ rămâne în afară.",
+        "ro": "Se oprește când $t$ intră în $S$; $v$ rămâne în afară."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s2",
+   "title": {
+    "en": "Valul lui Dijkstra pe M",
+    "ro": "Valul lui Dijkstra pe M"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Dijkstra fixează nodurile în cercuri tot mai mari în jurul lui $s$, chiar și cele care nu duc spre $t$.",
+      "ro": "Dijkstra fixează nodurile în cercuri tot mai mari în jurul lui $s$, chiar și cele care nu duc spre $t$."
+     }
+    },
+    {
+     "type": "viz",
+     "id": "ag-l03e-v1",
+     "widget": "graph-walk",
+     "predict": true,
+     "props": {
+      "mode": "dijkstra",
+      "directed": false,
+      "source": "s",
+      "target": "t",
+      "tieBreak": "alpha",
+      "nodes": [
+       {
+        "id": "s",
+        "x": 30,
+        "y": 124
+       },
+       {
+        "id": "p",
+        "x": 182,
+        "y": 77,
+        "lab": "above"
+       },
+       {
+        "id": "q",
+        "x": 182,
+        "y": 170
+       },
+       {
+        "id": "u",
+        "x": 30,
+        "y": 30,
+        "lab": "above"
+       },
+       {
+        "id": "v",
+        "x": 334,
+        "y": 30,
+        "lab": "above"
+       },
+       {
+        "id": "t",
+        "x": 334,
+        "y": 124
+       }
+      ],
+      "edges": [
+       {
+        "u": "s",
+        "v": "p",
+        "w": 5
+       },
+       {
+        "u": "s",
+        "v": "q",
+        "w": 6
+       },
+       {
+        "u": "s",
+        "v": "u",
+        "w": 6
+       },
+       {
+        "u": "u",
+        "v": "p",
+        "w": 5
+       },
+       {
+        "u": "u",
+        "v": "v",
+        "w": 8
+       },
+       {
+        "u": "p",
+        "v": "v",
+        "w": 5
+       },
+       {
+        "u": "p",
+        "v": "t",
+        "w": 5
+       },
+       {
+        "u": "q",
+        "v": "t",
+        "w": 5
+       },
+       {
+        "u": "v",
+        "v": "t",
+        "w": 6
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s3",
+   "title": {
+    "en": "Un estimator g",
+    "ro": "Un estimator g"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 215\"><title>Estimator g = distanța în linie dreaptă</title><g><title>s→p: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"45.3\" y1=\"119.3\" x2=\"167.7\" y2=\"81.4\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"102.2\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"109.2\" y=\"116\" text-anchor=\"middle\">5</text></g><g><title>s→q: 6</title><line class=\"muted\" stroke-width=\"2\" x1=\"45.3\" y1=\"128.6\" x2=\"167.6\" y2=\"165.7\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"95.8\" y=\"148.5\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"102.8\" y=\"162.5\" text-anchor=\"middle\">6</text></g><g><title>s→u: 6</title><line class=\"muted\" stroke-width=\"2\" x1=\"30\" y1=\"108\" x2=\"30\" y2=\"45\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"34\" y=\"68\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"41\" y=\"82\" text-anchor=\"middle\">6</text></g><g><title>u→p: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"45.3\" y1=\"34.7\" x2=\"167.7\" y2=\"72.6\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"95.8\" y=\"55\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"102.8\" y=\"69\" text-anchor=\"middle\">5</text></g><g><title>u→v: 8</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"30\" x2=\"319\" y2=\"30\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"175\" y=\"32\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"182\" y=\"46\" text-anchor=\"middle\">8</text></g><g><title>p→v: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"197.3\" y1=\"72.3\" x2=\"319.7\" y2=\"34.4\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"254.2\" y=\"55\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"261.2\" y=\"69\" text-anchor=\"middle\">5</text></g><g><title>p→t: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"197.3\" y1=\"81.7\" x2=\"319.7\" y2=\"119.6\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"247.8\" y=\"102\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"254.8\" y=\"116\" text-anchor=\"middle\">5</text></g><g><title>q→t: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"197.3\" y1=\"165.4\" x2=\"319.6\" y2=\"128.3\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"254.2\" y=\"148.5\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"261.2\" y=\"162.5\" text-anchor=\"middle\">5</text></g><g><title>v→t: 6</title><line class=\"muted\" stroke-width=\"2\" x1=\"334\" y1=\"46\" x2=\"334\" y2=\"109\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"316\" y=\"68\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"323\" y=\"82\" text-anchor=\"middle\">6</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"124\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"129.5\" text-anchor=\"middle\">s</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"156\" text-anchor=\"middle\">g=8</text><g><title>p</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"182\" cy=\"77\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"182\" y=\"82.5\" text-anchor=\"middle\">p</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"182\" y=\"56\" text-anchor=\"middle\">g=5</text><g><title>q</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"182\" cy=\"170\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"182\" y=\"175.5\" text-anchor=\"middle\">q</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"182\" y=\"202\" text-anchor=\"middle\">g=5</text><g><title>u</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"30\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"35.5\" text-anchor=\"middle\">u</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"9\" text-anchor=\"middle\">g=10</text><g><title>v</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"334\" cy=\"30\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"334\" y=\"35.5\" text-anchor=\"middle\">v</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"334\" y=\"9\" text-anchor=\"middle\">g=6</text><g><title>t</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"334\" cy=\"124\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"334\" y=\"129.5\" text-anchor=\"middle\">t</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"334\" y=\"156\" text-anchor=\"middle\">g=0</text></svg>",
+        "alt": {
+         "en": "Harta M cu valorile g sub noduri: s 8, p 5, q 5, u 10, v 6, t 0.",
+         "ro": "Harta M cu valorile g sub noduri: s 8, p 5, q 5, u 10, v 6, t 0."
+        },
+        "caption": {
+         "en": "$g(i)$ = distanța în linie dreaptă de la $i$ la $t$.",
+         "ro": "$g(i)$ = distanța în linie dreaptă de la $i$ la $t$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Un **estimator** $g(i)$ e o presupunere optimistă a costului rămas de la $i$ la $t$.",
+       "ro": "Un **estimator** $g(i)$ e o presupunere optimistă a costului rămas de la $i$ la $t$."
+      },
+      {
+       "en": "Aici $g$ e distanța în linie dreaptă: niciun drum nu poate fi mai scurt decât ea.",
+       "ro": "Aici $g$ e distanța în linie dreaptă: niciun drum nu poate fi mai scurt decât ea."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03e-q2",
+     "question": {
+      "en": "De ce e $g(i)$ o presupunere optimistă?",
+      "ro": "De ce e $g(i)$ o presupunere optimistă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Pentru că g e mereu 0",
+        "ro": "Pentru că g e mereu 0"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Aici g e distanța; g=0 e un caz particular.",
+        "ro": "Aici g e distanța; g=0 e un caz particular."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Drumul real de la $i$ la $t$ costă cel puțin distanța în linie dreaptă",
+        "ro": "Drumul real de la $i$ la $t$ costă cel puțin distanța în linie dreaptă"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: g nu supraestimează.",
+        "ro": "Corect: g nu supraestimează."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că g depinde de $u$",
+        "ro": "Pentru că g depinde de $u$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "g depinde doar de nod.",
+        "ro": "g depinde doar de nod."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s4",
+   "title": {
+    "en": "Regula A*: u plus g",
+    "ro": "Regula A*: u plus g"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "Fixezi nodul $j^*$ din afara lui $S$ cu cel mai mic $u_j+g(j)$ (slide-ul 16). Restul algoritmului e Dijkstra.",
+      "ro": "Fixezi nodul $j^*$ din afara lui $S$ cu cel mai mic $u_j+g(j)$ (slide-ul 16). Restul algoritmului e Dijkstra."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "E un algoritm de tip A*: alegi după costul de până acum plus presupunerea.",
+        "ro": "E un algoritm de tip A*: alegi după costul de până acum plus presupunerea."
+       }
+      }
+     ]
+    },
+    {
+     "type": "proof-steps",
+     "id": "ag-l03e-p1",
+     "claim": {
+      "en": "A* pe M, de la $s$ la $t$, cu $g$ din figură.",
+      "ro": "A* pe M, de la $s$ la $t$, cu $g$ din figură."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Începem: $S=\\{s\\}$. Cheile $u+g$: $p=5+5=10$, $q=6+5=11$, $u=6+10=16$.",
+        "ro": "Începem: $S=\\{s\\}$. Cheile $u+g$: $p=5+5=10$, $q=6+5=11$, $u=6+10=16$."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce nod fixăm?",
+         "ro": "Ce nod fixăm?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$q$, pentru că e al doilea",
+           "ro": "$q$, pentru că e al doilea"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Cheia lui $q$ e 11, mai mare decât 10.",
+           "ro": "Cheia lui $q$ e 11, mai mare decât 10."
+          },
+          "misconception": "primul-nod-in-ordine"
+         },
+         {
+          "text": {
+           "en": "$u$, cu cel mai mic $u=6$ (la egalitate cu $q$)",
+           "ro": "$u$, cu cel mai mic $u=6$ (la egalitate cu $q$)"
+          },
+          "correct": false,
+          "explain": {
+           "en": "La A* alegi după $u+g$, nu după $u$: cheia lui $u$ e 16.",
+           "ro": "La A* alegi după $u+g$, nu după $u$: cheia lui $u$ e 16."
+          },
+          "misconception": "cost-arc-fara-u"
+         },
+         {
+          "text": {
+           "en": "$p$, cheia 10",
+           "ro": "$p$, cheia 10"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: cea mai mică cheie.",
+           "ro": "Corect: cea mai mică cheie."
+          }
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Fixăm $p$ ($u_p=5$). Din $p$: $t=5+5=10$ cu cheia $10+0=10$, $v=10$ cu cheia $16$.",
+        "ro": "Fixăm $p$ ($u_p=5$). Din $p$: $t=5+5=10$ cu cheia $10+0=10$, $v=10$ cu cheia $16$."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce nod fixăm acum?",
+         "ro": "Ce nod fixăm acum?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$q$, cheia 11",
+           "ro": "$q$, cheia 11"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Cheia lui $t$ e 10, mai mică.",
+           "ro": "Cheia lui $t$ e 10, mai mică."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         },
+         {
+          "text": {
+           "en": "$v$",
+           "ro": "$v$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Cheia lui $v$ e 16.",
+           "ro": "Cheia lui $v$ e 16."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         },
+         {
+          "text": {
+           "en": "$t$, cheia 10",
+           "ro": "$t$, cheia 10"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $t$ e ținta, cheia egală cu cea mai mică.",
+           "ro": "Corect: $t$ e ținta, cheia egală cu cea mai mică."
+          }
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Fixăm $t$ cu $u_t=10$. Gata: am fixat 3 noduri ($s,p,t$) în loc de 5, cu același cost, 10.",
+        "ro": "Fixăm $t$ cu $u_t=10$. Gata: am fixat 3 noduri ($s,p,t$) în loc de 5, cu același cost, 10."
+       }
+      }
+     ],
+     "end": {
+      "en": "A* se uită spre țintă; Dijkstra se uită în toate direcțiile.",
+      "ro": "A* se uită spre țintă; Dijkstra se uită în toate direcțiile."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s5",
+   "title": {
+    "en": "Cheia unui nod",
+    "ro": "Cheia unui nod"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03e-q3",
+     "status": "ruled",
+     "statement": {
+      "en": "Pentru $q$: $u_q=6$ și $g(q)=5$. Cât e cheia $u_q+g(q)$?",
+      "ro": "Pentru $q$: $u_q=6$ și $g(q)=5$. Cât e cheia $u_q+g(q)$?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "cheia",
+        "ro": "cheia"
+       },
+       "formula": "11",
+       "expected": 11
+      }
+     ],
+     "hints": [
+      {
+       "en": "Adună $u$ și $g$.",
+       "ro": "Adună $u$ și $g$."
+      },
+      {
+       "en": "$6+5$.",
+       "ro": "$6+5$."
+      },
+      {
+       "en": "11.",
+       "ro": "11."
+      }
+     ],
+     "solution": {
+      "en": "$u_q+g(q)=6+5=11$.",
+      "ro": "$u_q+g(q)=6+5=11$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pentru $v$: $u_v=10$ și $g(v)=6$. Cât e cheia?",
+        "ro": "Pentru $v$: $u_v=10$ și $g(v)=6$. Cât e cheia?"
+       },
+       "solution": {
+        "en": "$10+6=16$.",
+        "ro": "$10+6=16$."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "16",
+         "expected": 16
+        }
+       ]
+      }
+     ],
+     "detectors": [
+      {
+       "field": "c",
+       "formula": "6",
+       "message": {
+        "en": "Ai luat doar $u$. Cheia adună și $g$.",
+        "ro": "Ai luat doar $u$. Cheia adună și $g$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s6",
+   "title": {
+    "en": "Condiția de consistență",
+    "ro": "Condiția de consistență"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Estimatorul trebuie să fie **consistent**: (ii) pentru fiecare arc $ij$, $g(i)\\le a_{ij}+g(j)$. Adică $g$ nu poate scădea mai mult decât costul arcului. Pe arcul $s\\rightarrow p$: $8\\le5+5$.",
+      "ro": "Estimatorul trebuie să fie **consistent**: (ii) pentru fiecare arc $ij$, $g(i)\\le a_{ij}+g(j)$. Adică $g$ nu poate scădea mai mult decât costul arcului. Pe arcul $s\\rightarrow p$: $8\\le5+5$."
+     }
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03e-q4",
+     "status": "ruled",
+     "statement": {
+      "en": "Verifică (ii) pe arcul $u\\rightarrow p$ (cost 5): cât e $a_{up}+g(p)$, cu $g(p)=5$, față de $g(u)=10$?",
+      "ro": "Verifică (ii) pe arcul $u\\rightarrow p$ (cost 5): cât e $a_{up}+g(p)$, cu $g(p)=5$, față de $g(u)=10$?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "$a_{up}+g(p)$",
+        "ro": "$a_{up}+g(p)$"
+       },
+       "formula": "10",
+       "expected": 10
+      }
+     ],
+     "hints": [
+      {
+       "en": "$a_{up}=5$ și $g(p)=5$.",
+       "ro": "$a_{up}=5$ și $g(p)=5$."
+      },
+      {
+       "en": "$5+5$.",
+       "ro": "$5+5$."
+      },
+      {
+       "en": "10; condiția $10\\le10$ e adevărată.",
+       "ro": "10; condiția $10\\le10$ e adevărată."
+      }
+     ],
+     "solution": {
+      "en": "$5+5=10\\ge g(u)=10$: condiția (ii) e îndeplinită.",
+      "ro": "$5+5=10\\ge g(u)=10$: condiția (ii) e îndeplinită."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Verifică (ii) pe arcul $s\\rightarrow q$ (cost 6), cu $g(q)=5$: cât e $a_{sq}+g(q)$ (față de $g(s)=8$)?",
+        "ro": "Verifică (ii) pe arcul $s\\rightarrow q$ (cost 6), cu $g(q)=5$: cât e $a_{sq}+g(q)$ (față de $g(s)=8$)?"
+       },
+       "solution": {
+        "en": "$6+5=11\\ge8$: (ii) e îndeplinită.",
+        "ro": "$6+5=11\\ge8$: (ii) e îndeplinită."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "11",
+         "expected": 11
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s7",
+   "title": {
+    "en": "Un estimator care greșește",
+    "ro": "Un estimator care greșește"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Estimator greșit</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→a: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"44.3\" y1=\"92.8\" x2=\"134.8\" y2=\"47.6\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"87.9\" y=\"70.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"94.9\" y=\"84.8\" text-anchor=\"middle\">2</text></g><g><title>a→t: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"165\" y1=\"45.6\" x2=\"294.1\" y2=\"94\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"219.1\" y=\"71.3\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"226.1\" y=\"85.3\" text-anchor=\"middle\">2</text></g><g><title>s→b: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"44.3\" y1=\"107.2\" x2=\"134.8\" y2=\"152.4\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"78.1\" y=\"130.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"85.1\" y=\"144.8\" text-anchor=\"middle\">1</text></g><g><title>b→t: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"165\" y1=\"154.4\" x2=\"294.1\" y2=\"106\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"226.9\" y=\"131.3\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"233.9\" y=\"145.3\" text-anchor=\"middle\">5</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"105.5\" text-anchor=\"middle\">s</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"132\" text-anchor=\"middle\">g=0</text><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"40\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"45.5\" text-anchor=\"middle\">a</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"19\" text-anchor=\"middle\">g=10</text><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"160\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"165.5\" text-anchor=\"middle\">b</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"192\" text-anchor=\"middle\">g=0</text><g><title>t</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"310\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"310\" y=\"105.5\" text-anchor=\"middle\">t</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"310\" y=\"132\" text-anchor=\"middle\">g=0</text></svg>",
+        "alt": {
+         "en": "Digraful s→a 2, a→t 2, s→b 1, b→t 5, cu g(a)=10, g(b)=g(s)=g(t)=0.",
+         "ro": "Digraful s→a 2, a→t 2, s→b 1, b→t 5, cu g(a)=10, g(b)=g(s)=g(t)=0."
+        },
+        "caption": {
+         "en": "$g(a)=10$ supraestimează: de la $a$ la $t$ costă doar 2.",
+         "ro": "$g(a)=10$ supraestimează: de la $a$ la $t$ costă doar 2."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Cheile: $a=2+10=12$, $b=1+0=1$. A* fixează $b$, apoi $t=1+5=6$ și se oprește cu 6.",
+       "ro": "Cheile: $a=2+10=12$, $b=1+0=1$. A* fixează $b$, apoi $t=1+5=6$ și se oprește cu 6."
+      },
+      {
+       "en": "Dar $s\\,a\\,t$ costă $2+2=4$. Cu $g=0$ s-ar fi obținut 4.",
+       "ro": "Dar $s\\,a\\,t$ costă $2+2=4$. Cu $g=0$ s-ar fi obținut 4."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03e-q5",
+     "question": {
+      "en": "Ce condiție a lui $g$ a fost încălcată?",
+      "ro": "Ce condiție a lui $g$ a fost încălcată?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$g(a)=10$ depășește costul real rămas, 2: estimatorul nu mai e optimist",
+        "ro": "$g(a)=10$ depășește costul real rămas, 2: estimatorul nu mai e optimist"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: de aceea A* a greșit.",
+        "ro": "Corect: de aceea A* a greșit."
+       }
+      },
+      {
+       "text": {
+        "en": "Costurile sunt negative",
+        "ro": "Costurile sunt negative"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Toate sunt pozitive.",
+        "ro": "Toate sunt pozitive."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Digraful are circuite",
+        "ro": "Digraful are circuite"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu are.",
+        "ro": "Nu are."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s8",
+   "title": {
+    "en": "g = 0 e Dijkstra",
+    "ro": "g = 0 e Dijkstra"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "$g=0$ e un estimator consistent (ambele condiții se verifică banal). Atunci cheia $u+g$ e doar $u$: A* devine exact Dijkstra.",
+      "ro": "$g=0$ e un estimator consistent (ambele condiții se verifică banal). Atunci cheia $u+g$ e doar $u$: A* devine exact Dijkstra."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03e-q6",
+     "question": {
+      "en": "Pentru ce estimator A* se comportă ca Dijkstra?",
+      "ro": "Pentru ce estimator A* se comportă ca Dijkstra?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$g(i)=u_i$",
+        "ro": "$g(i)=u_i$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Atunci cheia ar fi $2u$; nu e un estimator.",
+        "ro": "Atunci cheia ar fi $2u$; nu e un estimator."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Niciunul",
+        "ro": "Niciunul"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$g=0$ funcționează.",
+        "ro": "$g=0$ funcționează."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "$g=0$ pentru toate nodurile",
+        "ro": "$g=0$ pentru toate nodurile"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect.",
+        "ro": "Corect."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s9",
+   "title": {
+    "en": "Exercițiul 7: de la ambele capete",
+    "ro": "Exercițiul 7: de la ambele capete"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Triunghi</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→a: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"44.9\" y1=\"94.1\" x2=\"164.2\" y2=\"46.3\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"102.1\" y=\"71.2\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"109.1\" y=\"85.2\" text-anchor=\"middle\">3</text></g><g><title>a→t: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"194.9\" y1=\"45.9\" x2=\"314.2\" y2=\"93.7\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"243.9\" y=\"71.2\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"250.9\" y=\"85.2\" text-anchor=\"middle\">3</text></g><g><title>s→t: 5</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M45.4 95.5 Q180 56 313.7 95.2\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"172.8\" y=\"66.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"179.8\" y=\"80.7\" text-anchor=\"middle\">5</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"105.5\" text-anchor=\"middle\">s</text></g><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"180\" cy=\"40\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180\" y=\"45.5\" text-anchor=\"middle\">a</text></g><g><title>t</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"330\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"105.5\" text-anchor=\"middle\">t</text></g></svg>",
+        "alt": {
+         "en": "Digraful s→a 3, a→t 3, s→t 5.",
+         "ro": "Digraful s→a 3, a→t 3, s→t 5."
+        },
+        "caption": {
+         "en": "Costul direct $s\\rightarrow t$ e 5; prin $a$: 6.",
+         "ro": "Costul direct $s\\rightarrow t$ e 5; prin $a$: 6."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Dijkstra bidirecțional: o căutare din $s$ pe digraf și una din $t$ pe digraful cu arcele inversate; se oprește când un nod e fixat de ambele.",
+       "ro": "Dijkstra bidirecțional: o căutare din $s$ pe digraf și una din $t$ pe digraful cu arcele inversate; se oprește când un nod e fixat de ambele."
+      },
+      {
+       "en": "Exercițiul cere un exemplu pe care procedura nu e corectă.",
+       "ro": "Exercițiul cere un exemplu pe care procedura nu e corectă."
+      }
+     ]
+    },
+    {
+     "type": "proof-steps",
+     "id": "ag-l03e-p2",
+     "claim": {
+      "en": "Rulăm procedura pe digraful s→a 3, a→t 3, s→t 5.",
+      "ro": "Rulăm procedura pe digraful s→a 3, a→t 3, s→t 5."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Căutarea înainte din $s$: $u_a=3$, $u_t=5$. Fixează $a$ (3 < 5).",
+        "ro": "Căutarea înainte din $s$: $u_a=3$, $u_t=5$. Fixează $a$ (3 < 5)."
+       }
+      },
+      {
+       "shown": {
+        "en": "Căutarea înapoi din $t$, pe arcele inversate ($a\\rightarrow s$ 3, $t\\rightarrow a$ 3, $t\\rightarrow s$ 5): $a=3$, $s=5$. Fixează $a$ (3 < 5).",
+        "ro": "Căutarea înapoi din $t$, pe arcele inversate ($a\\rightarrow s$ 3, $t\\rightarrow a$ 3, $t\\rightarrow s$ 5): $a=3$, $s=5$. Fixează $a$ (3 < 5)."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce nod e fixat de ambele căutări?",
+         "ro": "Ce nod e fixat de ambele căutări?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "$s$",
+           "ro": "$s$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "$s$ e fixat doar de căutarea înainte.",
+           "ro": "$s$ e fixat doar de căutarea înainte."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         },
+         {
+          "text": {
+           "en": "$a$",
+           "ro": "$a$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect.",
+           "ro": "Corect."
+          }
+         },
+         {
+          "text": {
+           "en": "Niciunul",
+           "ro": "Niciunul"
+          },
+          "correct": false,
+          "explain": {
+           "en": "$a$ e fixat în ambele.",
+           "ro": "$a$ e fixat în ambele."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Procedura întoarce drumul $s\\rightarrow a\\rightarrow t$ cu cost 6. Dar arcul direct $s\\rightarrow t$ costă 5.",
+        "ro": "Procedura întoarce drumul $s\\rightarrow a\\rightarrow t$ cu cost 6. Dar arcul direct $s\\rightarrow t$ costă 5."
+       },
+       "predict": {
+        "question": {
+         "en": "Este rezultatul corect?",
+         "ro": "Este rezultatul corect?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Da: l-au găsit ambele căutări",
+           "ro": "Da: l-au găsit ambele căutări"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Costul real minim e 5.",
+           "ro": "Costul real minim e 5."
+          },
+          "misconception": "dijkstra-gaseste-tot"
+         },
+         {
+          "text": {
+           "en": "Nu: 6 > 5",
+           "ro": "Nu: 6 > 5"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: primul nod comun nu e neapărat pe un drum minim.",
+           "ro": "Corect: primul nod comun nu e neapărat pe un drum minim."
+          }
+         },
+         {
+          "text": {
+           "en": "Nu se poate stabili",
+           "ro": "Nu se poate stabili"
+          },
+          "correct": false,
+          "explain": {
+           "en": "$s\\rightarrow t$ costă 5 < 6.",
+           "ro": "$s\\rightarrow t$ costă 5 < 6."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Deci procedura nu e corectă.",
+      "ro": "Deci procedura nu e corectă."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s10",
+   "title": {
+    "en": "Ce costă de fapt",
+    "ro": "Ce costă de fapt"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03e-q7",
+     "status": "ruled",
+     "statement": {
+      "en": "Cât costă cel mai ieftin drum de la $s$ la $t$ în acest digraf?",
+      "ro": "Cât costă cel mai ieftin drum de la $s$ la $t$ în acest digraf?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "costul",
+        "ro": "costul"
+       },
+       "formula": "5",
+       "expected": 5
+      }
+     ],
+     "hints": [
+      {
+       "en": "Compară $s\\rightarrow t$ cu $s\\rightarrow a\\rightarrow t$.",
+       "ro": "Compară $s\\rightarrow t$ cu $s\\rightarrow a\\rightarrow t$."
+      },
+      {
+       "en": "$5$ față de $3+3$.",
+       "ro": "$5$ față de $3+3$."
+      },
+      {
+       "en": "5.",
+       "ro": "5."
+      }
+     ],
+     "solution": {
+      "en": "$\\min(5,\\,3+3)=5$.",
+      "ro": "$\\min(5,\\,3+3)=5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Într-un digraf cu $s\\rightarrow a$ 2, $a\\rightarrow t$ 2, $s\\rightarrow t$ 3: cât costă cel mai ieftin drum $s$–$t$?",
+        "ro": "Într-un digraf cu $s\\rightarrow a$ 2, $a\\rightarrow t$ 2, $s\\rightarrow t$ 3: cât costă cel mai ieftin drum $s$–$t$?"
+       },
+       "solution": {
+        "en": "$\\min(3,\\,2+2)=3$.",
+        "ro": "$\\min(3,\\,2+2)=3$."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "3",
+         "expected": 3
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Remediu (nu e pe slide): după primul nod comun nu te oprești; iei minimul peste toate nodurile $x$ din suma etichetelor înainte și înapoi: $x=t$ dă $5+0$, $x=s$ dă $0+5$, $x=a$ dă $6$. Minimul: 5. Pe slide-ul 40, ultima linie a enunțului e tăiată; sensul: „dați un exemplu în care eșuează”.",
+      "ro": "Remediu (nu e pe slide): după primul nod comun nu te oprești; iei minimul peste toate nodurile $x$ din suma etichetelor înainte și înapoi: $x=t$ dă $5+0$, $x=s$ dă $0+5$, $x=a$ dă $6$. Minimul: 5. Pe slide-ul 40, ultima linie a enunțului e tăiată; sensul: „dați un exemplu în care eșuează”."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s11",
+   "title": {
+    "en": "Un estimator de calculat",
+    "ro": "Un estimator de calculat"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03e-q8",
+     "status": "ruled",
+     "statement": {
+      "en": "Cu $g$ din figura hărții M: care e cheia $u+g$ pentru $p$, dacă $u_p=5$ și $g(p)=5$?",
+      "ro": "Cu $g$ din figura hărții M: care e cheia $u+g$ pentru $p$, dacă $u_p=5$ și $g(p)=5$?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "cheia",
+        "ro": "cheia"
+       },
+       "formula": "10",
+       "expected": 10
+      }
+     ],
+     "hints": [
+      {
+       "en": "$5+5$.",
+       "ro": "$5+5$."
+      },
+      {
+       "en": "Adună.",
+       "ro": "Adună."
+      },
+      {
+       "en": "10.",
+       "ro": "10."
+      }
+     ],
+     "solution": {
+      "en": "$5+5=10$.",
+      "ro": "$5+5=10$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pentru $u$: $u_u=6$ și $g(u)=10$. Cât e cheia?",
+        "ro": "Pentru $u$: $u_u=6$ și $g(u)=10$. Cât e cheia?"
+       },
+       "solution": {
+        "en": "$6+10=16$.",
+        "ro": "$6+10=16$."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "16",
+         "expected": 16
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s12",
+   "title": {
+    "en": "Pe scurt",
+    "ro": "Pe scurt"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "P1: Dijkstra oprit când $t$ intră în $S$.",
+       "ro": "P1: Dijkstra oprit când $t$ intră în $S$."
+      },
+      {
+       "en": "Estimator consistent $g$: (ii) $g(i)\\le a_{ij}+g(j)$; $g=0$ e Dijkstra.",
+       "ro": "Estimator consistent $g$: (ii) $g(i)\\le a_{ij}+g(j)$; $g=0$ e Dijkstra."
+      },
+      {
+       "en": "A*: fixezi nodul cu cel mai mic $u+g$; pe M, 3 noduri în loc de 5.",
+       "ro": "A*: fixezi nodul cu cel mai mic $u+g$; pe M, 3 noduri în loc de 5."
+      },
+      {
+       "en": "Bidirecțional: primul nod comun nu garantează un drum minim (exercițiul 7).",
+       "ro": "Bidirecțional: primul nod comun nu garantează un drum minim (exercițiul 7)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s13",
+   "title": {
+    "en": "Verificare: ce schimbă A*",
+    "ro": "Verificare: ce schimbă A*"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03e-q9",
+     "question": {
+      "en": "Ce schimbă A* față de Dijkstra?",
+      "ro": "Ce schimbă A* față de Dijkstra?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Actualizarea valorilor $u$",
+        "ro": "Actualizarea valorilor $u$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Rămâne aceeași.",
+        "ro": "Rămâne aceeași."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Alegerea nodului de fixat: după $u+g$, nu după $u$",
+        "ro": "Alegerea nodului de fixat: după $u+g$, nu după $u$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect.",
+        "ro": "Corect."
+       }
+      },
+      {
+       "text": {
+        "en": "Condiția de oprire a lui $S$",
+        "ro": "Condiția de oprire a lui $S$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se oprește tot când $t$ intră în $S$.",
+        "ro": "Se oprește tot când $t$ intră în $S$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s14",
+   "title": {
+    "en": "Verificare: o cheie",
+    "ro": "Verificare: o cheie"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03e-q10",
+     "status": "ruled",
+     "statement": {
+      "en": "Cu $u_v=10$ și $g(v)=6$: cât e cheia lui $v$?",
+      "ro": "Cu $u_v=10$ și $g(v)=6$: cât e cheia lui $v$?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "cheia",
+        "ro": "cheia"
+       },
+       "formula": "16",
+       "expected": 16
+      }
+     ],
+     "hints": [
+      {
+       "en": "Adună.",
+       "ro": "Adună."
+      },
+      {
+       "en": "$10+6$.",
+       "ro": "$10+6$."
+      },
+      {
+       "en": "16.",
+       "ro": "16."
+      }
+     ],
+     "solution": {
+      "en": "$10+6=16$.",
+      "ro": "$10+6=16$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Cu $u_q=6$ și $g(q)=5$: cât e cheia?",
+        "ro": "Cu $u_q=6$ și $g(q)=5$: cât e cheia?"
+       },
+       "solution": {
+        "en": "$6+5=11$.",
+        "ro": "$6+5=11$."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "11",
+         "expected": 11
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03e-s15",
+   "title": {
+    "en": "Verificare: de ce eșuează exercițiul 7",
+    "ro": "Verificare: de ce eșuează exercițiul 7"
+   },
+   "kicker": {
+    "en": "Lecția 3e",
+    "ro": "Lecția 3e"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03e-q11",
+     "question": {
+      "en": "De ce eșuează procedura bidirecțională din exercițiul 7?",
+      "ro": "De ce eșuează procedura bidirecțională din exercițiul 7?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Pentru că arcele au costuri egale",
+        "ro": "Pentru că arcele au costuri egale"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Costurile sunt 3, 3, 5.",
+        "ro": "Costurile sunt 3, 3, 5."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Primul nod fixat de ambele căutări nu e neapărat pe un drum minim",
+        "ro": "Primul nod fixat de ambele căutări nu e neapărat pe un drum minim"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: aici $a$ e comun, dar drumul prin $a$ costă 6 > 5.",
+        "ro": "Corect: aici $a$ e comun, dar drumul prin $a$ costă 6 > 5."
+       }
+      },
+      {
+       "text": {
+        "en": "Pentru că digraful are circuite",
+        "ro": "Pentru că digraful are circuite"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu are.",
+        "ro": "Nu are."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

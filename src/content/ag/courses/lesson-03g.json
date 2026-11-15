@@ -1,0 +1,2074 @@
+{
+ "meta": {
+  "id": "ag-l03g",
+  "title": {
+   "en": "Lecția 3g: toate perechile, Floyd-Warshall",
+   "ro": "Lecția 3g: toate perechile, Floyd-Warshall"
+  },
+  "shortTitle": {
+   "en": "L3g: Floyd-Warshall",
+   "ro": "L3g: Floyd-Warshall"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Algoritmica grafurilor, cursul 3, UAIC FII (agr3.pdf)",
+   "ro": "Algoritmica grafurilor, cursul 3, UAIC FII (agr3.pdf)"
+  }
+ },
+ "steps": [
+  {
+   "id": "ag-l03g-s1",
+   "title": {
+    "en": "Costuri între oricare două noduri",
+    "ro": "Costuri între oricare două noduri"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Digraful G3</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→3: 6</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M54.5 60 Q40 100 54.2 139\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"40.2\" y=\"90.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"47.2\" y=\"104.8\" text-anchor=\"middle\">6</text></g><g><title>1→4: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"76\" y1=\"45\" x2=\"283\" y2=\"45\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173\" y=\"47\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180\" y=\"61\" text-anchor=\"middle\">1</text></g><g><title>2→3: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"284\" y1=\"155\" x2=\"77\" y2=\"155\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173\" y=\"135\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180\" y=\"149\" text-anchor=\"middle\">2</text></g><g><title>3→1: -2</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M65.5 140 Q80 100 65.8 61\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"61.3\" y=\"91.2\" width=\"23\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"72.8\" y=\"105.2\" text-anchor=\"middle\">-2</text></g><g><title>3→4: 4</title><line class=\"muted\" stroke-width=\"2\" x1=\"74.5\" y1=\"148.3\" x2=\"284.5\" y2=\"52.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"177.6\" y=\"101\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"184.6\" y=\"115\" text-anchor=\"middle\">4</text></g><g><title>4→2: 0</title><line class=\"muted\" stroke-width=\"2\" x1=\"300\" y1=\"61\" x2=\"300\" y2=\"138\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"282\" y=\"91\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"289\" y=\"105\" text-anchor=\"middle\">0</text></g><g><title>1</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"60\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"60\" y=\"50.5\" text-anchor=\"middle\">1</text></g><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"300\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"300\" y=\"50.5\" text-anchor=\"middle\">4</text></g><g><title>3</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"60\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"60\" y=\"160.5\" text-anchor=\"middle\">3</text></g><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"300\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"300\" y=\"160.5\" text-anchor=\"middle\">2</text></g></svg>",
+        "alt": {
+         "en": "Digraful G3: 1→3 6, 1→4 1, 2→3 2, 3→1 -2, 3→4 4, 4→2 0.",
+         "ro": "Digraful G3: 1→3 6, 1→4 1, 2→3 2, 3→1 -2, 3→4 4, 4→2 0."
+        },
+        "caption": {
+         "en": "Digraful G3 are un arc negativ, $3\\rightarrow1$.",
+         "ro": "Digraful G3 are un arc negativ, $3\\rightarrow1$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Vrem un tabel cu cel mai mic cost de la fiecare nod $i$ la fiecare nod $j$: problema P3.",
+       "ro": "Vrem un tabel cu cel mai mic cost de la fiecare nod $i$ la fiecare nod $j$: problema P3."
+      },
+      {
+       "en": "Răspunsul are două matrice: $U=(u_{ij})$ cu costurile minime și `Before` cu nodul de dinaintea lui $j$ pe drumul de la $i$ la $j$.",
+       "ro": "Răspunsul are două matrice: $U=(u_{ij})$ cu costurile minime și `Before` cu nodul de dinaintea lui $j$ pe drumul de la $i$ la $j$."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q1",
+     "question": {
+      "en": "Rulăm Bellman-Ford-Moore din fiecare nod, pe rând. Cât durează în total?",
+      "ro": "Rulăm Bellman-Ford-Moore din fiecare nod, pe rând. Cât durează în total?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$O(n^3)$",
+        "ro": "$O(n^3)$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "O rulare e $O(n^3)$; $n$ rulări înseamnă $n^4$.",
+        "ro": "O rulare e $O(n^3)$; $n$ rulări înseamnă $n^4$."
+       },
+       "misconception": "un-singur-termen"
+      },
+      {
+       "text": {
+        "en": "$O(n)$",
+        "ro": "$O(n)$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Doar citirea răspunsului e $n^2$ valori.",
+        "ro": "Doar citirea răspunsului e $n^2$ valori."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "$n\\cdot O(n^3)=O(n^4)$",
+        "ro": "$n\\cdot O(n^3)=O(n^4)$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $n$ rulări, fiecare $O(n^3)$. Floyd-Warshall face $O(n^3)$.",
+        "ro": "Corect: $n$ rulări, fiecare $O(n^3)$. Floyd-Warshall face $O(n^3)$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s2",
+   "title": {
+    "en": "Noduri intermediare permise",
+    "ro": "Noduri intermediare permise"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Definim $u_{ij}^k$ = costul minim al unui drum de la $i$ la $j$ ale cărui noduri intermediare sunt doar din $\\{1,\\dots,k-1\\}$. Pentru $k=1$ nu e voie niciun nod intermediar: rămân arcele directe și $a_{ii}=0$.",
+      "ro": "Definim $u_{ij}^k$ = costul minim al unui drum de la $i$ la $j$ ale cărui noduri intermediare sunt doar din $\\{1,\\dots,k-1\\}$. Pentru $k=1$ nu e voie niciun nod intermediar: rămân arcele directe și $a_{ii}=0$."
+     }
+    },
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$a_{ij}$",
+         "1",
+         "2",
+         "3",
+         "4"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "∞",
+          "6",
+          "1"
+         ],
+         [
+          "2",
+          "∞",
+          "0",
+          "2",
+          "∞"
+         ],
+         [
+          "3",
+          "-2",
+          "∞",
+          "0",
+          "4"
+         ],
+         [
+          "4",
+          "∞",
+          "0",
+          "∞",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Matricea de început (∞: nu există arc)",
+         "ro": "Matricea de început (∞: nu există arc)"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q2",
+     "status": "ruled",
+     "statement": {
+      "en": "În matricea $U^1$ a lui G3: cât este $u_{34}^1$ și cât $u_{42}^1$ (în această ordine)?",
+      "ro": "În matricea $U^1$ a lui G3: cât este $u_{34}^1$ și cât $u_{42}^1$ (în această ordine)?"
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "num",
+       "label": {
+        "en": "prima valoare",
+        "ro": "prima valoare"
+       },
+       "formula": "4",
+       "expected": 4
+      },
+      {
+       "id": "b",
+       "kind": "num",
+       "label": {
+        "en": "a doua valoare",
+        "ro": "a doua valoare"
+       },
+       "formula": "0",
+       "expected": 0
+      }
+     ],
+     "hints": [
+      {
+       "en": "Citește rândul 3, coloana 4 și rândul 4, coloana 2.",
+       "ro": "Citește rândul 3, coloana 4 și rândul 4, coloana 2."
+      },
+      {
+       "en": "Sunt arce directe.",
+       "ro": "Sunt arce directe."
+      },
+      {
+       "en": "$3\\rightarrow4$ costă 4; $4\\rightarrow2$ costă 0.",
+       "ro": "$3\\rightarrow4$ costă 4; $4\\rightarrow2$ costă 0."
+      }
+     ],
+     "solution": {
+      "en": "$u^1_{34}=4$ (arcul $3\\rightarrow4$) și $u^1_{42}=0$ (arcul $4\\rightarrow2$).",
+      "ro": "$u^1_{34}=4$ (arcul $3\\rightarrow4$) și $u^1_{42}=0$ (arcul $4\\rightarrow2$)."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "În aceeași matrice: cât este $u^1_{13}$ și $u^1_{31}$ (în această ordine)?",
+        "ro": "În aceeași matrice: cât este $u^1_{13}$ și $u^1_{31}$ (în această ordine)?"
+       },
+       "solution": {
+        "en": "$1\\rightarrow3$ costă 6; $3\\rightarrow1$ costă $-2$.",
+        "ro": "$1\\rightarrow3$ costă 6; $3\\rightarrow1$ costă $-2$."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "6",
+         "expected": 6
+        },
+        {
+         "id": "b",
+         "formula": "-2",
+         "expected": -2
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s3",
+   "title": {
+    "en": "Pasul de la k la k+1",
+    "ro": "Pasul de la k la k+1"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "rule",
+     "text": {
+      "en": "$u_{ij}^{k+1}=\\min\\big(u_{ij}^k,\\;u_{ik}^k+u_{kj}^k\\big)$: treci prin nodul $k$ doar dacă e mai ieftin.",
+      "ro": "$u_{ij}^{k+1}=\\min\\big(u_{ij}^k,\\;u_{ik}^k+u_{kj}^k\\big)$: treci prin nodul $k$ doar dacă e mai ieftin."
+     },
+     "body": [
+      {
+       "text": {
+        "en": "Citești: cel mai bun drum fără $k$ sau drumul $i\\rightarrow k$ urmat de $k\\rightarrow j$.",
+        "ro": "Citești: cel mai bun drum fără $k$ sau drumul $i\\rightarrow k$ urmat de $k\\rightarrow j$."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q3",
+     "question": {
+      "en": "La $k=1$, ce drumuri noi sunt posibile?",
+      "ro": "La $k=1$, ce drumuri noi sunt posibile?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Cele care trec prin nodul 1: $i\\rightarrow1$ urmat de $1\\rightarrow j$",
+        "ro": "Cele care trec prin nodul 1: $i\\rightarrow1$ urmat de $1\\rightarrow j$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: 1 e singurul nod nou permis ca intermediar.",
+        "ro": "Corect: 1 e singurul nod nou permis ca intermediar."
+       }
+      },
+      {
+       "text": {
+        "en": "Cele care trec prin 4",
+        "ro": "Cele care trec prin 4"
+       },
+       "correct": false,
+       "explain": {
+        "en": "4 e ultimul nod, abia la $k=5$.",
+        "ro": "4 e ultimul nod, abia la $k=5$."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Toate drumurile",
+        "ro": "Toate drumurile"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Doar cele cu noduri intermediare din mulțimea permisă.",
+        "ro": "Doar cele cu noduri intermediare din mulțimea permisă."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s4",
+   "title": {
+    "en": "Nodul 1 ca intermediar",
+    "ro": "Nodul 1 ca intermediar"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$a_{ij}$",
+         "1",
+         "2",
+         "3",
+         "4"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "∞",
+          "6",
+          "1"
+         ],
+         [
+          "2",
+          "∞",
+          "0",
+          "2",
+          "∞"
+         ],
+         [
+          "3",
+          "-2",
+          "∞",
+          "0",
+          "4"
+         ],
+         [
+          "4",
+          "∞",
+          "0",
+          "∞",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Matricea înainte de nodul 1",
+         "ro": "Matricea înainte de nodul 1"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Cine intră în 1: doar $3\\rightarrow1$. Cine iese din 1: $1\\rightarrow3$ și $1\\rightarrow4$.",
+       "ro": "Cine intră în 1: doar $3\\rightarrow1$. Cine iese din 1: $1\\rightarrow3$ și $1\\rightarrow4$."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q4",
+     "question": {
+      "en": "Ce celulă se schimbă la $k=1$?",
+      "ro": "Ce celulă se schimbă la $k=1$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$u_{12}$",
+        "ro": "$u_{12}$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Din 1 nu există drum spre 2 prin 1 (nu intră nimic în 1 din 2).",
+        "ro": "Din 1 nu există drum spre 2 prin 1 (nu intră nimic în 1 din 2)."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "$u_{34}$: $\\min(4,\\,-2+1)=-1$",
+        "ro": "$u_{34}$: $\\min(4,\\,-2+1)=-1$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $3\\rightarrow1\\rightarrow4$ costă $-2+1=-1<4$.",
+        "ro": "Corect: $3\\rightarrow1\\rightarrow4$ costă $-2+1=-1<4$."
+       }
+      },
+      {
+       "text": {
+        "en": "$u_{31}$",
+        "ro": "$u_{31}$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Deja $-2$; prin 1 nu scade.",
+        "ro": "Deja $-2$; prin 1 nu scade."
+       },
+       "misconception": "schimbare-fara-scadere"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s5",
+   "title": {
+    "en": "Nodul 2 ca intermediar",
+    "ro": "Nodul 2 ca intermediar"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$a_{ij}$",
+         "1",
+         "2",
+         "3",
+         "4"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "∞",
+          "6",
+          "1"
+         ],
+         [
+          "2",
+          "∞",
+          "0",
+          "2",
+          "∞"
+         ],
+         [
+          "3",
+          "-2",
+          "∞",
+          "0",
+          "-1"
+         ],
+         [
+          "4",
+          "∞",
+          "0",
+          "∞",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Matricea înainte de nodul 2",
+         "ro": "Matricea înainte de nodul 2"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Cine intră în 2: doar $4\\rightarrow2$ (0). Cine iese din 2: $2\\rightarrow3$ (2).",
+       "ro": "Cine intră în 2: doar $4\\rightarrow2$ (0). Cine iese din 2: $2\\rightarrow3$ (2)."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q5",
+     "question": {
+      "en": "Ce celulă se schimbă la $k=2$?",
+      "ro": "Ce celulă se schimbă la $k=2$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$u_{23}$",
+        "ro": "$u_{23}$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Deja 2.",
+        "ro": "Deja 2."
+       },
+       "misconception": "schimbare-fara-scadere"
+      },
+      {
+       "text": {
+        "en": "$u_{43}$: $0+2=2$ în loc de ∞",
+        "ro": "$u_{43}$: $0+2=2$ în loc de ∞"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $4\\rightarrow2\\rightarrow3$.",
+        "ro": "Corect: $4\\rightarrow2\\rightarrow3$."
+       }
+      },
+      {
+       "text": {
+        "en": "$u_{34}$",
+        "ro": "$u_{34}$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu intră 3 în 2.",
+        "ro": "Nu intră 3 în 2."
+       },
+       "misconception": "caz-particular"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s6",
+   "title": {
+    "en": "Nodul 3 ca intermediar",
+    "ro": "Nodul 3 ca intermediar"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$a_{ij}$",
+         "1",
+         "2",
+         "3",
+         "4"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "∞",
+          "6",
+          "1"
+         ],
+         [
+          "2",
+          "∞",
+          "0",
+          "2",
+          "∞"
+         ],
+         [
+          "3",
+          "-2",
+          "∞",
+          "0",
+          "-1"
+         ],
+         [
+          "4",
+          "∞",
+          "0",
+          "2",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Matricea înainte de nodul 3",
+         "ro": "Matricea înainte de nodul 3"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Cine intră în 3: $1\\rightarrow3$ (6), $2\\rightarrow3$ (2), $4\\rightarrow3$ (2). Cine iese: $3\\rightarrow1$ ($-2$), $3\\rightarrow4$ ($-1$).",
+       "ro": "Cine intră în 3: $1\\rightarrow3$ (6), $2\\rightarrow3$ (2), $4\\rightarrow3$ (2). Cine iese: $3\\rightarrow1$ ($-2$), $3\\rightarrow4$ ($-1$)."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q6",
+     "question": {
+      "en": "Care sunt celulele care se schimbă la $k=3$?",
+      "ro": "Care sunt celulele care se schimbă la $k=3$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$u_{12}$, $u_{13}$, $u_{32}$",
+        "ro": "$u_{12}$, $u_{13}$, $u_{32}$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Acelea se schimbă la $k=4$.",
+        "ro": "Acelea se schimbă la $k=4$."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Nicio celulă",
+        "ro": "Nicio celulă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se schimbă trei.",
+        "ro": "Se schimbă trei."
+       },
+       "misconception": "un-singur-termen"
+      },
+      {
+       "text": {
+        "en": "$u_{21}$, $u_{24}$, $u_{41}$",
+        "ro": "$u_{21}$, $u_{24}$, $u_{41}$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $2\\rightarrow3\\rightarrow1$ ($2-2=0$), $2\\rightarrow3\\rightarrow4$ ($2-1=1$), $4\\rightarrow3\\rightarrow1$ ($2-2=0$).",
+        "ro": "Corect: $2\\rightarrow3\\rightarrow1$ ($2-2=0$), $2\\rightarrow3\\rightarrow4$ ($2-1=1$), $4\\rightarrow3\\rightarrow1$ ($2-2=0$)."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s7",
+   "title": {
+    "en": "Nodul 4 ca intermediar",
+    "ro": "Nodul 4 ca intermediar"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$a_{ij}$",
+         "1",
+         "2",
+         "3",
+         "4"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "∞",
+          "6",
+          "1"
+         ],
+         [
+          "2",
+          "0",
+          "0",
+          "2",
+          "1"
+         ],
+         [
+          "3",
+          "-2",
+          "∞",
+          "0",
+          "-1"
+         ],
+         [
+          "4",
+          "0",
+          "0",
+          "2",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Matricea înainte de nodul 4",
+         "ro": "Matricea înainte de nodul 4"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Cine intră în 4: $1\\rightarrow4$ (1), $3\\rightarrow4$ ($-1$). Cine iese: $4\\rightarrow2$ (0), $4\\rightarrow3$ (2), $4\\rightarrow1$ (0).",
+       "ro": "Cine intră în 4: $1\\rightarrow4$ (1), $3\\rightarrow4$ ($-1$). Cine iese: $4\\rightarrow2$ (0), $4\\rightarrow3$ (2), $4\\rightarrow1$ (0)."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q7",
+     "question": {
+      "en": "Care sunt celulele care se schimbă la $k=4$?",
+      "ro": "Care sunt celulele care se schimbă la $k=4$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$u_{21}$, $u_{24}$, $u_{41}$",
+        "ro": "$u_{21}$, $u_{24}$, $u_{41}$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Acelea s-au schimbat la $k=3$.",
+        "ro": "Acelea s-au schimbat la $k=3$."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "$u_{12}=1$, $u_{13}=3$, $u_{32}=-1$",
+        "ro": "$u_{12}=1$, $u_{13}=3$, $u_{32}=-1$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $1\\rightarrow4\\rightarrow2$, $1\\rightarrow4\\rightarrow3$, $3\\rightarrow4\\rightarrow2$.",
+        "ro": "Corect: $1\\rightarrow4\\rightarrow2$, $1\\rightarrow4\\rightarrow3$, $3\\rightarrow4\\rightarrow2$."
+       }
+      },
+      {
+       "text": {
+        "en": "Nicio celulă",
+        "ro": "Nicio celulă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se schimbă trei.",
+        "ro": "Se schimbă trei."
+       },
+       "misconception": "un-singur-termen"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s8",
+   "title": {
+    "en": "Matricea finală",
+    "ro": "Matricea finală"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$a_{ij}$",
+         "1",
+         "2",
+         "3",
+         "4"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "1",
+          "3",
+          "1"
+         ],
+         [
+          "2",
+          "0",
+          "0",
+          "2",
+          "1"
+         ],
+         [
+          "3",
+          "-2",
+          "-1",
+          "0",
+          "-1"
+         ],
+         [
+          "4",
+          "0",
+          "0",
+          "2",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Matricea finală a lui G3",
+         "ro": "Matricea finală a lui G3"
+        }
+       }
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q8",
+     "status": "ruled",
+     "statement": {
+      "en": "Din matricea finală: cât este $u_{13}$ și cât $u_{32}$ (în această ordine)?",
+      "ro": "Din matricea finală: cât este $u_{13}$ și cât $u_{32}$ (în această ordine)?"
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "num",
+       "label": {
+        "en": "prima valoare",
+        "ro": "prima valoare"
+       },
+       "formula": "3",
+       "expected": 3
+      },
+      {
+       "id": "b",
+       "kind": "num",
+       "label": {
+        "en": "a doua valoare",
+        "ro": "a doua valoare"
+       },
+       "formula": "-1",
+       "expected": -1
+      }
+     ],
+     "hints": [
+      {
+       "en": "Rândul 1, coloana 3; rândul 3, coloana 2.",
+       "ro": "Rândul 1, coloana 3; rândul 3, coloana 2."
+      },
+      {
+       "en": "Citește din tabel.",
+       "ro": "Citește din tabel."
+      },
+      {
+       "en": "$3$ și $-1$.",
+       "ro": "$3$ și $-1$."
+      }
+     ],
+     "solution": {
+      "en": "$u_{13}=3$ (prin $1\\rightarrow4\\rightarrow2\\rightarrow3$: $1+0+2$) și $u_{32}=-1$ (prin $3\\rightarrow4\\rightarrow2$: $-1+0$).",
+      "ro": "$u_{13}=3$ (prin $1\\rightarrow4\\rightarrow2\\rightarrow3$: $1+0+2$) și $u_{32}=-1$ (prin $3\\rightarrow4\\rightarrow2$: $-1+0$)."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "În aceeași matrice: cât este $u_{24}$ și $u_{41}$ (în această ordine)?",
+        "ro": "În aceeași matrice: cât este $u_{24}$ și $u_{41}$ (în această ordine)?"
+       },
+       "solution": {
+        "en": "$u_{24}=1$ ($2\\rightarrow3\\rightarrow4$: $2-1$) și $u_{41}=0$ ($4\\rightarrow2\\rightarrow3\\rightarrow1$: $0+2-2$).",
+        "ro": "$u_{24}=1$ ($2\\rightarrow3\\rightarrow4$: $2-1$) și $u_{41}=0$ ($4\\rightarrow2\\rightarrow3\\rightarrow1$: $0+2-2$)."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "1",
+         "expected": 1
+        },
+        {
+         "id": "b",
+         "formula": "0",
+         "expected": 0
+        }
+       ]
+      }
+     ],
+     "detectors": [
+      {
+       "field": "a",
+       "formula": "6",
+       "message": {
+        "en": "Ai citit arcul direct $1\\rightarrow3$ de la început (6). Drumul prin 4 și 2 costă mai puțin.",
+        "ro": "Ai citit arcul direct $1\\rightarrow3$ de la început (6). Drumul prin 4 și 2 costă mai puțin."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s9",
+   "title": {
+    "en": "Nodul dinaintea lui j",
+    "ro": "Nodul dinaintea lui j"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "table": {
+        "columns": [
+         "$1$ spre",
+         "2",
+         "3",
+         "4"
+        ],
+        "rows": [
+         [
+          "`before`",
+          "4",
+          "2",
+          "1"
+         ]
+        ],
+        "caption": {
+         "en": "`before(1,j)` în matricea finală",
+         "ro": "`before(1,j)` în matricea finală"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "`before(i,j)` pornește de la $i$.",
+       "ro": "`before(i,j)` pornește de la $i$."
+      },
+      {
+       "en": "Când $u_{ij}$ scade prin $k$, `before(i,j)` devine `before(k,j)`.",
+       "ro": "Când $u_{ij}$ scade prin $k$, `before(i,j)` devine `before(k,j)`."
+      },
+      {
+       "en": "Drumul $1\\rightarrow3$: `before(1,3)=2`, `before(1,2)=4`, `before(1,4)=1`: deci $1\\rightarrow4\\rightarrow2\\rightarrow3$.",
+       "ro": "Drumul $1\\rightarrow3$: `before(1,3)=2`, `before(1,2)=4`, `before(1,4)=1`: deci $1\\rightarrow4\\rightarrow2\\rightarrow3$."
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q9",
+     "status": "ruled",
+     "statement": {
+      "en": "Citind `before` din 3 înapoi spre 1 (`before(1,3)=2`, `before(1,2)=4`, `before(1,4)=1`): cine e nodul de dinaintea lui 2, și cât costă drumul $1\\rightarrow3$?",
+      "ro": "Citind `before` din 3 înapoi spre 1 (`before(1,3)=2`, `before(1,2)=4`, `before(1,4)=1`): cine e nodul de dinaintea lui 2, și cât costă drumul $1\\rightarrow3$?"
+     },
+     "fields": [
+      {
+       "id": "n",
+       "kind": "num",
+       "label": {
+        "en": "nodul dinaintea lui 2",
+        "ro": "nodul dinaintea lui 2"
+       },
+       "formula": "4",
+       "expected": 4
+      },
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "costul drumului",
+        "ro": "costul drumului"
+       },
+       "formula": "3",
+       "expected": 3
+      }
+     ],
+     "hints": [
+      {
+       "en": "Pornește din 3: `before(1,3)=2`.",
+       "ro": "Pornește din 3: `before(1,3)=2`."
+      },
+      {
+       "en": "Apoi `before(1,2)=4`, apoi `before(1,4)=1`.",
+       "ro": "Apoi `before(1,2)=4`, apoi `before(1,4)=1`."
+      },
+      {
+       "en": "Drumul $1,4,2,3$: $1+0+2=3$.",
+       "ro": "Drumul $1,4,2,3$: $1+0+2=3$."
+      }
+     ],
+     "solution": {
+      "en": "Înapoi: $3\\leftarrow2\\leftarrow4\\leftarrow1$. Costul $1+0+2=3$.",
+      "ro": "Înapoi: $3\\leftarrow2\\leftarrow4\\leftarrow1$. Costul $1+0+2=3$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "La fel pe G3, pentru drumul $3\\rightarrow2$, cu `before(3,2)=4` și `before(3,4)=3`: care e nodul dinaintea lui 2 și cât costă drumul?",
+        "ro": "La fel pe G3, pentru drumul $3\\rightarrow2$, cu `before(3,2)=4` și `before(3,4)=3`: care e nodul dinaintea lui 2 și cât costă drumul?"
+       },
+       "solution": {
+        "en": "Nodul dinaintea lui 2 e 4; drumul $3\\rightarrow4\\rightarrow2$ costă $-1+0=-1$.",
+        "ro": "Nodul dinaintea lui 2 e 4; drumul $3\\rightarrow4\\rightarrow2$ costă $-1+0=-1$."
+       },
+       "fields": [
+        {
+         "id": "n",
+         "formula": "4",
+         "expected": 4
+        },
+        {
+         "id": "c",
+         "formula": "-1",
+         "expected": -1
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s10",
+   "title": {
+    "en": "Codul, linie cu linie",
+    "ro": "Codul, linie cu linie"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "code",
+     "language": "text",
+     "code": "for k = 1..n:\n  for i = 1..n:\n    for j = 1..n:\n      if a_ik + a_kj < a_ij:\n        a_ij ← a_ik + a_kj\n        before(i,j) ← before(k,j)\n  (a_ii ← 0 la început)\nif a_ii < 0 pentru un i: \"circuit negativ\""
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q10",
+     "question": {
+      "en": "Care buclă trebuie să fie cea mai exterioară?",
+      "ro": "Care buclă trebuie să fie cea mai exterioară?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$k$, nodul intermediar",
+        "ro": "$k$, nodul intermediar"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: la fiecare $k$ matricea e completă pentru nodurile intermediare $<k$.",
+        "ro": "Corect: la fiecare $k$ matricea e completă pentru nodurile intermediare $<k$."
+       }
+      },
+      {
+       "text": {
+        "en": "$i$",
+        "ro": "$i$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Cu $i$ în afară, $u_{ik}$ sau $u_{kj}$ pot fi încă neactualizate.",
+        "ro": "Cu $i$ în afară, $u_{ik}$ sau $u_{kj}$ pot fi încă neactualizate."
+       },
+       "misconception": "primul-nod-in-ordine"
+      },
+      {
+       "text": {
+        "en": "$j$",
+        "ro": "$j$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu: contează să fie $k$.",
+        "ro": "Nu: contează să fie $k$."
+       },
+       "misconception": "primul-nod-in-ordine"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s11",
+   "title": {
+    "en": "Ce se întâmplă cu bucla greșită",
+    "ro": "Ce se întâmplă cu bucla greșită"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Dacă bucla după $i$ ar fi cea mai exterioară, pe G3 s-ar obține $u_{13}=6$ și $u_{24}=6$, în loc de 3 și 1. Drumul $1\\rightarrow4\\rightarrow2\\rightarrow3$ nu e găsit, pentru că $u_{42}$ și $u_{23}$ nu sunt încă gata când se procesează rândul 1.",
+      "ro": "Dacă bucla după $i$ ar fi cea mai exterioară, pe G3 s-ar obține $u_{13}=6$ și $u_{24}=6$, în loc de 3 și 1. Drumul $1\\rightarrow4\\rightarrow2\\rightarrow3$ nu e găsit, pentru că $u_{42}$ și $u_{23}$ nu sunt încă gata când se procesează rândul 1."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q11",
+     "question": {
+      "en": "Cu bucla $i$ în afară, ce $u_{13}$ rămâne pe G3?",
+      "ro": "Cu bucla $i$ în afară, ce $u_{13}$ rămâne pe G3?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "3, ca la algoritmul corect",
+        "ro": "3, ca la algoritmul corect"
+       },
+       "correct": false,
+       "explain": {
+        "en": "3 apare doar cu $k$ în afară.",
+        "ro": "3 apare doar cu $k$ în afară."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "6, arcul direct",
+        "ro": "6, arcul direct"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: drumul mai ieftin ar cere pași făcuți mai târziu.",
+        "ro": "Corect: drumul mai ieftin ar cere pași făcuți mai târziu."
+       }
+      },
+      {
+       "text": {
+        "en": "$-2$",
+        "ro": "$-2$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$-2$ e costul lui $3\\rightarrow1$.",
+        "ro": "$-2$ e costul lui $3\\rightarrow1$."
+       },
+       "misconception": "cost-arc-fara-u"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s12",
+   "title": {
+    "en": "Circuit negativ în matrice",
+    "ro": "Circuit negativ în matrice"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>G3 cu 4→2 = -3</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→3: 6</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M54.5 60 Q40 100 54.2 139\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"40.2\" y=\"90.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"47.2\" y=\"104.8\" text-anchor=\"middle\">6</text></g><g><title>1→4: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"76\" y1=\"45\" x2=\"283\" y2=\"45\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173\" y=\"47\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180\" y=\"61\" text-anchor=\"middle\">1</text></g><g><title>2→3: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"284\" y1=\"155\" x2=\"77\" y2=\"155\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173\" y=\"135\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180\" y=\"149\" text-anchor=\"middle\">2</text></g><g><title>3→1: -2</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M65.5 140 Q80 100 65.8 61\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"61.3\" y=\"91.2\" width=\"23\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"72.8\" y=\"105.2\" text-anchor=\"middle\">-2</text></g><g><title>3→4: 4</title><line class=\"muted\" stroke-width=\"2\" x1=\"74.5\" y1=\"148.3\" x2=\"284.5\" y2=\"52.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"177.6\" y=\"101\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"184.6\" y=\"115\" text-anchor=\"middle\">4</text></g><g><title>4→2: -3</title><line class=\"bad\" stroke-width=\"3\" x1=\"300\" y1=\"61\" x2=\"300\" y2=\"138\" marker-end=\"url(#ah-bad)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"277.5\" y=\"91\" width=\"23\" height=\"18\"/><text class=\"bad\" font-weight=\"700\" font-size=\"15\" x=\"289\" y=\"105\" text-anchor=\"middle\">-3</text></g><g><title>1</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"60\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"60\" y=\"50.5\" text-anchor=\"middle\">1</text></g><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"300\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"300\" y=\"50.5\" text-anchor=\"middle\">4</text></g><g><title>3</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"60\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"60\" y=\"160.5\" text-anchor=\"middle\">3</text></g><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"300\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"300\" y=\"160.5\" text-anchor=\"middle\">2</text></g></svg>",
+        "alt": {
+         "en": "G3 cu arcul 4→2 de cost -3; circuitul 1, 4, 2, 3, 1 costă -2.",
+         "ro": "G3 cu arcul 4→2 de cost -3; circuitul 1, 4, 2, 3, 1 costă -2."
+        },
+        "caption": {
+         "en": "Cu $4\\rightarrow2$ de cost $-3$, circuitul $1\\rightarrow4\\rightarrow2\\rightarrow3\\rightarrow1$ costă $-2$.",
+         "ro": "Cu $4\\rightarrow2$ de cost $-3$, circuitul $1\\rightarrow4\\rightarrow2\\rightarrow3\\rightarrow1$ costă $-2$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "La final, un element de pe diagonală devine negativ: $u_{ii}<0$.",
+       "ro": "La final, un element de pe diagonală devine negativ: $u_{ii}<0$."
+      },
+      {
+       "en": "Asta arată un circuit de cost negativ prin $i$: algoritmul răspunde „circuit negativ”.",
+       "ro": "Asta arată un circuit de cost negativ prin $i$: algoritmul răspunde „circuit negativ”."
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q12",
+     "status": "ruled",
+     "statement": {
+      "en": "Pe G3 cu $4\\rightarrow2=-3$, diagonala finală e $(-2,-2,-2,-4)$ pentru nodurile 1, 2, 3, 4. Cât este $u_{44}$ și câte elemente diagonale sunt negative?",
+      "ro": "Pe G3 cu $4\\rightarrow2=-3$, diagonala finală e $(-2,-2,-2,-4)$ pentru nodurile 1, 2, 3, 4. Cât este $u_{44}$ și câte elemente diagonale sunt negative?"
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "num",
+       "label": {
+        "en": "$u_{44}$",
+        "ro": "$u_{44}$"
+       },
+       "formula": "-4",
+       "expected": -4
+      },
+      {
+       "id": "b",
+       "kind": "num",
+       "label": {
+        "en": "câte sunt negative",
+        "ro": "câte sunt negative"
+       },
+       "formula": "4",
+       "expected": 4
+      }
+     ],
+     "hints": [
+      {
+       "en": "Citește diagonala.",
+       "ro": "Citește diagonala."
+      },
+      {
+       "en": "Al patrulea element e $u_{44}$.",
+       "ro": "Al patrulea element e $u_{44}$."
+      },
+      {
+       "en": "$-4$; toate patru sunt negative.",
+       "ro": "$-4$; toate patru sunt negative."
+      }
+     ],
+     "solution": {
+      "en": "$u_{44}=-4$; toate cele patru elemente sunt negative.",
+      "ro": "$u_{44}=-4$; toate cele patru elemente sunt negative."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe aceeași diagonală: cât este $u_{11}$ și câte elemente sunt $\\le -2$?",
+        "ro": "Pe aceeași diagonală: cât este $u_{11}$ și câte elemente sunt $\\le -2$?"
+       },
+       "solution": {
+        "en": "$u_{11}=-2$; toate patru sunt $\\le -2$.",
+        "ro": "$u_{11}=-2$; toate patru sunt $\\le -2$."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "-2",
+         "expected": -2
+        },
+        {
+         "id": "b",
+         "formula": "4",
+         "expected": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s13",
+   "title": {
+    "en": "Cel mai ieftin circuit prin fiecare nod",
+    "ro": "Cel mai ieftin circuit prin fiecare nod"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Dacă diagonala începe cu ∞ (nu cu 0) și nu există circuite negative, diagonala finală dă costul celui mai ieftin circuit prin fiecare nod. Pe G3: $(1,1,1,1)$, adică circuitul $1\\rightarrow4\\rightarrow2\\rightarrow3\\rightarrow1$ costă 1.",
+      "ro": "Dacă diagonala începe cu ∞ (nu cu 0) și nu există circuite negative, diagonala finală dă costul celui mai ieftin circuit prin fiecare nod. Pe G3: $(1,1,1,1)$, adică circuitul $1\\rightarrow4\\rightarrow2\\rightarrow3\\rightarrow1$ costă 1."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q13",
+     "question": {
+      "en": "De ce diagonala cu ∞ la început dă un circuit în loc de 0?",
+      "ro": "De ce diagonala cu ∞ la început dă un circuit în loc de 0?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Pentru că ∞ e mai mare",
+        "ro": "Pentru că ∞ e mai mare"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Contează ce semnifică: drumul trebuie să plece și să revină.",
+        "ro": "Contează ce semnifică: drumul trebuie să plece și să revină."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Pentru că arcele sunt negative",
+        "ro": "Pentru că arcele sunt negative"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu e legat de semn.",
+        "ro": "Nu e legat de semn."
+       },
+       "misconception": "arc-negativ-ignorat"
+      },
+      {
+       "text": {
+        "en": "Costul $u_{ii}$ nu mai e „drumul gol” de cost 0, ci cel mai bun drum care se întoarce în $i$",
+        "ro": "Costul $u_{ii}$ nu mai e „drumul gol” de cost 0, ci cel mai bun drum care se întoarce în $i$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: două convenții: 0 pentru distanțe, ∞ pentru circuite.",
+        "ro": "Corect: două convenții: 0 pentru distanțe, ∞ pentru circuite."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s14",
+   "title": {
+    "en": "Cât durează și când îl alegi",
+    "ro": "Cât durează și când îl alegi"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Trei bucle $n$ ori: $n^3$ actualizări. Pentru $n=4$: $4\\cdot4\\cdot4=64$. Floyd-Warshall merge cu arce negative și dă tot tabelul.",
+      "ro": "Trei bucle $n$ ori: $n^3$ actualizări. Pentru $n=4$: $4\\cdot4\\cdot4=64$. Floyd-Warshall merge cu arce negative și dă tot tabelul."
+     }
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q14",
+     "status": "ruled",
+     "statement": {
+      "en": "Câte actualizări face Floyd-Warshall pentru $n=5$?",
+      "ro": "Câte actualizări face Floyd-Warshall pentru $n=5$?"
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "num",
+       "label": {
+        "en": "numărul",
+        "ro": "numărul"
+       },
+       "formula": "125",
+       "expected": 125
+      }
+     ],
+     "hints": [
+      {
+       "en": "Trei bucle imbricate.",
+       "ro": "Trei bucle imbricate."
+      },
+      {
+       "en": "$5\\cdot5\\cdot5$.",
+       "ro": "$5\\cdot5\\cdot5$."
+      },
+      {
+       "en": "125.",
+       "ro": "125."
+      }
+     ],
+     "solution": {
+      "en": "$n^3=125$.",
+      "ro": "$n^3=125$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Câte actualizări face pentru $n=6$?",
+        "ro": "Câte actualizări face pentru $n=6$?"
+       },
+       "solution": {
+        "en": "$6^3=216$.",
+        "ro": "$6^3=216$."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "216",
+         "expected": 216
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q15",
+     "question": {
+      "en": "Toate perechile, cu arce negative și fără circuit negativ. Alegerea cea mai simplă?",
+      "ro": "Toate perechile, cu arce negative și fără circuit negativ. Alegerea cea mai simplă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Dijkstra din fiecare nod",
+        "ro": "Dijkstra din fiecare nod"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Cu arce negative Dijkstra nu e corect.",
+        "ro": "Cu arce negative Dijkstra nu e corect."
+       },
+       "misconception": "dijkstra-merge-cu-negative"
+      },
+      {
+       "text": {
+        "en": "Bellman-Ford-Moore din fiecare nod",
+        "ro": "Bellman-Ford-Moore din fiecare nod"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Corect, dar $O(n^4)$: mai lent.",
+        "ro": "Corect, dar $O(n^4)$: mai lent."
+       },
+       "misconception": "drum-cu-mai-putine-arce"
+      },
+      {
+       "text": {
+        "en": "Floyd-Warshall, $O(n^3)$",
+        "ro": "Floyd-Warshall, $O(n^3)$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: un singur algoritm, trei bucle.",
+        "ro": "Corect: un singur algoritm, trei bucle."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s15",
+   "title": {
+    "en": "Alt digraf: primele două noduri",
+    "ro": "Alt digraf: primele două noduri"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>G6</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>1→2: 7</title><line class=\"muted\" stroke-width=\"2\" x1=\"76\" y1=\"45\" x2=\"283\" y2=\"45\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173\" y=\"47\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180\" y=\"61\" text-anchor=\"middle\">7</text></g><g><title>2→4: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"300\" y1=\"61\" x2=\"300\" y2=\"138\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"282\" y=\"91\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"289\" y=\"105\" text-anchor=\"middle\">3</text></g><g><title>3→1: -2</title><line class=\"muted\" stroke-width=\"2\" x1=\"60\" y1=\"139\" x2=\"60\" y2=\"62\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"59.5\" y=\"91\" width=\"23\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"71\" y=\"105\" text-anchor=\"middle\">-2</text></g><g><title>3→2: 7</title><line class=\"muted\" stroke-width=\"2\" x1=\"74.5\" y1=\"148.3\" x2=\"284.5\" y2=\"52.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"177.6\" y=\"101\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"184.6\" y=\"115\" text-anchor=\"middle\">7</text></g><g><title>3→4: 7</title><line class=\"muted\" stroke-width=\"2\" x1=\"76\" y1=\"155\" x2=\"283\" y2=\"155\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173\" y=\"157\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180\" y=\"171\" text-anchor=\"middle\">7</text></g><g><title>4→3: 4</title><path class=\"muted\" fill=\"none\" stroke-width=\"2\" d=\"M284.3 151.9 Q180 131 76.7 151.7\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173.2\" y=\"132.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"180.2\" y=\"146.4\" text-anchor=\"middle\">4</text></g><g><title>1</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"60\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"60\" y=\"50.5\" text-anchor=\"middle\">1</text></g><g><title>2</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"300\" cy=\"45\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"300\" y=\"50.5\" text-anchor=\"middle\">2</text></g><g><title>3</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"60\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"60\" y=\"160.5\" text-anchor=\"middle\">3</text></g><g><title>4</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"300\" cy=\"155\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"300\" y=\"160.5\" text-anchor=\"middle\">4</text></g></svg>",
+        "alt": {
+         "en": "Digraful G6: 1→2 7, 2→4 3, 3→1 -2, 3→2 7, 3→4 7, 4→3 4.",
+         "ro": "Digraful G6: 1→2 7, 2→4 3, 3→1 -2, 3→2 7, 3→4 7, 4→3 4."
+        },
+        "caption": {
+         "en": "Digraful G6.",
+         "ro": "Digraful G6."
+        }
+       }
+      },
+      {
+       "table": {
+        "columns": [
+         "$a_{ij}$",
+         "1",
+         "2",
+         "3",
+         "4"
+        ],
+        "rows": [
+         [
+          "1",
+          "0",
+          "7",
+          "∞",
+          "∞"
+         ],
+         [
+          "2",
+          "∞",
+          "0",
+          "∞",
+          "3"
+         ],
+         [
+          "3",
+          "-2",
+          "7",
+          "0",
+          "7"
+         ],
+         [
+          "4",
+          "∞",
+          "∞",
+          "4",
+          "0"
+         ]
+        ],
+        "caption": {
+         "en": "Matricea de început",
+         "ro": "Matricea de început"
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "La $k=1$: intră $3\\rightarrow1$ ($-2$), iese $1\\rightarrow2$ (7): $u_{32}=\\min(7,\\,-2+7)=5$. Matricea devine cea cu $u_{32}=5$.",
+       "ro": "La $k=1$: intră $3\\rightarrow1$ ($-2$), iese $1\\rightarrow2$ (7): $u_{32}=\\min(7,\\,-2+7)=5$. Matricea devine cea cu $u_{32}=5$."
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q16",
+     "status": "ruled",
+     "statement": {
+      "en": "La $k=2$ intră $1\\rightarrow2$ (7) și $3\\rightarrow2$ (5); iese $2\\rightarrow4$ (3). Cât devin $u_{14}$ și $u_{34}$ (în această ordine)?",
+      "ro": "La $k=2$ intră $1\\rightarrow2$ (7) și $3\\rightarrow2$ (5); iese $2\\rightarrow4$ (3). Cât devin $u_{14}$ și $u_{34}$ (în această ordine)?"
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "num",
+       "label": {
+        "en": "prima celulă",
+        "ro": "prima celulă"
+       },
+       "formula": "10",
+       "expected": 10
+      },
+      {
+       "id": "b",
+       "kind": "num",
+       "label": {
+        "en": "a doua celulă",
+        "ro": "a doua celulă"
+       },
+       "formula": "7",
+       "expected": 7
+      }
+     ],
+     "hints": [
+      {
+       "en": "$u_{14}=\\min(\\infty,\\,u_{12}+u_{24})$ și $u_{34}=\\min(7,\\,u_{32}+u_{24})$.",
+       "ro": "$u_{14}=\\min(\\infty,\\,u_{12}+u_{24})$ și $u_{34}=\\min(7,\\,u_{32}+u_{24})$."
+      },
+      {
+       "en": "$7+3=10$; $5+3=8$ față de 7.",
+       "ro": "$7+3=10$; $5+3=8$ față de 7."
+      },
+      {
+       "en": "$10$ și $\\min(7,8)=7$.",
+       "ro": "$10$ și $\\min(7,8)=7$."
+      }
+     ],
+     "solution": {
+      "en": "$u_{14}=7+3=10$; $u_{34}=\\min(7,\\,5+3)=7$.",
+      "ro": "$u_{14}=7+3=10$; $u_{34}=\\min(7,\\,5+3)=7$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe digraful 1→2 4, 2→4 2, 3→4 9, 3→1 -1, după $k=1$ avem $u_{32}=3$. La $k=2$ cât devin $u_{14}$ și $u_{34}$ (în această ordine)?",
+        "ro": "Pe digraful 1→2 4, 2→4 2, 3→4 9, 3→1 -1, după $k=1$ avem $u_{32}=3$. La $k=2$ cât devin $u_{14}$ și $u_{34}$ (în această ordine)?"
+       },
+       "solution": {
+        "en": "$u_{14}=4+2=6$; $u_{34}=\\min(9,\\,3+2)=5$.",
+        "ro": "$u_{14}=4+2=6$; $u_{34}=\\min(9,\\,3+2)=5$."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "6",
+         "expected": 6
+        },
+        {
+         "id": "b",
+         "formula": "5",
+         "expected": 5
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s16",
+   "title": {
+    "en": "Restul lui G6, de rezolvat singur",
+    "ro": "Restul lui G6, de rezolvat singur"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q17",
+     "status": "ruled",
+     "statement": {
+      "en": "La $k=3$ cât devin $u_{41}$ și $u_{42}$ (în această ordine)? Intră în 3: $4\\rightarrow3$ (4); iese din 3: $3\\rightarrow1$ ($-2$), $3\\rightarrow2$ (5).",
+      "ro": "La $k=3$ cât devin $u_{41}$ și $u_{42}$ (în această ordine)? Intră în 3: $4\\rightarrow3$ (4); iese din 3: $3\\rightarrow1$ ($-2$), $3\\rightarrow2$ (5)."
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "num",
+       "label": {
+        "en": "prima celulă",
+        "ro": "prima celulă"
+       },
+       "formula": "2",
+       "expected": 2
+      },
+      {
+       "id": "b",
+       "kind": "num",
+       "label": {
+        "en": "a doua celulă",
+        "ro": "a doua celulă"
+       },
+       "formula": "9",
+       "expected": 9
+      }
+     ],
+     "hints": [
+      {
+       "en": "$u_{41}=u_{43}+u_{31}$, $u_{42}=u_{43}+u_{32}$.",
+       "ro": "$u_{41}=u_{43}+u_{31}$, $u_{42}=u_{43}+u_{32}$."
+      },
+      {
+       "en": "$4+(-2)$ și $4+5$.",
+       "ro": "$4+(-2)$ și $4+5$."
+      },
+      {
+       "en": "2 și 9.",
+       "ro": "2 și 9."
+      }
+     ],
+     "solution": {
+      "en": "$u_{41}=4-2=2$ și $u_{42}=4+5=9$.",
+      "ro": "$u_{41}=4-2=2$ și $u_{42}=4+5=9$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe digraful 1→2 3, 2→3 -1, 3→1 2, 1→3 5, la $k=3$ cât devin $u_{21}$ și $u_{32}$ (în această ordine)? (matricea după $k=2$ are $u_{13}=2$, $u_{32}=5$)",
+        "ro": "Pe digraful 1→2 3, 2→3 -1, 3→1 2, 1→3 5, la $k=3$ cât devin $u_{21}$ și $u_{32}$ (în această ordine)? (matricea după $k=2$ are $u_{13}=2$, $u_{32}=5$)"
+       },
+       "solution": {
+        "en": "$u_{21}=u_{23}+u_{31}=-1+2=1$; $u_{32}$ rămâne 5.",
+        "ro": "$u_{21}=u_{23}+u_{31}=-1+2=1$; $u_{32}$ rămâne 5."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "1",
+         "expected": 1
+        },
+        {
+         "id": "b",
+         "formula": "5",
+         "expected": 5
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q18",
+     "status": "ruled",
+     "statement": {
+      "en": "La $k=4$ cât devin $u_{13}$ și $u_{21}$ (în această ordine)? Intră în 4: $1\\rightarrow4$ (10), $2\\rightarrow4$ (3); iese din 4: $4\\rightarrow3$ (4), $4\\rightarrow1$ (2).",
+      "ro": "La $k=4$ cât devin $u_{13}$ și $u_{21}$ (în această ordine)? Intră în 4: $1\\rightarrow4$ (10), $2\\rightarrow4$ (3); iese din 4: $4\\rightarrow3$ (4), $4\\rightarrow1$ (2)."
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "num",
+       "label": {
+        "en": "prima celulă",
+        "ro": "prima celulă"
+       },
+       "formula": "14",
+       "expected": 14
+      },
+      {
+       "id": "b",
+       "kind": "num",
+       "label": {
+        "en": "a doua celulă",
+        "ro": "a doua celulă"
+       },
+       "formula": "5",
+       "expected": 5
+      }
+     ],
+     "hints": [
+      {
+       "en": "$u_{13}=u_{14}+u_{43}$, $u_{21}=u_{24}+u_{41}$.",
+       "ro": "$u_{13}=u_{14}+u_{43}$, $u_{21}=u_{24}+u_{41}$."
+      },
+      {
+       "en": "$10+4$ și $3+2$.",
+       "ro": "$10+4$ și $3+2$."
+      },
+      {
+       "en": "14 și 5.",
+       "ro": "14 și 5."
+      }
+     ],
+     "solution": {
+      "en": "$u_{13}=10+4=14$; $u_{21}=3+2=5$.",
+      "ro": "$u_{13}=10+4=14$; $u_{21}=3+2=5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe un alt digraf cu $u_{14}=6$, $u_{43}=1$, $u_{24}=2$, $u_{41}=3$, la $k=4$ cât devin $u_{13}$ și $u_{21}$ (în această ordine)? ($u_{13}$ și $u_{21}$ erau ∞)",
+        "ro": "Pe un alt digraf cu $u_{14}=6$, $u_{43}=1$, $u_{24}=2$, $u_{41}=3$, la $k=4$ cât devin $u_{13}$ și $u_{21}$ (în această ordine)? ($u_{13}$ și $u_{21}$ erau ∞)"
+       },
+       "solution": {
+        "en": "$u_{13}=6+1=7$; $u_{21}=2+3=5$.",
+        "ro": "$u_{13}=6+1=7$; $u_{21}=2+3=5$."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "7",
+         "expected": 7
+        },
+        {
+         "id": "b",
+         "formula": "5",
+         "expected": 5
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s17",
+   "title": {
+    "en": "Bucla greșită pe G6",
+    "ro": "Bucla greșită pe G6"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q19",
+     "question": {
+      "en": "Cu bucla $i$ în afară, pe G6 se obține $u_{21}=\\infty$. Cât e valoarea corectă?",
+      "ro": "Cu bucla $i$ în afară, pe G6 se obține $u_{21}=\\infty$. Cât e valoarea corectă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "5, prin $2\\rightarrow4\\rightarrow3\\rightarrow1$ ($3+4-2$)",
+        "ro": "5, prin $2\\rightarrow4\\rightarrow3\\rightarrow1$ ($3+4-2$)"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: abia la $k=4$ și $k=3$ se completează acest drum, în ordinea buclei $k$.",
+        "ro": "Corect: abia la $k=4$ și $k=3$ se completează acest drum, în ordinea buclei $k$."
+       }
+      },
+      {
+       "text": {
+        "en": "∞: nu există drum",
+        "ro": "∞: nu există drum"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Există: $2\\rightarrow4\\rightarrow3\\rightarrow1$.",
+        "ro": "Există: $2\\rightarrow4\\rightarrow3\\rightarrow1$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "3",
+        "ro": "3"
+       },
+       "correct": false,
+       "explain": {
+        "en": "3 e costul lui $2\\rightarrow4$, dar nu ajunge în 1.",
+        "ro": "3 e costul lui $2\\rightarrow4$, dar nu ajunge în 1."
+       },
+       "misconception": "doar-arcul-direct"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s18",
+   "title": {
+    "en": "Pe scurt",
+    "ro": "Pe scurt"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "$u_{ij}^k$: costul minim cu nodurile intermediare doar din $\\{1,\\dots,k-1\\}$.",
+       "ro": "$u_{ij}^k$: costul minim cu nodurile intermediare doar din $\\{1,\\dots,k-1\\}$."
+      },
+      {
+       "en": "Pasul: $u_{ij}^{k+1}=\\min(u_{ij}^k,\\,u_{ik}^k+u_{kj}^k)$; bucla $k$ e cea exterioară.",
+       "ro": "Pasul: $u_{ij}^{k+1}=\\min(u_{ij}^k,\\,u_{ik}^k+u_{kj}^k)$; bucla $k$ e cea exterioară."
+      },
+      {
+       "en": "`before(i,j)` devine `before(k,j)` la fiecare îmbunătățire.",
+       "ro": "`before(i,j)` devine `before(k,j)` la fiecare îmbunătățire."
+      },
+      {
+       "en": "$u_{ii}<0$ arată un circuit negativ; timp $O(n^3)$.",
+       "ro": "$u_{ii}<0$ arată un circuit negativ; timp $O(n^3)$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s19",
+   "title": {
+    "en": "Verificare: o singură celulă",
+    "ro": "Verificare: o singură celulă"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03g-q20",
+     "status": "ruled",
+     "statement": {
+      "en": "Pe digraful 1→2 3, 2→3 -1, 3→1 2, 1→3 5: la $k=1$ cât devine $u_{32}$?",
+      "ro": "Pe digraful 1→2 3, 2→3 -1, 3→1 2, 1→3 5: la $k=1$ cât devine $u_{32}$?"
+     },
+     "fields": [
+      {
+       "id": "a",
+       "kind": "num",
+       "label": {
+        "en": "$u_{32}$",
+        "ro": "$u_{32}$"
+       },
+       "formula": "5",
+       "expected": 5
+      }
+     ],
+     "hints": [
+      {
+       "en": "Intră în 1: $3\\rightarrow1$ (2); iese: $1\\rightarrow2$ (3).",
+       "ro": "Intră în 1: $3\\rightarrow1$ (2); iese: $1\\rightarrow2$ (3)."
+      },
+      {
+       "en": "$2+3$.",
+       "ro": "$2+3$."
+      },
+      {
+       "en": "5.",
+       "ro": "5."
+      }
+     ],
+     "solution": {
+      "en": "$u_{32}=\\min(\\infty,\\,u_{31}+u_{12})=2+3=5$.",
+      "ro": "$u_{32}=\\min(\\infty,\\,u_{31}+u_{12})=2+3=5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe digraful 1→2 4, 3→1 -1: la $k=1$ cât devine $u_{32}$?",
+        "ro": "Pe digraful 1→2 4, 3→1 -1: la $k=1$ cât devine $u_{32}$?"
+       },
+       "solution": {
+        "en": "$-1+4=3$.",
+        "ro": "$-1+4=3$."
+       },
+       "fields": [
+        {
+         "id": "a",
+         "formula": "3",
+         "expected": 3
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s20",
+   "title": {
+    "en": "Verificare: ce celulă se schimbă",
+    "ro": "Verificare: ce celulă se schimbă"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q21",
+     "question": {
+      "en": "La $k=2$, pe același digraf (după $k=1$: $u_{13}=5$): ce se schimbă?",
+      "ro": "La $k=2$, pe același digraf (după $k=1$: $u_{13}=5$): ce se schimbă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$u_{31}$",
+        "ro": "$u_{31}$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$u_{31}=2$ nu poate scădea prin 2.",
+        "ro": "$u_{31}=2$ nu poate scădea prin 2."
+       },
+       "misconception": "schimbare-fara-scadere"
+      },
+      {
+       "text": {
+        "en": "Nimic",
+        "ro": "Nimic"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se schimbă $u_{13}$.",
+        "ro": "Se schimbă $u_{13}$."
+       },
+       "misconception": "un-singur-termen"
+      },
+      {
+       "text": {
+        "en": "$u_{13}=\\min(5,\\,3-1)=2$",
+        "ro": "$u_{13}=\\min(5,\\,3-1)=2$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $1\\rightarrow2\\rightarrow3$ e mai ieftin.",
+        "ro": "Corect: $1\\rightarrow2\\rightarrow3$ e mai ieftin."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03g-s21",
+   "title": {
+    "en": "Verificare: ce arată diagonala",
+    "ro": "Verificare: ce arată diagonala"
+   },
+   "kicker": {
+    "en": "Lecția 3g",
+    "ro": "Lecția 3g"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03g-q22",
+     "question": {
+      "en": "La final $u_{22}=-1$ (diagonala pornită de la 0). Ce înseamnă?",
+      "ro": "La final $u_{22}=-1$ (diagonala pornită de la 0). Ce înseamnă?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Nodul 2 e izolat",
+        "ro": "Nodul 2 e izolat"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Un nod izolat are $u_{22}=0$.",
+        "ro": "Un nod izolat are $u_{22}=0$."
+       },
+       "misconception": "caz-particular"
+      },
+      {
+       "text": {
+        "en": "Totul e în regulă",
+        "ro": "Totul e în regulă"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pe diagonală trebuie să fie 0.",
+        "ro": "Pe diagonală trebuie să fie 0."
+       },
+       "misconception": "afirmatie-adevarata-negata"
+      },
+      {
+       "text": {
+        "en": "Există un circuit de cost negativ prin nodul 2",
+        "ro": "Există un circuit de cost negativ prin nodul 2"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: un drum de la 2 înapoi la 2 cu cost negativ.",
+        "ro": "Corect: un drum de la 2 înapoi la 2 cu cost negativ."
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
