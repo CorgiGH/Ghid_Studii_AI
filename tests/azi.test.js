@@ -74,13 +74,15 @@ describe('azi buttons', () => {
     expect(t[0].kind).toBe('lesson');
     expect(t[1].kind).toBe('crash');
   });
-  it('ag-partial and ag-tema-1 give two part buttons', () => {
-    for (const id of ['ag-partial', 'ag-tema-1']) {
-      const t = buildTargets(byId(id));
-      expect(t.map(x => x.part)).toEqual([1, 2]);
-      expect(t.every(x => x.parts === 2 && x.kind === 'crash')).toBe(true);
-      expect(new Set(t.map(x => x.href)).size).toBe(2);
-    }
+  it('ag-tema-1 gives two part buttons; ag-partial adds its lesson first', () => {
+    const t = buildTargets(byId('ag-tema-1'));
+    expect(t.map(x => x.part)).toEqual([1, 2]);
+    expect(t.every(x => x.parts === 2 && x.kind === 'crash')).toBe(true);
+    expect(new Set(t.map(x => x.href)).size).toBe(2);
+    const p = buildTargets(byId('ag-partial'));
+    expect(p.map(x => x.kind)).toEqual(['lesson', 'crash', 'crash']);
+    expect(p.slice(1).map(x => x.part)).toEqual([1, 2]);
+    expect(new Set(p.map(x => x.href)).size).toBe(3);
   });
   it('a string crash still works and a missing course gives no button', () => {
     expect(buildTargets({ id: 'x', link: { subject: 'ia', course: 'ia-crash-t2' }, crash: 'ia-crash-t2' })).toHaveLength(1);
