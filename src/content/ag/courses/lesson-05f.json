@@ -1,0 +1,1564 @@
+{
+  "meta": {
+    "id": "ag-l05f",
+    "title": {
+      "en": "Lesson 5f: Matchings, edge covers, the Norman-Rabin theorem",
+      "ro": "Lecția 5f: Cuplaje, acoperiri cu muchii, teorema Norman-Rabin"
+    },
+    "shortTitle": {
+      "en": "L5f: Matchings and covers",
+      "ro": "L5f: Cuplaje și acoperiri"
+    },
+    "source": {
+      "en": "Algoritmica grafurilor, cursul 5, UAIC FII, slide-urile 28–36",
+      "ro": "Algoritmica grafurilor, cursul 5, UAIC FII, slide-urile 28–36"
+    },
+    "clarity": 1
+  },
+  "steps": [
+    {
+      "id": "ag-l05f-s1",
+      "title": {
+        "en": "Șase oameni la rând",
+        "ro": "Șase oameni la rând"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 28",
+        "ro": "Cursul 5 · slide 28"
+      },
+      "blocks": [
+        {
+          "type": "reflect",
+          "id": "ag-l05f-r1",
+          "prompt": {
+            "en": "Șase oameni stau la rând: 1, 2, 3, 4, 5, 6. Doi vecini pot forma o pereche pentru o sarcină, dar nimeni nu poate fi în două perechi. Câte perechi poți face cel mult? Rămâne cineva singur?",
+            "ro": "Șase oameni stau la rând: 1, 2, 3, 4, 5, 6. Doi vecini pot forma o pereche pentru o sarcină, dar nimeni nu poate fi în două perechi. Câte perechi poți face cel mult? Rămâne cineva singur?"
+          },
+          "placeholder": {
+            "en": "Scrie ce crezi",
+            "ro": "Scrie ce crezi"
+          },
+          "answer": {
+            "en": "Poți face 3 perechi: 12, 34, 56, și nu rămâne nimeni singur. Dar dacă alegi 23 și 45, rămân 1 și 6 singuri, și nu mai poți adăuga nimic. Lecția dă nume acestor lucruri.",
+            "ro": "Poți face 3 perechi: 12, 34, 56, și nu rămâne nimeni singur. Dar dacă alegi 23 și 45, rămân 1 și 6 singuri, și nu mai poți adăuga nimic. Lecția dă nume acestor lucruri."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 120'><title>Șase oameni</title><g><title>1–2</title><line class='muted' stroke-width='2' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='muted' stroke-width='2' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='muted' stroke-width='2' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='muted' stroke-width='2' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='muted' stroke-width='2' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+            "alt": {
+              "en": "Drumul 1–2–3–4–5–6.",
+              "ro": "Drumul 1–2–3–4–5–6."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s2",
+      "title": {
+        "en": "Cuplajul",
+        "ro": "Cuplajul"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 28",
+        "ro": "Cursul 5 · slide 28"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Un cuplaj M este o mulțime de muchii în care niciun nod nu se află în două muchii.",
+                "ro": "Un cuplaj M este o mulțime de muchii în care niciun nod nu se află în două muchii."
+              }
+            },
+            {
+              "text": {
+                "en": "O muchie e incidentă cu v dacă v e unul dintre capetele ei. Notăm $d_A(v)$ numărul muchiilor din A incidente cu v: cuplaj înseamnă $d_M(v) \\le 1$ pentru orice nod v.",
+                "ro": "O muchie e incidentă cu v dacă v e unul dintre capetele ei. Notăm $d_A(v)$ numărul muchiilor din A incidente cu v: cuplaj înseamnă $d_M(v) \\le 1$ pentru orice nod v."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 120'><title>Cuplajul 12, 34</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='muted' stroke-width='2' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='ok' stroke-width='3' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='muted' stroke-width='2' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='muted' stroke-width='2' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+                "alt": {
+                  "en": "Drumul cu muchiile 12 și 34 colorate.",
+                  "ro": "Drumul cu muchiile 12 și 34 colorate."
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s3",
+      "title": {
+        "en": "Care mulțime nu e cuplaj",
+        "ro": "Care mulțime nu e cuplaj"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 28",
+        "ro": "Cursul 5 · slide 28"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05f-q1",
+          "question": {
+            "en": "Pe drumul 1–2–3–4–5–6, care mulțime de muchii nu este cuplaj?",
+            "ro": "Pe drumul 1–2–3–4–5–6, care mulțime de muchii nu este cuplaj?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "{12, 34, 56}",
+                "ro": "{12, 34, 56}"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Niciun nod nu apare de două ori: e un cuplaj.",
+                "ro": "Niciun nod nu apare de două ori: e un cuplaj."
+              },
+              "misconception": "regula-inventata"
+            },
+            {
+              "text": {
+                "en": "{12, 23}",
+                "ro": "{12, 23}"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Nodul 2 este în ambele muchii: $d_M(2) = 2$.",
+                "ro": "Nodul 2 este în ambele muchii: $d_M(2) = 2$."
+              }
+            },
+            {
+              "text": {
+                "en": "{23, 45}",
+                "ro": "{23, 45}"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Muchiile 23 și 45 nu au niciun nod comun: e un cuplaj, chiar dacă 1 și 6 rămân singuri.",
+                "ro": "Muchiile 23 și 45 nu au niciun nod comun: e un cuplaj, chiar dacă 1 și 6 rămân singuri."
+              },
+              "misconception": "regula-inventata"
+            },
+            {
+              "text": {
+                "en": "{34}",
+                "ro": "{34}"
+              },
+              "correct": false,
+              "explain": {
+                "en": "O singură muchie e mereu un cuplaj.",
+                "ro": "O singură muchie e mereu un cuplaj."
+              },
+              "misconception": "regula-inventata"
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 120'><title>Drumul</title><g><title>1–2</title><line class='muted' stroke-width='2' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='muted' stroke-width='2' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='muted' stroke-width='2' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='muted' stroke-width='2' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='muted' stroke-width='2' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+            "alt": {
+              "en": "Drumul 1–6.",
+              "ro": "Drumul 1–6."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s4",
+      "title": {
+        "en": "Familia cuplajelor",
+        "ro": "Familia cuplajelor"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 29",
+        "ro": "Cursul 5 · slide 29"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "$\\mathcal{M}_G$ este familia tuturor cuplajelor lui G. Mulțimea vidă e cuplaj, iar orice submulțime a unui cuplaj e cuplaj.",
+                "ro": "$\\mathcal{M}_G$ este familia tuturor cuplajelor lui G. Mulțimea vidă e cuplaj, iar orice submulțime a unui cuplaj e cuplaj."
+              }
+            },
+            {
+              "text": {
+                "en": "Pe drumul 1, 2, 3, 4 sunt 5 cuplaje: ∅, {12}, {23}, {34}, {12, 34}.",
+                "ro": "Pe drumul 1, 2, 3, 4 sunt 5 cuplaje: ∅, {12}, {23}, {34}, {12, 34}."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s5",
+      "title": {
+        "en": "Noduri saturate și expuse",
+        "ro": "Noduri saturate și expuse"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 29",
+        "ro": "Cursul 5 · slide 29"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Pentru M = {23, 45}: nodurile atinse de M sunt saturate, S(M) = {2, 3, 4, 5}. Cele rămase sunt expuse: E(M) = {1, 6}.",
+                "ro": "Pentru M = {23, 45}: nodurile atinse de M sunt saturate, S(M) = {2, 3, 4, 5}. Cele rămase sunt expuse: E(M) = {1, 6}."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 120'><title>M = 23, 45</title><g><title>1–2</title><line class='muted' stroke-width='2' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='ok' stroke-width='3' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='muted' stroke-width='2' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='ok' stroke-width='3' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='muted' stroke-width='2' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='warn fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='warn fill-bg' stroke-width='4' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+                "alt": {
+                  "en": "M = {23, 45} colorat; nodurile expuse 1 și 6 încercuite.",
+                  "ro": "M = {23, 45} colorat; nodurile expuse 1 și 6 încercuite."
+                }
+              }
+            },
+            {
+              "note": {
+                "en": "Aici E(M) este o mulțime de noduri, nu de muchii ca E(G).",
+                "ro": "Aici E(M) este o mulțime de noduri, nu de muchii ca E(G)."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s6",
+      "title": {
+        "en": "Câte noduri saturate, câte expuse",
+        "ro": "Câte noduri saturate, câte expuse"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 29",
+        "ro": "Cursul 5 · slide 29"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05f-e1",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Drumul are 6 noduri. M = {23, 45}. Câte noduri sunt saturate (|S(M)|)? Câte sunt expuse (|E(M)|)?",
+            "ro": "Drumul are 6 noduri. M = {23, 45}. Câte noduri sunt saturate (|S(M)|)? Câte sunt expuse (|E(M)|)?"
+          },
+          "fields": [
+            {
+              "id": "s",
+              "kind": "num",
+              "label": {
+                "en": "|S(M)|",
+                "ro": "|S(M)|"
+              },
+              "formula": "2*2",
+              "expected": 4
+            },
+            {
+              "id": "e",
+              "kind": "num",
+              "label": {
+                "en": "|E(M)|",
+                "ro": "|E(M)|"
+              },
+              "formula": "6-2*2",
+              "expected": 2
+            }
+          ],
+          "hints": [
+            {
+              "en": "Fiecare muchie a cuplajului saturează 2 noduri.",
+              "ro": "Fiecare muchie a cuplajului saturează 2 noduri."
+            },
+            {
+              "en": "|S(M)| = 2 · |M|.",
+              "ro": "|S(M)| = 2 · |M|."
+            },
+            {
+              "en": "|E(M)| = |V| − 2 · |M|.",
+              "ro": "|E(M)| = |V| − 2 · |M|."
+            }
+          ],
+          "solution": {
+            "en": "|S(M)| = 2 · 2 = 4; |E(M)| = 6 − 4 = 2.",
+            "ro": "|S(M)| = 2 · 2 = 4; |E(M)| = 6 − 4 = 2."
+          },
+          "detectors": [
+            {
+              "field": "s",
+              "formula": "2",
+              "message": {
+                "en": "2 e numărul muchiilor; fiecare saturează două noduri.",
+                "ro": "2 e numărul muchiilor; fiecare saturează două noduri."
+              }
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 120'><title>M</title><g><title>1–2</title><line class='muted' stroke-width='2' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='ok' stroke-width='3' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='muted' stroke-width='2' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='ok' stroke-width='3' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='muted' stroke-width='2' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='warn fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='warn fill-bg' stroke-width='4' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+            "alt": {
+              "en": "M = {23, 45}.",
+              "ro": "M = {23, 45}."
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Același drum, M = {12, 34, 56}. |S(M)|? |E(M)|?",
+                "ro": "Același drum, M = {12, 34, 56}. |S(M)|? |E(M)|?"
+              },
+              "solution": {
+                "en": "|S(M)| = 6; |E(M)| = 0: cuplaj perfect.",
+                "ro": "|S(M)| = 6; |E(M)| = 0: cuplaj perfect."
+              },
+              "fields": [
+                {
+                  "id": "s",
+                  "formula": "2*3",
+                  "expected": 6
+                },
+                {
+                  "id": "e",
+                  "formula": "6-2*3",
+                  "expected": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s7",
+      "title": {
+        "en": "Cuplaj maxim",
+        "ro": "Cuplaj maxim"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 30",
+        "ro": "Cursul 5 · slide 30"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Problema P1: dat G, găsește un cuplaj $M^*$ cu cât mai multe muchii (cardinal maxim).",
+                "ro": "Problema P1: dat G, găsește un cuplaj $M^*$ cu cât mai multe muchii (cardinal maxim)."
+              }
+            },
+            {
+              "tex": "|M^*| = \\max_{M \\in \\mathcal{M}_G} |M|"
+            },
+            {
+              "text": {
+                "en": "Notăm ν(G) acest maxim, $|M^*|$. Pe drumul cu 6 noduri, {12, 34, 56} dă ν(G) = 3.",
+                "ro": "Notăm ν(G) acest maxim, $|M^*|$. Pe drumul cu 6 noduri, {12, 34, 56} dă ν(G) = 3."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 120'><title>ν = 3</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='muted' stroke-width='2' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='ok' stroke-width='3' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='muted' stroke-width='2' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='ok' stroke-width='3' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+                "alt": {
+                  "en": "M = {12, 34, 56}.",
+                  "ro": "M = {12, 34, 56}."
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s8",
+      "title": {
+        "en": "Maximal sau maxim",
+        "ro": "Maximal sau maxim"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 30",
+        "ro": "Cursul 5 · slide 30"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05f-q2",
+          "question": {
+            "en": "M = {23, 45} nu mai poate primi nicio muchie. Este M un cuplaj maxim?",
+            "ro": "M = {23, 45} nu mai poate primi nicio muchie. Este M un cuplaj maxim?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "nu: {12, 34, 56} are 3 muchii",
+                "ro": "nu: {12, 34, 56} are 3 muchii"
+              },
+              "correct": true,
+              "explain": {
+                "en": "M nu poate fi extins, dar are 2 muchii, iar ν = 3. Maximal (nu mai merge extins) nu e același lucru cu maxim (cardinal cel mai mare).",
+                "ro": "M nu poate fi extins, dar are 2 muchii, iar ν = 3. Maximal (nu mai merge extins) nu e același lucru cu maxim (cardinal cel mai mare)."
+              }
+            },
+            {
+              "text": {
+                "en": "da, pentru că nu mai poate fi extins",
+                "ro": "da, pentru că nu mai poate fi extins"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Că nu poate fi extins nu înseamnă că e cel mai mare.",
+                "ro": "Că nu poate fi extins nu înseamnă că e cel mai mare."
+              },
+              "misconception": "conditie-necesara-luata-drept-suficienta"
+            },
+            {
+              "text": {
+                "en": "da, pentru că 2 = n/3",
+                "ro": "da, pentru că 2 = n/3"
+              },
+              "correct": false,
+              "explain": {
+                "en": "ν(G) este numărul cel mai mare de muchii posibil: aici 3.",
+                "ro": "ν(G) este numărul cel mai mare de muchii posibil: aici 3."
+              },
+              "misconception": "motiv-gresit"
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 120'><title>M</title><g><title>1–2</title><line class='muted' stroke-width='2' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='ok' stroke-width='3' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='muted' stroke-width='2' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='ok' stroke-width='3' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='muted' stroke-width='2' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='warn fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='warn fill-bg' stroke-width='4' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+            "alt": {
+              "en": "M = {23, 45}.",
+              "ro": "M = {23, 45}."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s9",
+      "title": {
+        "en": "Acoperirea cu muchii",
+        "ro": "Acoperirea cu muchii"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 31",
+        "ro": "Cursul 5 · slide 31"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "O acoperire cu muchii F este o mulțime de muchii care atinge fiecare nod: $d_F(v) \\ge 1$ pentru orice v. Pe drumul 1–6, F = {12, 34, 56} este o acoperire.",
+                "ro": "O acoperire cu muchii F este o mulțime de muchii care atinge fiecare nod: $d_F(v) \\ge 1$ pentru orice v. Pe drumul 1–6, F = {12, 34, 56} este o acoperire."
+              }
+            },
+            {
+              "text": {
+                "en": "Familia tuturor acoperirilor cu muchii ale lui G se notează $\\mathcal{F}_G$.",
+                "ro": "Familia tuturor acoperirilor cu muchii ale lui G se notează $\\mathcal{F}_G$."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 120'><title>Acoperire</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='muted' stroke-width='2' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='ok' stroke-width='3' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='muted' stroke-width='2' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='ok' stroke-width='3' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+                "alt": {
+                  "en": "F = {12, 34, 56} colorat.",
+                  "ro": "F = {12, 34, 56} colorat."
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s10",
+      "title": {
+        "en": "Când există acoperiri",
+        "ro": "Când există acoperiri"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 31",
+        "ro": "Cursul 5 · slide 31"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "points": [
+                {
+                  "en": "$\\mathcal{F}_G \\neq \\varnothing$ dacă și numai dacă G nu are noduri izolate (noduri fără nicio muchie);",
+                  "ro": "$\\mathcal{F}_G \\neq \\varnothing$ dacă și numai dacă G nu are noduri izolate (noduri fără nicio muchie);"
+                },
+                {
+                  "en": "dacă $F \\in \\mathcal{F}_G$ și $F' \\supseteq F$, atunci $F' \\in \\mathcal{F}_G$: o mulțime care conține o acoperire e tot o acoperire.",
+                  "ro": "dacă $F \\in \\mathcal{F}_G$ și $F' \\supseteq F$, atunci $F' \\in \\mathcal{F}_G$: o mulțime care conține o acoperire e tot o acoperire."
+                }
+              ]
+            },
+            {
+              "text": {
+                "en": "Drumul 1–6 cu un nod 7 izolat: niciun F nu atinge 7, deci $\\mathcal{F}_G$ e vidă.",
+                "ro": "Drumul 1–6 cu un nod 7 izolat: niciun F nu atinge 7, deci $\\mathcal{F}_G$ e vidă."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s11",
+      "title": {
+        "en": "Acoperire minimă",
+        "ro": "Acoperire minimă"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 31",
+        "ro": "Cursul 5 · slide 31"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05f-e2",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Problema P2: dat G, găsește $F^* \\in \\mathcal{F}_G$ cu $|F^*| = \\min_{F \\in \\mathcal{F}_G} |F|$. Cât este $|F^*|$ pe drumul cu 4 noduri (1–2–3–4), pe drumul cu 6 noduri și pe steaua K₁,₃ (centrul 1 și frunzele 2, 3, 4; frunză = nod cu o singură muchie)?",
+            "ro": "Problema P2: dat G, găsește $F^* \\in \\mathcal{F}_G$ cu $|F^*| = \\min_{F \\in \\mathcal{F}_G} |F|$. Cât este $|F^*|$ pe drumul cu 4 noduri (1–2–3–4), pe drumul cu 6 noduri și pe steaua K₁,₃ (centrul 1 și frunzele 2, 3, 4; frunză = nod cu o singură muchie)?"
+          },
+          "fields": [
+            {
+              "id": "a",
+              "kind": "num",
+              "label": {
+                "en": "Drumul cu 4 noduri",
+                "ro": "Drumul cu 4 noduri"
+              },
+              "formula": "2",
+              "expected": 2
+            },
+            {
+              "id": "b",
+              "kind": "num",
+              "label": {
+                "en": "Drumul cu 6 noduri",
+                "ro": "Drumul cu 6 noduri"
+              },
+              "formula": "3",
+              "expected": 3
+            },
+            {
+              "id": "c",
+              "kind": "num",
+              "label": {
+                "en": "Steaua K₁,₃",
+                "ro": "Steaua K₁,₃"
+              },
+              "formula": "3",
+              "expected": 3
+            }
+          ],
+          "hints": [
+            {
+              "en": "O muchie atinge cel mult 2 noduri.",
+              "ro": "O muchie atinge cel mult 2 noduri."
+            },
+            {
+              "en": "Drumul cu 4 noduri: 12 și 34.",
+              "ro": "Drumul cu 4 noduri: 12 și 34."
+            },
+            {
+              "en": "Steaua: fiecare frunză are o singură muchie.",
+              "ro": "Steaua: fiecare frunză are o singură muchie."
+            }
+          ],
+          "solution": {
+            "en": "Drumul cu 4 noduri: 12, 34 (2). Drumul cu 6: 12, 34, 56 (3). Steaua: toate cele trei muchii (3), fiindcă fiecare frunză cere muchia ei.",
+            "ro": "Drumul cu 4 noduri: 12, 34 (2). Drumul cu 6: 12, 34, 56 (3). Steaua: toate cele trei muchii (3), fiindcă fiecare frunză cere muchia ei."
+          },
+          "detectors": [
+            {
+              "field": "c",
+              "formula": "1",
+              "message": {
+                "en": "Muchia centrală nu există singură: fiecare frunză cere muchia ei.",
+                "ro": "Muchia centrală nu există singură: fiecare frunză cere muchia ei."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "La fel pentru drumul cu 2 noduri, drumul cu 8 noduri și steaua K₁,₅.",
+                "ro": "La fel pentru drumul cu 2 noduri, drumul cu 8 noduri și steaua K₁,₅."
+              },
+              "solution": {
+                "en": "2 noduri: 1; 8 noduri: 4; K₁,₅: 5 (fiecare frunză).",
+                "ro": "2 noduri: 1; 8 noduri: 4; K₁,₅: 5 (fiecare frunză)."
+              },
+              "fields": [
+                {
+                  "id": "a",
+                  "formula": "1",
+                  "expected": 1
+                },
+                {
+                  "id": "b",
+                  "formula": "4",
+                  "expected": 4
+                },
+                {
+                  "id": "c",
+                  "formula": "5",
+                  "expected": 5
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s12",
+      "title": {
+        "en": "Surpriza: |M*| + |F*| = n",
+        "ro": "Surpriza: |M*| + |F*| = n"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 32",
+        "ro": "Cursul 5 · slide 32"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Teorema 2 (Norman-Rabin, 1959): G are ordinul n (n noduri) și nu are noduri izolate. Dacă $M^*$ este un cuplaj de cardinal maxim și $F^*$ o acoperire minimă cu muchii, atunci:",
+                "ro": "Teorema 2 (Norman-Rabin, 1959): G are ordinul n (n noduri) și nu are noduri izolate. Dacă $M^*$ este un cuplaj de cardinal maxim și $F^*$ o acoperire minimă cu muchii, atunci:"
+              }
+            },
+            {
+              "tex": "|M^*| + |F^*| = n"
+            },
+            {
+              "table": {
+                "columns": [
+                  "graf",
+                  "n",
+                  "|M*|",
+                  "|F*|",
+                  "sumă"
+                ],
+                "rows": [
+                  [
+                    "drum, 6 noduri",
+                    6,
+                    3,
+                    3,
+                    6
+                  ],
+                  [
+                    "drum, 4 noduri",
+                    4,
+                    2,
+                    2,
+                    4
+                  ],
+                  [
+                    "K₁,₃",
+                    4,
+                    1,
+                    3,
+                    4
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s13",
+      "title": {
+        "en": "Din cuplaj în acoperire",
+        "ro": "Din cuplaj în acoperire"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 33",
+        "ro": "Cursul 5 · slide 33"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ag-l05f-p1",
+          "claim": {
+            "en": "Dintr-un cuplaj maxim $M^*$ facem o acoperire cu $n - |M^*|$ muchii. Urmărim pe steaua K₁,₃.",
+            "ro": "Dintr-un cuplaj maxim $M^*$ facem o acoperire cu $n - |M^*|$ muchii. Urmărim pe steaua K₁,₃."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "Fie $M^*$ un cuplaj maxim; pe stea, $M^* = \\{12\\}$. Fiecare nod expus v are cel puțin o muchie (G nu are noduri izolate). Luăm câte o muchie $e_v$ la fiecare nod expus: aici la 3 și la 4.",
+                "ro": "Fie $M^*$ un cuplaj maxim; pe stea, $M^* = \\{12\\}$. Fiecare nod expus v are cel puțin o muchie (G nu are noduri izolate). Luăm câte o muchie $e_v$ la fiecare nod expus: aici la 3 și la 4."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 210'><title>M* = {12}</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='164.2' y1='91.4' x2='85.8' y2='48.6'/></g><g><title>1–3</title><line class='muted' stroke-width='2' x1='195.8' y1='91.4' x2='274.2' y2='48.6'/></g><g><title>1–4</title><line class='muted' stroke-width='2' x1='180' y1='118' x2='180' y2='152'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='70' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='70' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='warn fill-bg' stroke-width='4' cx='290' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='290' y='45.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='warn fill-bg' stroke-width='4' cx='180' cy='170' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='175.8' text-anchor='middle'>4</text></g></svg>",
+                "alt": {
+                  "en": "Steaua K₁,₃ cu muchia 12 colorată și nodurile expuse 3 și 4 marcate.",
+                  "ro": "Steaua K₁,₃ cu muchia 12 colorată și nodurile expuse 3 și 4 marcate."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "Celălalt capăt al lui $e_v$ este saturat: altfel $M^* + e_v$ ar fi un cuplaj mai mare. Aici $e_3 = 13$ și $e_4 = 14$ ajung în 1, saturat de 12.",
+                "ro": "Celălalt capăt al lui $e_v$ este saturat: altfel $M^* + e_v$ ar fi un cuplaj mai mare. Aici $e_3 = 13$ și $e_4 = 14$ ajung în 1, saturat de 12."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 210'><title>Muchiile adăugate</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='164.2' y1='91.4' x2='85.8' y2='48.6'/></g><g><title>1–3</title><line class='accent' stroke-width='3' x1='195.8' y1='91.4' x2='274.2' y2='48.6'/></g><g><title>1–4</title><line class='accent' stroke-width='3' x1='180' y1='118' x2='180' y2='152'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='70' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='70' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='warn fill-bg' stroke-width='4' cx='290' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='290' y='45.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='warn fill-bg' stroke-width='4' cx='180' cy='170' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='175.8' text-anchor='middle'>4</text></g></svg>",
+                "alt": {
+                  "en": "Steaua cu 12 colorată și muchiile 13, 14 adăugate.",
+                  "ro": "Steaua cu 12 colorată și muchiile 13, 14 adăugate."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "$M^*$ e maxim. De ce $e_v = vw$ are w saturat?",
+                  "ro": "$M^*$ e maxim. De ce $e_v = vw$ are w saturat?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "pentru că $e_v$ e din $M^*$",
+                      "ro": "pentru că $e_v$ e din $M^*$"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "$e_v$ nu e în $M^*$: v e expus.",
+                      "ro": "$e_v$ nu e în $M^*$: v e expus."
+                    },
+                    "misconception": "motiv-gresit"
+                  },
+                  {
+                    "text": {
+                      "en": "altfel $M^* + e_v$ ar fi un cuplaj mai mare",
+                      "ro": "altfel $M^* + e_v$ ar fi un cuplaj mai mare"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Dacă w ar fi expus, v și w ar fi libere: $M^*$ + vw ar fi un cuplaj cu o muchie în plus.",
+                      "ro": "Dacă w ar fi expus, v și w ar fi libere: $M^*$ + vw ar fi un cuplaj cu o muchie în plus."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "pentru că w e izolat",
+                      "ro": "pentru că w e izolat"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "G nu are noduri izolate.",
+                      "ro": "G nu are noduri izolate."
+                    },
+                    "misconception": "uita-ipoteza"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Muchiile $e_v$ sunt distincte: două noduri expuse nu sunt vecine, altfel $M^*$ nu era maxim. Niciuna nu e în $M^*$. Deci $F = M^* \\cup \\{e_v\\}$ are $|M^*| + |E(M^*)| = n - |M^*|$ muchii și acoperă tot.",
+                "ro": "Muchiile $e_v$ sunt distincte: două noduri expuse nu sunt vecine, altfel $M^*$ nu era maxim. Niciuna nu e în $M^*$. Deci $F = M^* \\cup \\{e_v\\}$ are $|M^*| + |E(M^*)| = n - |M^*|$ muchii și acoperă tot."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 210'><title>F = {12, 13, 14}</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='164.2' y1='91.4' x2='85.8' y2='48.6'/></g><g><title>1–3</title><line class='accent' stroke-width='3' x1='195.8' y1='91.4' x2='274.2' y2='48.6'/></g><g><title>1–4</title><line class='accent' stroke-width='3' x1='180' y1='118' x2='180' y2='152'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='70' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='70' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='290' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='290' y='45.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='170' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='175.8' text-anchor='middle'>4</text></g></svg>",
+                "alt": {
+                  "en": "Steaua cu toate cele trei muchii colorate: F atinge fiecare nod.",
+                  "ro": "Steaua cu toate cele trei muchii colorate: F atinge fiecare nod."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "Pe stea: 1 + 2 = 3 = 4 − 1 muchii. În general, acoperirea minimă are cel mult $n - |M^*|$ muchii: $|F^*| \\le n - |M^*|$.",
+                "ro": "Pe stea: 1 + 2 = 3 = 4 − 1 muchii. În general, acoperirea minimă are cel mult $n - |M^*|$ muchii: $|F^*| \\le n - |M^*|$."
+              }
+            }
+          ],
+          "end": {
+            "en": "Prima jumătate: $|F^*| \\le n - |M^*|$.",
+            "ro": "Prima jumătate: $|F^*| \\le n - |M^*|$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s14",
+      "title": {
+        "en": "Pe un cuplaj care nu e maxim",
+        "ro": "Pe un cuplaj care nu e maxim"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 32",
+        "ro": "Cursul 5 · slide 32"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05f-q3",
+          "question": {
+            "en": "Faci aceeași construcție pornind de la M = {23, 45}, care nu e maxim. Se adaugă 12 și 56. Câte muchii are F?",
+            "ro": "Faci aceeași construcție pornind de la M = {23, 45}, care nu e maxim. Se adaugă 12 și 56. Câte muchii are F?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "4: mai mult decât minimul 3",
+                "ro": "4: mai mult decât minimul 3"
+              },
+              "correct": true,
+              "explain": {
+                "en": "F = {23, 45, 12, 56}: acoperă, dar |F| = 6 − 2 = 4, nu 3. Pentru M maxim dă minimul.",
+                "ro": "F = {23, 45, 12, 56}: acoperă, dar |F| = 6 − 2 = 4, nu 3. Pentru M maxim dă minimul."
+              }
+            },
+            {
+              "text": {
+                "en": "3, cât minimul",
+                "ro": "3, cât minimul"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Cu M de 2 muchii și 2 noduri expuse: 2 + 2 = 4.",
+                "ro": "Cu M de 2 muchii și 2 noduri expuse: 2 + 2 = 4."
+              },
+              "misconception": "conditie-necesara-luata-drept-suficienta"
+            },
+            {
+              "text": {
+                "en": "2",
+                "ro": "2"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Doar M are 2 muchii; mai adaugi 2.",
+                "ro": "Doar M are 2 muchii; mai adaugi 2."
+              },
+              "misconception": "numarat-gresit"
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 120'><title>F din M</title><g><title>1–2</title><line class='accent' stroke-width='3' x1='48' y1='100' x2='72' y2='100'/></g><g><title>2–3</title><line class='ok' stroke-width='3' x1='108' y1='100' x2='132' y2='100'/></g><g><title>3–4</title><line class='muted' stroke-width='2' x1='168' y1='100' x2='192' y2='100'/></g><g><title>4–5</title><line class='ok' stroke-width='3' x1='228' y1='100' x2='252' y2='100'/></g><g><title>5–6</title><line class='accent' stroke-width='3' x1='288' y1='100' x2='312' y2='100'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='90' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='90' y='105.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='150' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='150' y='105.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='210' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='210' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='270' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='270' y='105.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>6</text></g></svg>",
+            "alt": {
+              "en": "M = {23, 45} cu 12 și 56 adăugate.",
+              "ro": "M = {23, 45} cu 12 și 56 adăugate."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s15",
+      "title": {
+        "en": "Din acoperire în cuplaj",
+        "ro": "Din acoperire în cuplaj"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 33",
+        "ro": "Cursul 5 · slide 33"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ag-l05f-p2",
+          "claim": {
+            "en": "Dintr-o acoperire minimă $F^*$ facem un cuplaj cu $n - |F^*|$ muchii. Urmărim pe steaua K₁,₃, unde $F^*$ = {12, 13, 14}.",
+            "ro": "Dintr-o acoperire minimă $F^*$ facem un cuplaj cu $n - |F^*|$ muchii. Urmărim pe steaua K₁,₃, unde $F^*$ = {12, 13, 14}."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "M ← $F^*$. Cât timp un nod v are $d_M(v) > 1$, scoatem din M o muchie e = vv′ incidentă cu v. Pe stea, $d_M(1) = 3$.",
+                "ro": "M ← $F^*$. Cât timp un nod v are $d_M(v) > 1$, scoatem din M o muchie e = vv′ incidentă cu v. Pe stea, $d_M(1) = 3$."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 210'><title>M = F*</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='164.2' y1='91.4' x2='85.8' y2='48.6'/></g><g><title>1–3</title><line class='ok' stroke-width='3' x1='195.8' y1='91.4' x2='274.2' y2='48.6'/></g><g><title>1–4</title><line class='ok' stroke-width='3' x1='180' y1='118' x2='180' y2='152'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='70' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='70' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='290' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='290' y='45.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='170' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='175.8' text-anchor='middle'>4</text></g></svg>",
+                "alt": {
+                  "en": "Steaua cu toate cele trei muchii colorate: M pornește de la F*.",
+                  "ro": "Steaua cu toate cele trei muchii colorate: M pornește de la F*."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "Scoatem 13: nodul 1 rămâne acoperit (mai are 12 și 14), iar 3 rămâne fără muchie. La fel la orice pas: v mai rămâne acoperit (avea mai multe muchii).",
+                "ro": "Scoatem 13: nodul 1 rămâne acoperit (mai are 12 și 14), iar 3 rămâne fără muchie. La fel la orice pas: v mai rămâne acoperit (avea mai multe muchii)."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 210'><title>Fără 13</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='164.2' y1='91.4' x2='85.8' y2='48.6'/></g><g><title>1–3</title><line class='muted' stroke-width='2' stroke-dasharray='6 4' x1='195.8' y1='91.4' x2='274.2' y2='48.6'/></g><g><title>1–4</title><line class='ok' stroke-width='3' x1='180' y1='118' x2='180' y2='152'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='70' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='70' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='warn fill-bg' stroke-width='4' cx='290' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='290' y='45.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='170' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='175.8' text-anchor='middle'>4</text></g></svg>",
+                "alt": {
+                  "en": "Steaua: muchia 13 scoasă, nodul 3 expus.",
+                  "ro": "Steaua: muchia 13 scoasă, nodul 3 expus."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Ce se întâmplă cu v′, celălalt capăt al lui e?",
+                  "ro": "Ce se întâmplă cu v′, celălalt capăt al lui e?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "rămâne saturat",
+                      "ro": "rămâne saturat"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Ar mai avea altă muchie în M: atunci e era de prisos în $F^*$, contra minimalității.",
+                      "ro": "Ar mai avea altă muchie în M: atunci e era de prisos în $F^*$, contra minimalității."
+                    },
+                    "misconception": "motiv-gresit"
+                  },
+                  {
+                    "text": {
+                      "en": "se dublează",
+                      "ro": "se dublează"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "Nu: scoatem o muchie, nu adăugăm.",
+                      "ro": "Nu: scoatem o muchie, nu adăugăm."
+                    },
+                    "misconception": "regula-inventata"
+                  },
+                  {
+                    "text": {
+                      "en": "devine expus în cuplajul final",
+                      "ro": "devine expus în cuplajul final"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "Dacă v′ ar mai avea o muchie în M, $F^* \\setminus \\{e\\}$ ar fi tot acoperire, mai mică decât $F^*$: imposibil.",
+                      "ro": "Dacă v′ ar mai avea o muchie în M, $F^* \\setminus \\{e\\}$ ar fi tot acoperire, mai mică decât $F^*$: imposibil."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Scoatem și 14: rămâne M = {12}, un cuplaj. Fiecare muchie scoasă a făcut exact un nod expus. Deci $|F^*| - |M| = |E(M)| = n - 2|M|$; pe stea, 3 − 1 = 2 = 4 − 2.",
+                "ro": "Scoatem și 14: rămâne M = {12}, un cuplaj. Fiecare muchie scoasă a făcut exact un nod expus. Deci $|F^*| - |M| = |E(M)| = n - 2|M|$; pe stea, 3 − 1 = 2 = 4 − 2."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 210'><title>M = {12}</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='164.2' y1='91.4' x2='85.8' y2='48.6'/></g><g><title>1–3</title><line class='muted' stroke-width='2' stroke-dasharray='6 4' x1='195.8' y1='91.4' x2='274.2' y2='48.6'/></g><g><title>1–4</title><line class='muted' stroke-width='2' stroke-dasharray='6 4' x1='180' y1='118' x2='180' y2='152'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='70' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='70' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='warn fill-bg' stroke-width='4' cx='290' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='290' y='45.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='warn fill-bg' stroke-width='4' cx='180' cy='170' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='175.8' text-anchor='middle'>4</text></g></svg>",
+                "alt": {
+                  "en": "Steaua: au rămas doar 12; nodurile 3 și 4 sunt expuse.",
+                  "ro": "Steaua: au rămas doar 12; nodurile 3 și 4 sunt expuse."
+                }
+              }
+            },
+            {
+              "shown": {
+                "en": "De aici $|F^*| = n - |M| \\ge n - |M^*|$, pentru că $|M| \\le |M^*|$.",
+                "ro": "De aici $|F^*| = n - |M| \\ge n - |M^*|$, pentru că $|M| \\le |M^*|$."
+              }
+            }
+          ],
+          "end": {
+            "en": "A doua jumătate: $|F^*| \\ge n - |M^*|$. Cu prima: $|M^*| + |F^*| = n$.",
+            "ro": "A doua jumătate: $|F^*| \\ge n - |M^*|$. Cu prima: $|M^*| + |F^*| = n$."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s16",
+      "title": {
+        "en": "Steaua K₁,₃",
+        "ro": "Steaua K₁,₃"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 33",
+        "ro": "Cursul 5 · slide 33"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Pe K₁,₃ teorema dă $|M^*| + |F^*| = 1 + 3 = 4 = n$. Ambele construcții ajung la optim: din {12} adăugăm 13, 14; din {12, 13, 14} scoatem 13, 14.",
+                "ro": "Pe K₁,₃ teorema dă $|M^*| + |F^*| = 1 + 3 = 4 = n$. Ambele construcții ajung la optim: din {12} adăugăm 13, 14; din {12, 13, 14} scoatem 13, 14."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 210'><title>Steaua</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='164.2' y1='91.4' x2='85.8' y2='48.6'/></g><g><title>1–3</title><line class='ok' stroke-width='3' x1='195.8' y1='91.4' x2='274.2' y2='48.6'/></g><g><title>1–4</title><line class='ok' stroke-width='3' x1='180' y1='118' x2='180' y2='152'/></g><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='70' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='70' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='290' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='290' y='45.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='170' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='175.8' text-anchor='middle'>4</text></g></svg>",
+                "alt": {
+                  "en": "K₁,₃ cu centrul 1 și frunzele 2, 3, 4.",
+                  "ro": "K₁,₃ cu centrul 1 și frunzele 2, 3, 4."
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s17",
+      "title": {
+        "en": "Concluzia teoremei",
+        "ro": "Concluzia teoremei"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 34",
+        "ro": "Cursul 5 · slide 34"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "A doua jumătate a dat $|F^*| \\ge n - |M^*|$, iar prima $|F^*| \\le n - |M^*|$. Deci $|F^*| = n - |M^*|$.",
+                "ro": "A doua jumătate a dat $|F^*| \\ge n - |M^*|$, iar prima $|F^*| \\le n - |M^*|$. Deci $|F^*| = n - |M^*|$."
+              }
+            }
+          ]
+        },
+        {
+          "type": "rule",
+          "text": {
+            "en": "$|M^*| + |F^*| = n$, când G nu are noduri izolate.",
+            "ro": "$|M^*| + |F^*| = n$, când G nu are noduri izolate."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s18",
+      "title": {
+        "en": "Cele două probleme",
+        "ro": "Cele două probleme"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 35",
+        "ro": "Cursul 5 · slide 35"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Slide-ul 35: P1 și P2 sunt polinomial echivalente, pentru că M și F construite mai sus sunt soluții optime pentru cele două probleme.",
+                "ro": "Slide-ul 35: P1 și P2 sunt polinomial echivalente, pentru că M și F construite mai sus sunt soluții optime pentru cele două probleme."
+              }
+            },
+            {
+              "text": {
+                "en": "Polinomial echivalente: o soluție a uneia dă o soluție a celeilalte în timp polinomial, adică într-un număr de pași mărginit de o putere a lui n.",
+                "ro": "Polinomial echivalente: o soluție a uneia dă o soluție a celeilalte în timp polinomial, adică într-un număr de pași mărginit de o putere a lui n."
+              }
+            },
+            {
+              "points": [
+                {
+                  "en": "din cuplaj maxim: adaugi o muchie la fiecare nod expus;",
+                  "ro": "din cuplaj maxim: adaugi o muchie la fiecare nod expus;"
+                },
+                {
+                  "en": "din acoperire minimă: scoți muchii cât timp un nod are gradul mai mare decât 1.",
+                  "ro": "din acoperire minimă: scoți muchii cât timp un nod are gradul mai mare decât 1."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s19",
+      "title": {
+        "en": "Un cardinal din celălalt",
+        "ro": "Un cardinal din celălalt"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 32",
+        "ro": "Cursul 5 · slide 32"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05f-e3",
+          "status": "verified-twice",
+          "statement": {
+            "en": "G de ordin 10, fără noduri izolate, are $|M^*| = 4$: cât este $|F^*|$? G de ordin 12, fără noduri izolate, are $|F^*| = 5$: cât este $|M^*|$?",
+            "ro": "G de ordin 10, fără noduri izolate, are $|M^*| = 4$: cât este $|F^*|$? G de ordin 12, fără noduri izolate, are $|F^*| = 5$: cât este $|M^*|$?"
+          },
+          "fields": [
+            {
+              "id": "r",
+              "kind": "num",
+              "label": {
+                "en": "$|F^*|$ la n = 10",
+                "ro": "$|F^*|$ la n = 10"
+              },
+              "formula": "10-4",
+              "expected": 6
+            },
+            {
+              "id": "n",
+              "kind": "num",
+              "label": {
+                "en": "$|M^*|$ la n = 12",
+                "ro": "$|M^*|$ la n = 12"
+              },
+              "formula": "12-5",
+              "expected": 7
+            }
+          ],
+          "hints": [
+            {
+              "en": "|M*| + |F*| = n.",
+              "ro": "|M*| + |F*| = n."
+            },
+            {
+              "en": "|F*| = n − |M*| și |M*| = n − |F*|.",
+              "ro": "|F*| = n − |M*| și |M*| = n − |F*|."
+            },
+            {
+              "en": "10 − 4 și 12 − 5.",
+              "ro": "10 − 4 și 12 − 5."
+            }
+          ],
+          "solution": {
+            "en": "|F*| = 10 − 4 = 6; |M*| = 12 − 5 = 7.",
+            "ro": "|F*| = 10 − 4 = 6; |M*| = 12 − 5 = 7."
+          },
+          "detectors": [
+            {
+              "field": "r",
+              "formula": "m",
+              "message": {
+                "en": "Acesta e $|M^*|$; $|F^*| = n - |M^*|$.",
+                "ro": "Acesta e $|M^*|$; $|F^*| = n - |M^*|$."
+              }
+            }
+          ],
+          "data": {
+            "m": 4
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "n = 20 și $|M^*| = 8$: $|F^*|$? Apoi n = 9 și $|F^*| = 5$: $|M^*|$?",
+                "ro": "n = 20 și $|M^*| = 8$: $|F^*|$? Apoi n = 9 și $|F^*| = 5$: $|M^*|$?"
+              },
+              "solution": {
+                "en": "|F*| = 20 − 8 = 12; |M*| = 9 − 5 = 4.",
+                "ro": "|F*| = 20 − 8 = 12; |M*| = 9 − 5 = 4."
+              },
+              "fields": [
+                {
+                  "id": "r",
+                  "formula": "20-8",
+                  "expected": 12
+                },
+                {
+                  "id": "n",
+                  "formula": "9-5",
+                  "expected": 4
+                }
+              ],
+              "data": {
+                "m": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s20",
+      "title": {
+        "en": "Ipotezele contează",
+        "ro": "Ipotezele contează"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 32",
+        "ro": "Cursul 5 · slide 32"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05f-q4",
+          "question": {
+            "en": "Care ipoteză cere teorema $|M^*| + |F^*| = n$?",
+            "ro": "Care ipoteză cere teorema $|M^*| + |F^*| = n$?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "G fără noduri izolate; cuplajul să fie maxim, nu doar maximal",
+                "ro": "G fără noduri izolate; cuplajul să fie maxim, nu doar maximal"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Fără ele, ori nu există acoperire, ori construcția dă prea multe muchii.",
+                "ro": "Fără ele, ori nu există acoperire, ori construcția dă prea multe muchii."
+              }
+            },
+            {
+              "text": {
+                "en": "G conex",
+                "ro": "G conex"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Nu cere conexitate: orice graf fără noduri izolate merge.",
+                "ro": "Nu cere conexitate: orice graf fără noduri izolate merge."
+              },
+              "misconception": "conex-explica-totul"
+            },
+            {
+              "text": {
+                "en": "G bipartit",
+                "ro": "G bipartit"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Teorema e pentru orice graf; bipartitul apare la König.",
+                "ro": "Teorema e pentru orice graf; bipartitul apare la König."
+              },
+              "misconception": "regula-inventata"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s21",
+      "title": {
+        "en": "Cât de mare poate fi ν",
+        "ro": "Cât de mare poate fi ν"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 36",
+        "ro": "Cursul 5 · slide 36"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Un cuplaj saturează 2 noduri pe muchie, deci ν(G) ≤ ⌊n/2⌋; egalitatea cu n par înseamnă un cuplaj perfect (cursul 6).",
+                "ro": "Un cuplaj saturează 2 noduri pe muchie, deci ν(G) ≤ ⌊n/2⌋; egalitatea cu n par înseamnă un cuplaj perfect (cursul 6)."
+              }
+            },
+            {
+              "text": {
+                "en": "Slide-ul 36 numește doar: programare liniară în numere întregi, metoda „ungară” pentru bipartite, algoritmul Hopcroft–Karp. Detalii la cursul 6.",
+                "ro": "Slide-ul 36 numește doar: programare liniară în numere întregi, metoda „ungară” pentru bipartite, algoritmul Hopcroft–Karp. Detalii la cursul 6."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s22",
+      "title": {
+        "en": "Pe scurt",
+        "ro": "Pe scurt"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 35",
+        "ro": "Cursul 5 · slide 35"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Cuplaj: niciun nod în două muchii. Saturat = atins; expus = neatins.",
+              "ro": "Cuplaj: niciun nod în două muchii. Saturat = atins; expus = neatins."
+            },
+            {
+              "en": "|S(M)| = 2|M| și |E(M)| = |V| − 2|M|.",
+              "ro": "|S(M)| = 2|M| și |E(M)| = |V| − 2|M|."
+            },
+            {
+              "en": "P1: cuplajul $M^*$ cel mai mare, ν(G) = |M*| (maximal ≠ maxim). P2: acoperirea cu muchii $F^*$ cea mai mică.",
+              "ro": "P1: cuplajul $M^*$ cel mai mare, ν(G) = |M*| (maximal ≠ maxim). P2: acoperirea cu muchii $F^*$ cea mai mică."
+            },
+            {
+              "en": "Norman-Rabin: $|M^*| + |F^*| = n$, fără noduri izolate.",
+              "ro": "Norman-Rabin: $|M^*| + |F^*| = n$, fără noduri izolate."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s23",
+      "title": {
+        "en": "Saturate și expuse",
+        "ro": "Saturate și expuse"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 29",
+        "ro": "Cursul 5 · slide 29"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05f-e4",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Un graf cu 10 noduri are un cuplaj M cu 3 muchii. Câte noduri sunt saturate? Câte expuse?",
+            "ro": "Un graf cu 10 noduri are un cuplaj M cu 3 muchii. Câte noduri sunt saturate? Câte expuse?"
+          },
+          "fields": [
+            {
+              "id": "s",
+              "kind": "num",
+              "label": {
+                "en": "|S(M)|",
+                "ro": "|S(M)|"
+              },
+              "formula": "2*3",
+              "expected": 6
+            },
+            {
+              "id": "e",
+              "kind": "num",
+              "label": {
+                "en": "|E(M)|",
+                "ro": "|E(M)|"
+              },
+              "formula": "10-2*3",
+              "expected": 4
+            }
+          ],
+          "hints": [
+            {
+              "en": "Fiecare muchie saturează 2 noduri.",
+              "ro": "Fiecare muchie saturează 2 noduri."
+            },
+            {
+              "en": "2 · 3.",
+              "ro": "2 · 3."
+            },
+            {
+              "en": "10 − 6.",
+              "ro": "10 − 6."
+            }
+          ],
+          "solution": {
+            "en": "|S(M)| = 6 și |E(M)| = 10 − 6 = 4.",
+            "ro": "|S(M)| = 6 și |E(M)| = 10 − 6 = 4."
+          },
+          "detectors": [
+            {
+              "field": "s",
+              "formula": "3",
+              "message": {
+                "en": "3 e numărul muchiilor: nodurile saturate sunt 2 · 3.",
+                "ro": "3 e numărul muchiilor: nodurile saturate sunt 2 · 3."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "Un graf cu 12 noduri are un cuplaj cu 5 muchii.",
+                "ro": "Un graf cu 12 noduri are un cuplaj cu 5 muchii."
+              },
+              "solution": {
+                "en": "10 saturate, 2 expuse.",
+                "ro": "10 saturate, 2 expuse."
+              },
+              "fields": [
+                {
+                  "id": "s",
+                  "formula": "2*5",
+                  "expected": 10
+                },
+                {
+                  "id": "e",
+                  "formula": "12-2*5",
+                  "expected": 2
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s24",
+      "title": {
+        "en": "Maximal sau maxim",
+        "ro": "Maximal sau maxim"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 30",
+        "ro": "Cursul 5 · slide 30"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05f-q5",
+          "question": {
+            "en": "Un cuplaj M nu poate fi extins cu nicio muchie. Ce știm sigur?",
+            "ro": "Un cuplaj M nu poate fi extins cu nicio muchie. Ce știm sigur?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "M poate să nu fie maxim",
+                "ro": "M poate să nu fie maxim"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Pe drumul 1–6, {23, 45} nu se extinde, dar {12, 34, 56} are mai multe muchii.",
+                "ro": "Pe drumul 1–6, {23, 45} nu se extinde, dar {12, 34, 56} are mai multe muchii."
+              }
+            },
+            {
+              "text": {
+                "en": "M este maxim",
+                "ro": "M este maxim"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Maximal ≠ maxim.",
+                "ro": "Maximal ≠ maxim."
+              },
+              "misconception": "conditie-necesara-luata-drept-suficienta"
+            },
+            {
+              "text": {
+                "en": "M este perfect",
+                "ro": "M este perfect"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Rămân expuse 1 și 6 pe drumul 1–6, cu {23, 45}.",
+                "ro": "Rămân expuse 1 și 6 pe drumul 1–6, cu {23, 45}."
+              },
+              "misconception": "conditie-necesara-luata-drept-suficienta"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05f-s25",
+      "title": {
+        "en": "Acoperirea din cuplaj",
+        "ro": "Acoperirea din cuplaj"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 32",
+        "ro": "Cursul 5 · slide 32"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05f-e5",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Pe drumul cu 8 noduri, $|M^*| = 4$. Câte muchii are acoperirea minimă $F^*$?",
+            "ro": "Pe drumul cu 8 noduri, $|M^*| = 4$. Câte muchii are acoperirea minimă $F^*$?"
+          },
+          "fields": [
+            {
+              "id": "r",
+              "kind": "num",
+              "label": {
+                "en": "$|F^*|$",
+                "ro": "$|F^*|$"
+              },
+              "formula": "8-4",
+              "expected": 4
+            }
+          ],
+          "hints": [
+            {
+              "en": "|M*| + |F*| = n.",
+              "ro": "|M*| + |F*| = n."
+            },
+            {
+              "en": "|F*| = n − |M*|.",
+              "ro": "|F*| = n − |M*|."
+            },
+            {
+              "en": "8 − 4.",
+              "ro": "8 − 4."
+            }
+          ],
+          "solution": {
+            "en": "|F*| = 8 − 4 = 4.",
+            "ro": "|F*| = 8 − 4 = 4."
+          },
+          "detectors": [
+            {
+              "field": "r",
+              "formula": "nn",
+              "message": {
+                "en": "Acesta e n; scazi $|M^*|$: $|F^*| = n - |M^*|$.",
+                "ro": "Acesta e n; scazi $|M^*|$: $|F^*| = n - |M^*|$."
+              }
+            }
+          ],
+          "data": {
+            "nn": 8
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Un graf cu 15 noduri, fără noduri izolate, are $|M^*| = 6$. Cât este $|F^*|$?",
+                "ro": "Un graf cu 15 noduri, fără noduri izolate, are $|M^*| = 6$. Cât este $|F^*|$?"
+              },
+              "solution": {
+                "en": "|F*| = 15 − 6 = 9.",
+                "ro": "|F*| = 15 − 6 = 9."
+              },
+              "fields": [
+                {
+                  "id": "r",
+                  "formula": "15-6",
+                  "expected": 9
+                }
+              ],
+              "data": {
+                "nn": 15
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

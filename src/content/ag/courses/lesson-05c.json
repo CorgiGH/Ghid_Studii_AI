@@ -1,0 +1,1909 @@
+{
+  "meta": {
+    "id": "ag-l05c",
+    "title": {
+      "en": "Lesson 5c: Prim's algorithm",
+      "ro": "Lecția 5c: Algoritmul lui Prim"
+    },
+    "shortTitle": {
+      "en": "L5c: Prim",
+      "ro": "L5c: Prim"
+    },
+    "source": {
+      "en": "Algoritmica grafurilor, cursul 5, UAIC FII, slide-urile 10–12",
+      "ro": "Algoritmica grafurilor, cursul 5, UAIC FII, slide-urile 10–12"
+    },
+    "clarity": 1
+  },
+  "steps": [
+    {
+      "id": "ag-l05c-s1",
+      "title": {
+        "en": "Prim: arborele cel mare",
+        "ro": "Prim: arborele cel mare"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 10",
+        "ro": "Cursul 5 · slide 10"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Prim este metoda generală în care $T_s^k$ este mereu arborele cel mare; restul nodurilor sunt încă singure. Lucrăm pe G3, graful din lecția 5b, și pornim din nodul s = 1.",
+                "ro": "Prim este metoda generală în care $T_s^k$ este mereu arborele cel mare; restul nodurilor sunt încă singure. Lucrăm pe G3, graful din lecția 5b, și pornim din nodul s = 1."
+              }
+            },
+            {
+              "text": {
+                "en": "Mulțimea nodurilor arborelui se numește $V_s$, iar muchiile lui $E_s$.",
+                "ro": "Mulțimea nodurilor arborelui se numește $V_s$, iar muchiile lui $E_s$."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 200'><title>G3, pornim din 1</title><g><title>1–2</title><line class='muted' stroke-width='2' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='muted' stroke-width='2' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='muted' stroke-width='2' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='muted' stroke-width='2' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='muted' stroke-width='2' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g></svg>",
+                "alt": {
+                  "en": "G3 cu nodul 1 colorat: arborele începe cu el.",
+                  "ro": "G3 cu nodul 1 colorat: arborele începe cu el."
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s2",
+      "title": {
+        "en": "Ce ținem minte despre fiecare nod",
+        "ro": "Ce ținem minte despre fiecare nod"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 10",
+        "ro": "Cursul 5 · slide 10"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Pentru fiecare nod j din afara arborelui ținem: β[j] = costul celei mai ieftine muchii de la j la un nod al arborelui, și α[j] = capătul din arbore al acelei muchii.",
+                "ro": "Pentru fiecare nod j din afara arborelui ținem: β[j] = costul celei mai ieftine muchii de la j la un nod al arborelui, și α[j] = capătul din arbore al acelei muchii."
+              }
+            },
+            {
+              "text": {
+                "en": "La început arborele e {1}: slide-ul pune α[j] = 1 pentru orice j. Dacă între j și 1 nu e muchie, β[j] = ∞.",
+                "ro": "La început arborele e {1}: slide-ul pune α[j] = 1 pentru orice j. Dacă între j și 1 nu e muchie, β[j] = ∞."
+              }
+            },
+            {
+              "table": {
+                "columns": [
+                  "j",
+                  "β[j]",
+                  "α[j]"
+                ],
+                "rows": [
+                  [
+                    "2",
+                    "4",
+                    "1"
+                  ],
+                  [
+                    "3",
+                    "7",
+                    "1"
+                  ],
+                  [
+                    "4",
+                    "∞",
+                    "1"
+                  ],
+                  [
+                    "5",
+                    "∞",
+                    "1"
+                  ],
+                  [
+                    "6",
+                    "∞",
+                    "1"
+                  ],
+                  [
+                    "7",
+                    "∞",
+                    "1"
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s3",
+      "title": {
+        "en": "Primele trei noduri",
+        "ro": "Primele trei noduri"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ag-l05c-p1",
+          "claim": {
+            "en": "Prim din 1 pe G3: primii trei pași.",
+            "ro": "Prim din 1 pe G3: primii trei pași."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "Intră 2, cu β[2] = 4 prin muchia 12. Actualizăm: β[3] = min(7, 2) = 2, α[3] = 2; β[4] = min(∞, 6) = 6, α[4] = 2.",
+                "ro": "Intră 2, cu β[2] = 4 prin muchia 12. Actualizăm: β[3] = min(7, 2) = 2, α[3] = 2; β[4] = min(∞, 6) = 6, α[4] = 2."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 200'><title>După intrarea lui 2</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='muted' stroke-width='2' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='muted' stroke-width='2' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='muted' stroke-width='2' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='muted' stroke-width='2' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><text class='accent' font-size='15' font-weight='700' x='116.2' y='143.8' text-anchor='start'>2</text><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><text class='accent' font-size='15' font-weight='700' x='196.2' y='83.8' text-anchor='start'>6</text><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='143.8' text-anchor='start'>∞</text><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='23.8' text-anchor='start'>∞</text><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g><text class='accent' font-size='15' font-weight='700' x='346.2' y='83.8' text-anchor='start'>∞</text></svg>",
+                "alt": {
+                  "en": "G3 cu nodurile 1 2 în arbore și valorile β lângă celelalte.",
+                  "ro": "G3 cu nodurile 1 2 în arbore și valorile β lângă celelalte."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Arborele are nodurile {1}. Valorile β ale celorlalți: 2: 4, 3: 7, 4: ∞, 5: ∞, 6: ∞, 7: ∞. Care nod intră?",
+                  "ro": "Arborele are nodurile {1}. Valorile β ale celorlalți: 2: 4, 3: 7, 4: ∞, 5: ∞, 6: ∞, 7: ∞. Care nod intră?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "4",
+                      "ro": "4"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[4] = ∞: nicio muchie nu leagă 4 de arbore încă.",
+                      "ro": "β[4] = ∞: nicio muchie nu leagă 4 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "5",
+                      "ro": "5"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[5] = ∞: nicio muchie nu leagă 5 de arbore încă.",
+                      "ro": "β[5] = ∞: nicio muchie nu leagă 5 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "6",
+                      "ro": "6"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[6] = ∞: nicio muchie nu leagă 6 de arbore încă.",
+                      "ro": "β[6] = ∞: nicio muchie nu leagă 6 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "7",
+                      "ro": "7"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[7] = ∞: nicio muchie nu leagă 7 de arbore încă.",
+                      "ro": "β[7] = ∞: nicio muchie nu leagă 7 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "2",
+                      "ro": "2"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "β[2] = 4 este cel mai mic dintre cele finite.",
+                      "ro": "β[2] = 4 este cel mai mic dintre cele finite."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "3",
+                      "ro": "3"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[3] = 7, dar β[2] = 4 este mai mic.",
+                      "ro": "β[3] = 7, dar β[2] = 4 este mai mic."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Intră 3, cu β[3] = 2 prin muchia 23. Actualizăm: β[4] = min(6, 3) = 3, α[4] = 3; β[5] = min(∞, 9) = 9, α[5] = 3.",
+                "ro": "Intră 3, cu β[3] = 2 prin muchia 23. Actualizăm: β[4] = min(6, 3) = 3, α[4] = 3; β[5] = min(∞, 9) = 9, α[5] = 3."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 200'><title>După intrarea lui 3</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='muted' stroke-width='2' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='muted' stroke-width='2' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='muted' stroke-width='2' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><text class='accent' font-size='15' font-weight='700' x='196.2' y='83.8' text-anchor='start'>3</text><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='143.8' text-anchor='start'>9</text><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='23.8' text-anchor='start'>∞</text><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g><text class='accent' font-size='15' font-weight='700' x='346.2' y='83.8' text-anchor='start'>∞</text></svg>",
+                "alt": {
+                  "en": "G3 cu nodurile 1 2 3 în arbore și valorile β lângă celelalte.",
+                  "ro": "G3 cu nodurile 1 2 3 în arbore și valorile β lângă celelalte."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Arborele are nodurile {1, 2}. Valorile β ale celorlalți: 3: 2, 4: 6, 5: ∞, 6: ∞, 7: ∞. Care nod intră?",
+                  "ro": "Arborele are nodurile {1, 2}. Valorile β ale celorlalți: 3: 2, 4: 6, 5: ∞, 6: ∞, 7: ∞. Care nod intră?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "6",
+                      "ro": "6"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[6] = ∞: nicio muchie nu leagă 6 de arbore încă.",
+                      "ro": "β[6] = ∞: nicio muchie nu leagă 6 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "7",
+                      "ro": "7"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[7] = ∞: nicio muchie nu leagă 7 de arbore încă.",
+                      "ro": "β[7] = ∞: nicio muchie nu leagă 7 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "3",
+                      "ro": "3"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "β[3] = 2 este cel mai mic dintre cele finite.",
+                      "ro": "β[3] = 2 este cel mai mic dintre cele finite."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "4",
+                      "ro": "4"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[4] = 6, dar β[3] = 2 este mai mic.",
+                      "ro": "β[4] = 6, dar β[3] = 2 este mai mic."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "5",
+                      "ro": "5"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[5] = ∞: nicio muchie nu leagă 5 de arbore încă.",
+                      "ro": "β[5] = ∞: nicio muchie nu leagă 5 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Intră 4, cu β[4] = 3 prin muchia 34. Actualizăm: β[5] = min(9, 8) = 8, α[5] = 4; β[6] = min(∞, 5) = 5, α[6] = 4.",
+                "ro": "Intră 4, cu β[4] = 3 prin muchia 34. Actualizăm: β[5] = min(9, 8) = 8, α[5] = 4; β[6] = min(∞, 5) = 5, α[6] = 4."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 200'><title>După intrarea lui 4</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='ok' stroke-width='3' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='muted' stroke-width='2' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='muted' stroke-width='2' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='ok fill-bg' stroke-width='4' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='143.8' text-anchor='start'>8</text><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='23.8' text-anchor='start'>5</text><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g><text class='accent' font-size='15' font-weight='700' x='346.2' y='83.8' text-anchor='start'>∞</text></svg>",
+                "alt": {
+                  "en": "G3 cu nodurile 1 2 3 4 în arbore și valorile β lângă celelalte.",
+                  "ro": "G3 cu nodurile 1 2 3 4 în arbore și valorile β lângă celelalte."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Arborele are nodurile {1, 2, 3}. Valorile β ale celorlalți: 4: 3, 5: 9, 6: ∞, 7: ∞. Care nod intră?",
+                  "ro": "Arborele are nodurile {1, 2, 3}. Valorile β ale celorlalți: 4: 3, 5: 9, 6: ∞, 7: ∞. Care nod intră?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "4",
+                      "ro": "4"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "β[4] = 3 este cel mai mic dintre cele finite.",
+                      "ro": "β[4] = 3 este cel mai mic dintre cele finite."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "5",
+                      "ro": "5"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[5] = 9, dar β[4] = 3 este mai mic.",
+                      "ro": "β[5] = 9, dar β[4] = 3 este mai mic."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "6",
+                      "ro": "6"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[6] = ∞: nicio muchie nu leagă 6 de arbore încă.",
+                      "ro": "β[6] = ∞: nicio muchie nu leagă 6 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "7",
+                      "ro": "7"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[7] = ∞: nicio muchie nu leagă 7 de arbore încă.",
+                      "ro": "β[7] = ∞: nicio muchie nu leagă 7 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  }
+                ]
+              }
+            }
+          ],
+          "end": {
+            "en": "Au intrat 2, 3, 4; muchiile alese sunt 12, 23, 34. Numerele de lângă noduri sunt valorile β.",
+            "ro": "Au intrat 2, 3, 4; muchiile alese sunt 12, 23, 34. Numerele de lângă noduri sunt valorile β."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>Început</title><g><title>1–2</title><line class='muted' stroke-width='2' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='muted' stroke-width='2' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='muted' stroke-width='2' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='muted' stroke-width='2' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='muted' stroke-width='2' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><text class='accent' font-size='15' font-weight='700' x='116.2' y='23.8' text-anchor='start'>4</text><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><text class='accent' font-size='15' font-weight='700' x='116.2' y='143.8' text-anchor='start'>7</text><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><text class='accent' font-size='15' font-weight='700' x='196.2' y='83.8' text-anchor='start'>∞</text><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='143.8' text-anchor='start'>∞</text><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='23.8' text-anchor='start'>∞</text><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g><text class='accent' font-size='15' font-weight='700' x='346.2' y='83.8' text-anchor='start'>∞</text></svg>",
+            "alt": {
+              "en": "G3 cu nodul 1 în arbore; β lângă celelalte noduri.",
+              "ro": "G3 cu nodul 1 în arbore; β lângă celelalte noduri."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s4",
+      "title": {
+        "en": "Ultimii trei pași",
+        "ro": "Ultimii trei pași"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "proof-steps",
+          "id": "ag-l05c-p2",
+          "claim": {
+            "en": "Continuăm cu ultimii trei pași.",
+            "ro": "Continuăm cu ultimii trei pași."
+          },
+          "steps": [
+            {
+              "shown": {
+                "en": "Intră 6, cu β[6] = 5 prin muchia 46. Actualizăm: β[5] = min(8, 1) = 1, α[5] = 6; β[7] = min(∞, 11) = 11, α[7] = 6.",
+                "ro": "Intră 6, cu β[6] = 5 prin muchia 46. Actualizăm: β[5] = min(8, 1) = 1, α[5] = 6; β[7] = min(∞, 11) = 11, α[7] = 6."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 200'><title>După intrarea lui 6</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='ok' stroke-width='3' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='ok' stroke-width='3' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='muted' stroke-width='2' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='ok fill-bg' stroke-width='4' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='143.8' text-anchor='start'>1</text><g><title>6</title><circle class='ok fill-bg' stroke-width='4' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g><text class='accent' font-size='15' font-weight='700' x='346.2' y='83.8' text-anchor='start'>11</text></svg>",
+                "alt": {
+                  "en": "G3 cu nodurile 1 2 3 4 6 în arbore și valorile β lângă celelalte.",
+                  "ro": "G3 cu nodurile 1 2 3 4 6 în arbore și valorile β lângă celelalte."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Arborele are nodurile {1, 2, 3, 4}. Valorile β ale celorlalți: 5: 8, 6: 5, 7: ∞. Care nod intră?",
+                  "ro": "Arborele are nodurile {1, 2, 3, 4}. Valorile β ale celorlalți: 5: 8, 6: 5, 7: ∞. Care nod intră?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "7",
+                      "ro": "7"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[7] = ∞: nicio muchie nu leagă 7 de arbore încă.",
+                      "ro": "β[7] = ∞: nicio muchie nu leagă 7 de arbore încă."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "5",
+                      "ro": "5"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[5] = 8, dar β[6] = 5 este mai mic.",
+                      "ro": "β[5] = 8, dar β[6] = 5 este mai mic."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  },
+                  {
+                    "text": {
+                      "en": "6",
+                      "ro": "6"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "β[6] = 5 este cel mai mic dintre cele finite.",
+                      "ro": "β[6] = 5 este cel mai mic dintre cele finite."
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Intră 5, cu β[5] = 1 prin muchia 65. Actualizăm: β[7] = min(11, 10) = 10, α[7] = 5.",
+                "ro": "Intră 5, cu β[5] = 1 prin muchia 65. Actualizăm: β[7] = min(11, 10) = 10, α[7] = 5."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 200'><title>După intrarea lui 5</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='ok' stroke-width='3' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='ok' stroke-width='3' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='ok' stroke-width='3' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='ok fill-bg' stroke-width='4' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='ok fill-bg' stroke-width='4' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='ok fill-bg' stroke-width='4' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g><text class='accent' font-size='15' font-weight='700' x='346.2' y='83.8' text-anchor='start'>10</text></svg>",
+                "alt": {
+                  "en": "G3 cu nodurile 1 2 3 4 6 5 în arbore și valorile β lângă celelalte.",
+                  "ro": "G3 cu nodurile 1 2 3 4 6 5 în arbore și valorile β lângă celelalte."
+                }
+              },
+              "predict": {
+                "question": {
+                  "en": "Arborele are nodurile {1, 2, 3, 4, 6}. Valorile β ale celorlalți: 5: 1, 7: 11. Care nod intră?",
+                  "ro": "Arborele are nodurile {1, 2, 3, 4, 6}. Valorile β ale celorlalți: 5: 1, 7: 11. Care nod intră?"
+                },
+                "options": [
+                  {
+                    "text": {
+                      "en": "5",
+                      "ro": "5"
+                    },
+                    "correct": true,
+                    "explain": {
+                      "en": "β[5] = 1 este cel mai mic dintre cele finite.",
+                      "ro": "β[5] = 1 este cel mai mic dintre cele finite."
+                    }
+                  },
+                  {
+                    "text": {
+                      "en": "7",
+                      "ro": "7"
+                    },
+                    "correct": false,
+                    "explain": {
+                      "en": "β[7] = 11, dar β[5] = 1 este mai mic.",
+                      "ro": "β[7] = 11, dar β[5] = 1 este mai mic."
+                    },
+                    "misconception": "alege-cea-mai-mare-sau-prima"
+                  }
+                ]
+              }
+            },
+            {
+              "shown": {
+                "en": "Intră 7, cu β[7] = 10 prin muchia 57. Nu mai sunt vecini în afară.",
+                "ro": "Intră 7, cu β[7] = 10 prin muchia 57. Nu mai sunt vecini în afară."
+              },
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 200'><title>După intrarea lui 7</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='ok' stroke-width='3' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='ok' stroke-width='3' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='ok' stroke-width='3' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='ok' stroke-width='3' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='ok fill-bg' stroke-width='4' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='ok fill-bg' stroke-width='4' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='ok fill-bg' stroke-width='4' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><g><title>7</title><circle class='ok fill-bg' stroke-width='4' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g></svg>",
+                "alt": {
+                  "en": "G3 cu nodurile 1 2 3 4 6 5 7 în arbore și valorile β lângă celelalte.",
+                  "ro": "G3 cu nodurile 1 2 3 4 6 5 7 în arbore și valorile β lângă celelalte."
+                }
+              }
+            }
+          ],
+          "end": {
+            "en": "Arborele final are muchiile 12, 23, 34, 46, 56, 57.",
+            "ro": "Arborele final are muchiile 12, 23, 34, 46, 56, 57."
+          },
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>După 4</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='ok' stroke-width='3' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='muted' stroke-width='2' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='muted' stroke-width='2' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='ok fill-bg' stroke-width='4' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='143.8' text-anchor='start'>8</text><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='23.8' text-anchor='start'>5</text><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g><text class='accent' font-size='15' font-weight='700' x='346.2' y='83.8' text-anchor='start'>∞</text></svg>",
+            "alt": {
+              "en": "G3 cu 1, 2, 3, 4 în arbore și valorile β.",
+              "ro": "G3 cu 1, 2, 3, 4 în arbore și valorile β."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s5",
+      "title": {
+        "en": "Muchiile arborelui și costul",
+        "ro": "Muchiile arborelui și costul"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05c-e1",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Arborele are muchiile α[j*]j* alese la fiecare pas: 12, 23, 34, 46, 56, 57. Care este costul lui?",
+            "ro": "Arborele are muchiile α[j*]j* alese la fiecare pas: 12, 23, 34, 46, 56, 57. Care este costul lui?"
+          },
+          "fields": [
+            {
+              "id": "c",
+              "kind": "num",
+              "label": {
+                "en": "c(T)",
+                "ro": "c(T)"
+              },
+              "formula": "4+2+3+5+1+10",
+              "expected": 25
+            }
+          ],
+          "hints": [
+            {
+              "en": "Costurile muchiilor: 12 → 4, 23 → 2, 34 → 3, 46 → 5, 56 → 1, 57 → 10.",
+              "ro": "Costurile muchiilor: 12 → 4, 23 → 2, 34 → 3, 46 → 5, 56 → 1, 57 → 10."
+            },
+            {
+              "en": "Adună cele șase costuri.",
+              "ro": "Adună cele șase costuri."
+            },
+            {
+              "en": "4 + 2 + 3 + 5 + 1 + 10.",
+              "ro": "4 + 2 + 3 + 5 + 1 + 10."
+            }
+          ],
+          "solution": {
+            "en": "c(T) = 4 + 2 + 3 + 5 + 1 + 10 = 25.",
+            "ro": "c(T) = 4 + 2 + 3 + 5 + 1 + 10 = 25."
+          },
+          "detectors": [
+            {
+              "field": "c",
+              "formula": "66",
+              "message": {
+                "en": "Ai adunat toate cele 11 muchii ale grafului; arborele are 6.",
+                "ro": "Ai adunat toate cele 11 muchii ale grafului; arborele are 6."
+              }
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>Arborele Prim</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='ok' stroke-width='3' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='ok' stroke-width='3' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='ok' stroke-width='3' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='ok' stroke-width='3' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g></svg>",
+            "alt": {
+              "en": "G3 cu muchiile arborelui colorate.",
+              "ro": "G3 cu muchiile arborelui colorate."
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Prim pe G3, dar pornit din 7. Costul arborelui obținut?",
+                "ro": "Prim pe G3, dar pornit din 7. Costul arborelui obținut?"
+              },
+              "solution": {
+                "en": "Arborele de cost minim este unic, deci același: cost 25.",
+                "ro": "Arborele de cost minim este unic, deci același: cost 25."
+              },
+              "fields": [
+                {
+                  "id": "c",
+                  "formula": "10+1+5+3+2+4",
+                  "expected": 25
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s6",
+      "title": {
+        "en": "Codul din curs",
+        "ro": "Codul din curs"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Cele patru părți ale algoritmului: inițializare, alegerea lui j*, adăugarea, actualizarea.",
+                "ro": "Cele patru părți ale algoritmului: inițializare, alegerea lui j*, adăugarea, actualizarea."
+              }
+            }
+          ]
+        },
+        {
+          "type": "code",
+          "language": "text",
+          "code": "V_s ← {s}; E_s ← ∅\npentru v ∈ V \\ {s}:\n    α[v] ← s; β[v] ← c(sv)      // ∞ dacă sv nu e muchie\ncât timp V_s ≠ V:\n    alege j* ∈ V \\ V_s cu β[j*] minim\n    V_s ← V_s ∪ {j*}; E_s ← E_s ∪ {α[j*]j*}\n    pentru j ∈ V \\ V_s:\n        dacă β[j] > c(j*j): β[j] ← c(j*j); α[j] ← j*"
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s7",
+      "title": {
+        "en": "Invariantul (S)",
+        "ro": "Invariantul (S)"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 12",
+        "ro": "Cursul 5 · slide 12"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "După inițializare și după fiecare trecere, pentru orice j din afara arborelui, β[j] este costul celei mai ieftine muchii de la j la un nod al arborelui, iar α[j] este acel nod.",
+                "ro": "După inițializare și după fiecare trecere, pentru orice j din afara arborelui, β[j] este costul celei mai ieftine muchii de la j la un nod al arborelui, iar α[j] este acel nod."
+              }
+            },
+            {
+              "tex": "\\beta[j] = c(\\alpha[j]\\,j) = \\min_{i \\in V_s,\\; ij \\in E} c(ij)"
+            },
+            {
+              "note": {
+                "en": "Aici i parcurge nodurile arborelui; muchiile ij sunt cele ale grafului.",
+                "ro": "Aici i parcurge nodurile arborelui; muchiile ij sunt cele ale grafului."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s8",
+      "title": {
+        "en": "De ce este Prim o metodă corectă",
+        "ro": "De ce este Prim o metodă corectă"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 12",
+        "ro": "Cursul 5 · slide 12"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Din (S): muchia α[j*]j* este cea mai ieftină muchie de la un nod din afară la arbore, adică cea mai ieftină muchie care iese din $V_s$.",
+                "ro": "Din (S): muchia α[j*]j* este cea mai ieftină muchie de la un nod din afară la arbore, adică cea mai ieftină muchie care iese din $V_s$."
+              }
+            },
+            {
+              "text": {
+                "en": "Deci Prim face exact ce cere metoda generală, cu $T_s^k$ = arborele cel mare. Din teorema 1 rezultă un arbore de cost minim.",
+                "ro": "Deci Prim face exact ce cere metoda generală, cu $T_s^k$ = arborele cel mare. Din teorema 1 rezultă un arbore de cost minim."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s9",
+      "title": {
+        "en": "Valoarea β după patru noduri",
+        "ro": "Valoarea β după patru noduri"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05c-e2",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Prim din 1 pe G3, după ce au intrat 1, 2, 3, 4. Care este β[5]? Care este β[6]?",
+            "ro": "Prim din 1 pe G3, după ce au intrat 1, 2, 3, 4. Care este β[5]? Care este β[6]?"
+          },
+          "fields": [
+            {
+              "id": "x",
+              "kind": "num",
+              "label": {
+                "en": "Prima valoare, β[5]",
+                "ro": "Prima valoare, β[5]"
+              },
+              "formula": "8",
+              "expected": 8
+            },
+            {
+              "id": "y",
+              "kind": "num",
+              "label": {
+                "en": "A doua valoare, β[6]",
+                "ro": "A doua valoare, β[6]"
+              },
+              "formula": "5",
+              "expected": 5
+            }
+          ],
+          "hints": [
+            {
+              "en": "Nodul 5 are muchii spre 3 (9) și 4 (8); 3 și 4 sunt în arbore.",
+              "ro": "Nodul 5 are muchii spre 3 (9) și 4 (8); 3 și 4 sunt în arbore."
+            },
+            {
+              "en": "Nodul 6 are muchia 46 (5) spre 4; muchiile 56 și 67 nu duc la arbore încă.",
+              "ro": "Nodul 6 are muchia 46 (5) spre 4; muchiile 56 și 67 nu duc la arbore încă."
+            },
+            {
+              "en": "β[5] = min(9, 8) = 8; β[6] = 5.",
+              "ro": "β[5] = min(9, 8) = 8; β[6] = 5."
+            }
+          ],
+          "solution": {
+            "en": "β[5] = min(9, 8) = 8 (α = 4). β[6] = 5 (α = 4).",
+            "ro": "β[5] = min(9, 8) = 8 (α = 4). β[6] = 5 (α = 4)."
+          },
+          "detectors": [
+            {
+              "field": "y",
+              "formula": "9",
+              "message": {
+                "en": "Mai există și muchia 45, de cost 8, de la 5 la nodul 4 al arborelui.",
+                "ro": "Mai există și muchia 45, de cost 8, de la 5 la nodul 4 al arborelui."
+              }
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>După 4 noduri</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='43.7' y1='88.3' x2='86.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='84.1' text-anchor='middle'>4</text><g><title>1–3</title><line class='muted' stroke-width='2' x1='43.7' y1='111.7' x2='86.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='57.2' y='144.1' text-anchor='middle'>7</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='100' y1='58' x2='100' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='88' y='105' text-anchor='middle'>2</text><g><title>2–4</title><line class='muted' stroke-width='2' x1='114.4' y1='50.8' x2='165.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='132.8' y='84.6' text-anchor='middle'>6</text><g><title>3–4</title><line class='ok' stroke-width='3' x1='114.4' y1='149.2' x2='165.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='147.2' y='144.6' text-anchor='middle'>3</text><g><title>3–5</title><line class='muted' stroke-width='2' x1='118' y1='160' x2='232' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='175' y='177' text-anchor='middle'>9</text><g><title>4–5</title><line class='muted' stroke-width='2' x1='193.7' y1='111.7' x2='236.3' y2='148.3'/></g><text class='fg' font-size='15' font-weight='700' x='207.2' y='144.1' text-anchor='middle'>8</text><g><title>4–6</title><line class='muted' stroke-width='2' x1='193.7' y1='88.3' x2='236.3' y2='51.7'/></g><text class='fg' font-size='15' font-weight='700' x='222.8' y='84.1' text-anchor='middle'>5</text><g><title>5–6</title><line class='muted' stroke-width='2' x1='250' y1='142' x2='250' y2='58'/></g><text class='fg' font-size='15' font-weight='700' x='262' y='105' text-anchor='middle'>1</text><g><title>5–7</title><line class='muted' stroke-width='2' x1='264.4' y1='149.2' x2='315.6' y2='110.8'/></g><text class='fg' font-size='15' font-weight='700' x='297.2' y='144.6' text-anchor='middle'>10</text><g><title>6–7</title><line class='muted' stroke-width='2' x1='264.4' y1='50.8' x2='315.6' y2='89.2'/></g><text class='fg' font-size='15' font-weight='700' x='282.8' y='84.6' text-anchor='middle'>11</text><g><title>1</title><circle class='ok fill-bg' stroke-width='4' cx='30' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='30' y='105.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='ok fill-bg' stroke-width='4' cx='100' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='100' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='ok fill-bg' stroke-width='4' cx='180' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='180' y='105.8' text-anchor='middle'>4</text></g><g><title>5</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='165.8' text-anchor='middle'>5</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='143.8' text-anchor='start'>8</text><g><title>6</title><circle class='fg fill-bg' stroke-width='2' cx='250' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='250' y='45.8' text-anchor='middle'>6</text></g><text class='accent' font-size='15' font-weight='700' x='266.2' y='23.8' text-anchor='start'>5</text><g><title>7</title><circle class='fg fill-bg' stroke-width='2' cx='330' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='330' y='105.8' text-anchor='middle'>7</text></g><text class='accent' font-size='15' font-weight='700' x='346.2' y='83.8' text-anchor='start'>∞</text></svg>",
+            "alt": {
+              "en": "G3 cu 1, 2, 3, 4 în arbore.",
+              "ro": "G3 cu 1, 2, 3, 4 în arbore."
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Prim din 1 pe G3, după ce au intrat 1, 2, 3. Prima valoare: β[4]. A doua: β[5].",
+                "ro": "Prim din 1 pe G3, după ce au intrat 1, 2, 3. Prima valoare: β[4]. A doua: β[5]."
+              },
+              "solution": {
+                "en": "β[4] = min(6 prin 2, 3 prin 3) = 3. β[5] = 9 (singura muchie spre arbore este 35).",
+                "ro": "β[4] = min(6 prin 2, 3 prin 3) = 3. β[5] = 9 (singura muchie spre arbore este 35)."
+              },
+              "fields": [
+                {
+                  "id": "x",
+                  "formula": "3",
+                  "expected": 3
+                },
+                {
+                  "id": "y",
+                  "formula": "9",
+                  "expected": 9
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s10",
+      "title": {
+        "en": "Prim din alt nod",
+        "ro": "Prim din alt nod"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Pornește din 7. Alege nodul care intră, apoi urmărește valorile β.",
+                "ro": "Pornește din 7. Alege nodul care intră, apoi urmărește valorile β."
+              }
+            }
+          ]
+        },
+        {
+          "type": "viz",
+          "id": "ag-l05c-v1",
+          "widget": "graph-walk",
+          "predict": true,
+          "props": {
+            "mode": "prim",
+            "nodes": [
+              {
+                "id": "1",
+                "x": 30,
+                "y": 100
+              },
+              {
+                "id": "2",
+                "x": 100,
+                "y": 40
+              },
+              {
+                "id": "3",
+                "x": 100,
+                "y": 160
+              },
+              {
+                "id": "4",
+                "x": 180,
+                "y": 100
+              },
+              {
+                "id": "5",
+                "x": 250,
+                "y": 160
+              },
+              {
+                "id": "6",
+                "x": 250,
+                "y": 40
+              },
+              {
+                "id": "7",
+                "x": 330,
+                "y": 100
+              }
+            ],
+            "edges": [
+              {
+                "u": "1",
+                "v": "2",
+                "w": 4
+              },
+              {
+                "u": "1",
+                "v": "3",
+                "w": 7
+              },
+              {
+                "u": "2",
+                "v": "3",
+                "w": 2
+              },
+              {
+                "u": "2",
+                "v": "4",
+                "w": 6
+              },
+              {
+                "u": "3",
+                "v": "4",
+                "w": 3
+              },
+              {
+                "u": "3",
+                "v": "5",
+                "w": 9
+              },
+              {
+                "u": "4",
+                "v": "5",
+                "w": 8
+              },
+              {
+                "u": "4",
+                "v": "6",
+                "w": 5
+              },
+              {
+                "u": "5",
+                "v": "6",
+                "w": 1
+              },
+              {
+                "u": "5",
+                "v": "7",
+                "w": 10
+              },
+              {
+                "u": "6",
+                "v": "7",
+                "w": 11
+              }
+            ],
+            "source": "7"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s11",
+      "title": {
+        "en": "Prim singur, din a",
+        "ro": "Prim singur, din a"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Graful are nodurile a–f. Pornește din a. Costul arborelui trebuie să fie 18.",
+                "ro": "Graful are nodurile a–f. Pornește din a. Costul arborelui trebuie să fie 18."
+              }
+            }
+          ]
+        },
+        {
+          "type": "viz",
+          "id": "ag-l05c-v2",
+          "widget": "graph-walk",
+          "predict": true,
+          "props": {
+            "mode": "prim",
+            "nodes": [
+              {
+                "id": "a",
+                "x": 40,
+                "y": 100
+              },
+              {
+                "id": "b",
+                "x": 120,
+                "y": 40
+              },
+              {
+                "id": "c",
+                "x": 120,
+                "y": 160
+              },
+              {
+                "id": "d",
+                "x": 220,
+                "y": 40
+              },
+              {
+                "id": "e",
+                "x": 220,
+                "y": 160
+              },
+              {
+                "id": "f",
+                "x": 320,
+                "y": 100
+              }
+            ],
+            "edges": [
+              {
+                "u": "a",
+                "v": "b",
+                "w": 6
+              },
+              {
+                "u": "a",
+                "v": "c",
+                "w": 3
+              },
+              {
+                "u": "b",
+                "v": "c",
+                "w": 4
+              },
+              {
+                "u": "b",
+                "v": "d",
+                "w": 2
+              },
+              {
+                "u": "c",
+                "v": "d",
+                "w": 5
+              },
+              {
+                "u": "c",
+                "v": "e",
+                "w": 7
+              },
+              {
+                "u": "d",
+                "v": "e",
+                "w": 1
+              },
+              {
+                "u": "d",
+                "v": "f",
+                "w": 8
+              },
+              {
+                "u": "e",
+                "v": "f",
+                "w": 9
+              }
+            ],
+            "source": "a"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s12",
+      "title": {
+        "en": "Ordinea și costul pe a–f",
+        "ro": "Ordinea și costul pe a–f"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05c-e3",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Prim din a pe graful a–f (ab 6, ac 3, bc 4, bd 2, cd 5, ce 7, de 1, df 8, ef 9). Care e al treilea nod care intră (după a și c) și care e costul arborelui?",
+            "ro": "Prim din a pe graful a–f (ab 6, ac 3, bc 4, bd 2, cd 5, ce 7, de 1, df 8, ef 9). Care e al treilea nod care intră (după a și c) și care e costul arborelui?"
+          },
+          "fields": [
+            {
+              "id": "n",
+              "kind": "choice",
+              "label": {
+                "en": "Nodul al treilea",
+                "ro": "Nodul al treilea"
+              },
+              "formula": "'b'",
+              "expected": "b",
+              "options": [
+                {
+                  "en": "b",
+                  "ro": "b"
+                },
+                {
+                  "en": "d",
+                  "ro": "d"
+                },
+                {
+                  "en": "e",
+                  "ro": "e"
+                }
+              ]
+            },
+            {
+              "id": "c",
+              "kind": "num",
+              "label": {
+                "en": "Cost",
+                "ro": "Cost"
+              },
+              "formula": "3+4+2+1+8",
+              "expected": 18
+            }
+          ],
+          "hints": [
+            {
+              "en": "După a și c: β[b] = 4 (prin c), β[d] = 5, β[e] = 7.",
+              "ro": "După a și c: β[b] = 4 (prin c), β[d] = 5, β[e] = 7."
+            },
+            {
+              "en": "Cel mai mic este β[b] = 4.",
+              "ro": "Cel mai mic este β[b] = 4."
+            },
+            {
+              "en": "Muchiile alese: ac, cb, bd, de, df.",
+              "ro": "Muchiile alese: ac, cb, bd, de, df."
+            }
+          ],
+          "solution": {
+            "en": "Ordinea a, c, b, d, e, f. Muchiile ac 3, cb 4, bd 2, de 1, df 8: 3 + 4 + 2 + 1 + 8 = 18.",
+            "ro": "Ordinea a, c, b, d, e, f. Muchiile ac 3, cb 4, bd 2, de 1, df 8: 3 + 4 + 2 + 1 + 8 = 18."
+          },
+          "detectors": [
+            {
+              "field": "n",
+              "formula": "'d'",
+              "message": {
+                "en": "După a și c, β[d] = 5 (prin cd), mai mare decât β[b] = 4. Muchia bd (2) nu atinge încă arborele {a, c}.",
+                "ro": "După a și c, β[d] = 5 (prin cd), mai mare decât β[b] = 4. Muchia bd (2) nu atinge încă arborele {a, c}."
+              }
+            },
+            {
+              "field": "n",
+              "formula": "'e'",
+              "message": {
+                "en": "După a și c, β[e] = 7 (prin ce), mai mare decât β[b] = 4.",
+                "ro": "După a și c, β[e] = 7 (prin ce), mai mare decât β[b] = 4."
+              }
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>Graful a–f</title><g><title>a–b</title><line class='muted' stroke-width='2' x1='54.4' y1='89.2' x2='105.6' y2='50.8'/></g><text class='fg' font-size='15' font-weight='700' x='87.2' y='84.6' text-anchor='middle'>6</text><g><title>a–c</title><line class='muted' stroke-width='2' x1='54.4' y1='110.8' x2='105.6' y2='149.2'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='144.6' text-anchor='middle'>3</text><g><title>b–c</title><line class='muted' stroke-width='2' x1='120' y1='58' x2='120' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='108' y='105' text-anchor='middle'>4</text><g><title>b–d</title><line class='muted' stroke-width='2' x1='138' y1='40' x2='202' y2='40'/></g><text class='fg' font-size='15' font-weight='700' x='170' y='57' text-anchor='middle'>2</text><g><title>c–d</title><line class='muted' stroke-width='2' x1='131.5' y1='146.2' x2='208.5' y2='53.8'/></g><text class='fg' font-size='15' font-weight='700' x='179.2' y='112.7' text-anchor='middle'>5</text><g><title>c–e</title><line class='muted' stroke-width='2' x1='138' y1='160' x2='202' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='170' y='177' text-anchor='middle'>7</text><g><title>d–e</title><line class='muted' stroke-width='2' x1='220' y1='58' x2='220' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='208' y='105' text-anchor='middle'>1</text><g><title>d–f</title><line class='muted' stroke-width='2' x1='235.4' y1='49.3' x2='304.6' y2='90.7'/></g><text class='fg' font-size='15' font-weight='700' x='263.8' y='85.3' text-anchor='middle'>8</text><g><title>e–f</title><line class='muted' stroke-width='2' x1='235.4' y1='150.7' x2='304.6' y2='109.3'/></g><text class='fg' font-size='15' font-weight='700' x='276.2' y='145.3' text-anchor='middle'>9</text><g><title>a</title><circle class='fg fill-bg' stroke-width='2' cx='40' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='40' y='105.8' text-anchor='middle'>a</text></g><g><title>b</title><circle class='fg fill-bg' stroke-width='2' cx='120' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='120' y='45.8' text-anchor='middle'>b</text></g><g><title>c</title><circle class='fg fill-bg' stroke-width='2' cx='120' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='120' y='165.8' text-anchor='middle'>c</text></g><g><title>d</title><circle class='fg fill-bg' stroke-width='2' cx='220' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='220' y='45.8' text-anchor='middle'>d</text></g><g><title>e</title><circle class='fg fill-bg' stroke-width='2' cx='220' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='220' y='165.8' text-anchor='middle'>e</text></g><g><title>f</title><circle class='fg fill-bg' stroke-width='2' cx='320' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='320' y='105.8' text-anchor='middle'>f</text></g></svg>",
+            "alt": {
+              "en": "Graf cu nodurile a–f și costurile.",
+              "ro": "Graf cu nodurile a–f și costurile."
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Același graf, dar de costă 10 (restul la fel). Prim din a: al treilea nod și costul?",
+                "ro": "Același graf, dar de costă 10 (restul la fel). Prim din a: al treilea nod și costul?"
+              },
+              "solution": {
+                "en": "Ordinea a, c, b, d, e, f rămâne pentru primele trei, dar arborele se schimbă: ac 3, cb 4, bd 2, ce 7, df 8: 24. Costul 10 a scos de din arbore.",
+                "ro": "Ordinea a, c, b, d, e, f rămâne pentru primele trei, dar arborele se schimbă: ac 3, cb 4, bd 2, ce 7, df 8: 24. Costul 10 a scos de din arbore."
+              },
+              "fields": [
+                {
+                  "id": "n",
+                  "formula": "'b'",
+                  "expected": "b"
+                },
+                {
+                  "id": "c",
+                  "formula": "3+4+2+7+8",
+                  "expected": 24
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s13",
+      "title": {
+        "en": "Dacă pornim din f",
+        "ro": "Dacă pornim din f"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 10",
+        "ro": "Cursul 5 · slide 10"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05c-q1",
+          "question": {
+            "en": "Rulezi Prim pe același graf a–f, dar pornești din f. Ce arbore obții?",
+            "ro": "Rulezi Prim pe același graf a–f, dar pornești din f. Ce arbore obții?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "același arbore, cost 18",
+                "ro": "același arbore, cost 18"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Costurile sunt toate diferite, deci arborele de cost minim este unic: orice pornire îl dă. Ordinea nodurilor diferă.",
+                "ro": "Costurile sunt toate diferite, deci arborele de cost minim este unic: orice pornire îl dă. Ordinea nodurilor diferă."
+              }
+            },
+            {
+              "text": {
+                "en": "un arbore de cost mai mare",
+                "ro": "un arbore de cost mai mare"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Prim e corect pentru orice nod de start: costul rămâne minim.",
+                "ro": "Prim e corect pentru orice nod de start: costul rămâne minim."
+              },
+              "misconception": "regula-inventata"
+            },
+            {
+              "text": {
+                "en": "alt arbore tot de cost 18",
+                "ro": "alt arbore tot de cost 18"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Cu costuri diferite, arborele minim este unic: nu poate fi „altul”.",
+                "ro": "Cu costuri diferite, arborele minim este unic: nu poate fi „altul”."
+              },
+              "misconception": "uita-ipoteza"
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>Graful a–f</title><g><title>a–b</title><line class='muted' stroke-width='2' x1='54.4' y1='89.2' x2='105.6' y2='50.8'/></g><text class='fg' font-size='15' font-weight='700' x='87.2' y='84.6' text-anchor='middle'>6</text><g><title>a–c</title><line class='muted' stroke-width='2' x1='54.4' y1='110.8' x2='105.6' y2='149.2'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='144.6' text-anchor='middle'>3</text><g><title>b–c</title><line class='muted' stroke-width='2' x1='120' y1='58' x2='120' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='108' y='105' text-anchor='middle'>4</text><g><title>b–d</title><line class='muted' stroke-width='2' x1='138' y1='40' x2='202' y2='40'/></g><text class='fg' font-size='15' font-weight='700' x='170' y='57' text-anchor='middle'>2</text><g><title>c–d</title><line class='muted' stroke-width='2' x1='131.5' y1='146.2' x2='208.5' y2='53.8'/></g><text class='fg' font-size='15' font-weight='700' x='179.2' y='112.7' text-anchor='middle'>5</text><g><title>c–e</title><line class='muted' stroke-width='2' x1='138' y1='160' x2='202' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='170' y='177' text-anchor='middle'>7</text><g><title>d–e</title><line class='muted' stroke-width='2' x1='220' y1='58' x2='220' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='208' y='105' text-anchor='middle'>1</text><g><title>d–f</title><line class='muted' stroke-width='2' x1='235.4' y1='49.3' x2='304.6' y2='90.7'/></g><text class='fg' font-size='15' font-weight='700' x='263.8' y='85.3' text-anchor='middle'>8</text><g><title>e–f</title><line class='muted' stroke-width='2' x1='235.4' y1='150.7' x2='304.6' y2='109.3'/></g><text class='fg' font-size='15' font-weight='700' x='276.2' y='145.3' text-anchor='middle'>9</text><g><title>a</title><circle class='fg fill-bg' stroke-width='2' cx='40' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='40' y='105.8' text-anchor='middle'>a</text></g><g><title>b</title><circle class='fg fill-bg' stroke-width='2' cx='120' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='120' y='45.8' text-anchor='middle'>b</text></g><g><title>c</title><circle class='fg fill-bg' stroke-width='2' cx='120' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='120' y='165.8' text-anchor='middle'>c</text></g><g><title>d</title><circle class='fg fill-bg' stroke-width='2' cx='220' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='220' y='45.8' text-anchor='middle'>d</text></g><g><title>e</title><circle class='fg fill-bg' stroke-width='2' cx='220' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='220' y='165.8' text-anchor='middle'>e</text></g><g><title>f</title><circle class='fg fill-bg' stroke-width='2' cx='320' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='320' y='105.8' text-anchor='middle'>f</text></g></svg>",
+            "alt": {
+              "en": "Graf a–f.",
+              "ro": "Graf a–f."
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s14",
+      "title": {
+        "en": "Costuri egale: alt arbore",
+        "ro": "Costuri egale: alt arbore"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 10",
+        "ro": "Cursul 5 · slide 10"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Pătratul 1, 2, 3, 4 are toate muchiile de cost 1. Prim din 1 ia 12, 23, 14; Prim din 3 ia 23, 12, 34. Alt arbore, același cost 3.",
+                "ro": "Pătratul 1, 2, 3, 4 are toate muchiile de cost 1. Prim din 1 ia 12, 23, 14; Prim din 3 ia 23, 12, 34. Alt arbore, același cost 3."
+              }
+            },
+            {
+              "figure": {
+                "svg": "<svg viewBox='0 0 360 200'><title>Pătratul</title><g><title>1–2</title><line class='ok' stroke-width='3' x1='98' y1='40' x2='222' y2='40'/></g><text class='fg' font-size='15' font-weight='700' x='160' y='57' text-anchor='middle'>1</text><g><title>2–3</title><line class='ok' stroke-width='3' x1='240' y1='58' x2='240' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='228' y='105' text-anchor='middle'>1</text><g><title>3–4</title><line class='muted' stroke-width='2' x1='222' y1='160' x2='98' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='160' y='153' text-anchor='middle'>1</text><g><title>1–4</title><line class='ok' stroke-width='3' x1='80' y1='58' x2='80' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='68' y='105' text-anchor='middle'>1</text><g><title>1</title><circle class='fg fill-bg' stroke-width='2' cx='80' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='80' y='45.8' text-anchor='middle'>1</text></g><g><title>2</title><circle class='fg fill-bg' stroke-width='2' cx='240' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='240' y='45.8' text-anchor='middle'>2</text></g><g><title>3</title><circle class='fg fill-bg' stroke-width='2' cx='240' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='240' y='165.8' text-anchor='middle'>3</text></g><g><title>4</title><circle class='fg fill-bg' stroke-width='2' cx='80' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='80' y='165.8' text-anchor='middle'>4</text></g></svg>",
+                "alt": {
+                  "en": "Pătrat cu muchiile de cost 1.",
+                  "ro": "Pătrat cu muchiile de cost 1."
+                },
+                "caption": {
+                  "en": "Prim din 1.",
+                  "ro": "Prim din 1."
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s15",
+      "title": {
+        "en": "Contează doar comparațiile",
+        "ro": "Contează doar comparațiile"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 10",
+        "ro": "Cursul 5 · slide 10"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05c-e4",
+          "status": "verified-twice",
+          "statement": {
+            "en": "La graful a–f scazi 10 din costul fiecărei muchii. Arborele are tot 5 muchii. Ce arbore iese? Care e costul lui?",
+            "ro": "La graful a–f scazi 10 din costul fiecărei muchii. Arborele are tot 5 muchii. Ce arbore iese? Care e costul lui?"
+          },
+          "fields": [
+            {
+              "id": "s",
+              "kind": "tf",
+              "label": {
+                "en": "Același arbore?",
+                "ro": "Același arbore?"
+              },
+              "formula": "'true'",
+              "expected": "true"
+            },
+            {
+              "id": "c",
+              "kind": "num",
+              "label": {
+                "en": "Cost",
+                "ro": "Cost"
+              },
+              "formula": "18-50",
+              "expected": -32
+            }
+          ],
+          "hints": [
+            {
+              "en": "Scăderea aceluiași număr păstrează ordinea muchiilor.",
+              "ro": "Scăderea aceluiași număr păstrează ordinea muchiilor."
+            },
+            {
+              "en": "Arborele are 5 muchii: 5 · 10 = 50 de scăzut.",
+              "ro": "Arborele are 5 muchii: 5 · 10 = 50 de scăzut."
+            },
+            {
+              "en": "18 − 50.",
+              "ro": "18 − 50."
+            }
+          ],
+          "solution": {
+            "en": "Ordinea costurilor nu s-a schimbat, deci Prim alege aceleași muchii. Costul scade cu 5 · 10 = 50: 18 − 50 = −32. Prim merge și cu costuri negative.",
+            "ro": "Ordinea costurilor nu s-a schimbat, deci Prim alege aceleași muchii. Costul scade cu 5 · 10 = 50: 18 − 50 = −32. Prim merge și cu costuri negative."
+          },
+          "detectors": [
+            {
+              "field": "c",
+              "formula": "18-10",
+              "message": {
+                "en": "Fiecare dintre cele 5 muchii ale arborelui scade cu 10, nu doar una.",
+                "ro": "Fiecare dintre cele 5 muchii ale arborelui scade cu 10, nu doar una."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "La graful a–f aduni 3 la costul fiecărei muchii. Același arbore? Cost?",
+                "ro": "La graful a–f aduni 3 la costul fiecărei muchii. Același arbore? Cost?"
+              },
+              "solution": {
+                "en": "Ordinea rămâne: aceleași 5 muchii, costul 18 + 5 · 3 = 33.",
+                "ro": "Ordinea rămâne: aceleași 5 muchii, costul 18 + 5 · 3 = 33."
+              },
+              "fields": [
+                {
+                  "id": "s",
+                  "formula": "'true'",
+                  "expected": "true"
+                },
+                {
+                  "id": "c",
+                  "formula": "18+15",
+                  "expected": 33
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s16",
+      "title": {
+        "en": "Timpul lui Prim",
+        "ro": "Timpul lui Prim"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 12",
+        "ro": "Cursul 5 · slide 12"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "intro": [
+            {
+              "text": {
+                "en": "Sunt n − 1 runde. În fiecare, căutarea lui j* parcurge cel mult n valori, iar actualizarea alte n. Total O(n − 1) + O(n − 2) + … + O(1) = O(n²).",
+                "ro": "Sunt n − 1 runde. În fiecare, căutarea lui j* parcurge cel mult n valori, iar actualizarea alte n. Total O(n − 1) + O(n − 2) + … + O(1) = O(n²)."
+              }
+            },
+            {
+              "text": {
+                "en": "n = numărul de noduri. Este bun când graful are multe muchii, m = O(n²).",
+                "ro": "n = numărul de noduri. Este bun când graful are multe muchii, m = O(n²)."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s17",
+      "title": {
+        "en": "Câți pași pentru 100 de noduri",
+        "ro": "Câți pași pentru 100 de noduri"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 12",
+        "ro": "Cursul 5 · slide 12"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05c-e5",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Un graf are n = 100 de noduri. Cam câți pași face Prim (n²)?",
+            "ro": "Un graf are n = 100 de noduri. Cam câți pași face Prim (n²)?"
+          },
+          "fields": [
+            {
+              "id": "p",
+              "kind": "num",
+              "label": {
+                "en": "n²",
+                "ro": "n²"
+              },
+              "formula": "100*100",
+              "expected": 10000
+            }
+          ],
+          "hints": [
+            {
+              "en": "Timpul este O(n²).",
+              "ro": "Timpul este O(n²)."
+            },
+            {
+              "en": "n² înseamnă n ori n.",
+              "ro": "n² înseamnă n ori n."
+            },
+            {
+              "en": "100 · 100.",
+              "ro": "100 · 100."
+            }
+          ],
+          "solution": {
+            "en": "100² = 10 000 de pași.",
+            "ro": "100² = 10 000 de pași."
+          },
+          "detectors": [
+            {
+              "field": "p",
+              "formula": "100",
+              "message": {
+                "en": "Timpul este n², nu n.",
+                "ro": "Timpul este n², nu n."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "Același lucru pentru n = 1000.",
+                "ro": "Același lucru pentru n = 1000."
+              },
+              "solution": {
+                "en": "1000² = 1 000 000.",
+                "ro": "1000² = 1 000 000."
+              },
+              "fields": [
+                {
+                  "id": "p",
+                  "formula": "1000*1000",
+                  "expected": 1000000
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s18",
+      "title": {
+        "en": "Toate β sunt ∞",
+        "ro": "Toate β sunt ∞"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05c-q2",
+          "question": {
+            "en": "Prim pe un graf în care, după două noduri, β[j] = ∞ pentru toate nodurile din afară. Ce înseamnă?",
+            "ro": "Prim pe un graf în care, după două noduri, β[j] = ∞ pentru toate nodurile din afară. Ce înseamnă?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "graful nu este conex",
+                "ro": "graful nu este conex"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Nicio muchie nu leagă arborele de restul nodurilor: nu există arbore parțial. De aceea slide-ul presupune graful conex; altfel algoritmul ar alege totuși un ∞, fără sens.",
+                "ro": "Nicio muchie nu leagă arborele de restul nodurilor: nu există arbore parțial. De aceea slide-ul presupune graful conex; altfel algoritmul ar alege totuși un ∞, fără sens."
+              }
+            },
+            {
+              "text": {
+                "en": "se ia un nod la întâmplare",
+                "ro": "se ia un nod la întâmplare"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Nicio muchie nu iese din arbore; luat la întâmplare, nodul n-ar avea muchie spre arbore.",
+                "ro": "Nicio muchie nu iese din arbore; luat la întâmplare, nodul n-ar avea muchie spre arbore."
+              },
+              "misconception": "uita-ipoteza"
+            },
+            {
+              "text": {
+                "en": "se ia cel mai mic nod",
+                "ro": "se ia cel mai mic nod"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Nu are nicio legătură cu β.",
+                "ro": "Nu are nicio legătură cu β."
+              },
+              "misconception": "primul-nod-in-ordine"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s19",
+      "title": {
+        "en": "Trei afirmații despre Prim",
+        "ro": "Trei afirmații despre Prim"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 10",
+        "ro": "Cursul 5 · slide 10"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05c-q3",
+          "question": {
+            "en": "Care afirmație despre Prim este adevărată?",
+            "ro": "Care afirmație despre Prim este adevărată?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "β[j] poate doar să scadă în timpul algoritmului",
+                "ro": "β[j] poate doar să scadă în timpul algoritmului"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Un nod nou în arbore poate oferi o muchie mai ieftină, niciodată una mai scumpă: β ia minimul.",
+                "ro": "Un nod nou în arbore poate oferi o muchie mai ieftină, niciodată una mai scumpă: β ia minimul."
+              }
+            },
+            {
+              "text": {
+                "en": "nu are nevoie de un nod de start",
+                "ro": "nu are nevoie de un nod de start"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Prim pornește dintr-un nod s dat.",
+                "ro": "Prim pornește dintr-un nod s dat."
+              },
+              "misconception": "regula-inventata"
+            },
+            {
+              "text": {
+                "en": "α[j] este un nod din afara arborelui",
+                "ro": "α[j] este un nod din afara arborelui"
+              },
+              "correct": false,
+              "explain": {
+                "en": "α[j] este capătul muchiei care se află în arbore.",
+                "ro": "α[j] este capătul muchiei care se află în arbore."
+              },
+              "misconception": "rolurile-inversate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s20",
+      "title": {
+        "en": "Pe scurt",
+        "ro": "Pe scurt"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 12",
+        "ro": "Cursul 5 · slide 12"
+      },
+      "blocks": [
+        {
+          "type": "steps",
+          "items": [
+            {
+              "en": "Prim: arborele crește cu un nod pe rând, mereu pe cea mai ieftină muchie care iese din el.",
+              "ro": "Prim: arborele crește cu un nod pe rând, mereu pe cea mai ieftină muchie care iese din el."
+            },
+            {
+              "en": "β[j] = cea mai ieftină muchie spre arbore, α[j] = capătul ei din arbore.",
+              "ro": "β[j] = cea mai ieftină muchie spre arbore, α[j] = capătul ei din arbore."
+            },
+            {
+              "en": "Timp O(n²), bun pentru grafuri cu multe muchii.",
+              "ro": "Timp O(n²), bun pentru grafuri cu multe muchii."
+            },
+            {
+              "en": "Din orice nod de start arborele are același cost; costurile egale pot da arbori diferiți.",
+              "ro": "Din orice nod de start arborele are același cost; costurile egale pot da arbori diferiți."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s21",
+      "title": {
+        "en": "β după ce intră c",
+        "ro": "β după ce intră c"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 11",
+        "ro": "Cursul 5 · slide 11"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05c-e6",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Graful a–f cu de = 10 (celelalte la fel). Prim din a: primul nod care intră este c (β = 3). După ce intră c, care este β[b]? Care este β[d]?",
+            "ro": "Graful a–f cu de = 10 (celelalte la fel). Prim din a: primul nod care intră este c (β = 3). După ce intră c, care este β[b]? Care este β[d]?"
+          },
+          "fields": [
+            {
+              "id": "x",
+              "kind": "num",
+              "label": {
+                "en": "Prima valoare, β[b]",
+                "ro": "Prima valoare, β[b]"
+              },
+              "formula": "4",
+              "expected": 4
+            },
+            {
+              "id": "y",
+              "kind": "num",
+              "label": {
+                "en": "A doua valoare, β[d]",
+                "ro": "A doua valoare, β[d]"
+              },
+              "formula": "5",
+              "expected": 5
+            }
+          ],
+          "hints": [
+            {
+              "en": "Nodul b are ab (6) și bc (4); c e în arbore.",
+              "ro": "Nodul b are ab (6) și bc (4); c e în arbore."
+            },
+            {
+              "en": "Nodul d are cd (5) spre c.",
+              "ro": "Nodul d are cd (5) spre c."
+            },
+            {
+              "en": "β[b] = min(6, 4), β[d] = 5.",
+              "ro": "β[b] = min(6, 4), β[d] = 5."
+            }
+          ],
+          "solution": {
+            "en": "β[b] = min(6, 4) = 4 (α = c). β[d] = 5 (α = c).",
+            "ro": "β[b] = min(6, 4) = 4 (α = c). β[d] = 5 (α = c)."
+          },
+          "detectors": [
+            {
+              "field": "x",
+              "formula": "6",
+              "message": {
+                "en": "6 e muchia ab, de la nodul a. Nodul b are o muchie mai ieftină spre arbore: bc, de cost 4.",
+                "ro": "6 e muchia ab, de la nodul a. Nodul b are o muchie mai ieftină spre arbore: bc, de cost 4."
+              }
+            },
+            {
+              "field": "y",
+              "formula": "10",
+              "message": {
+                "en": "Muchia de (10) nu duce la arbore: e nu a intrat încă.",
+                "ro": "Muchia de (10) nu duce la arbore: e nu a intrat încă."
+              }
+            }
+          ],
+          "figure": {
+            "svg": "<svg viewBox='0 0 360 200'><title>Graful a–f cu de = 10</title><g><title>a–b</title><line class='muted' stroke-width='2' x1='54.4' y1='89.2' x2='105.6' y2='50.8'/></g><text class='fg' font-size='15' font-weight='700' x='87.2' y='84.6' text-anchor='middle'>6</text><g><title>a–c</title><line class='muted' stroke-width='2' x1='54.4' y1='110.8' x2='105.6' y2='149.2'/></g><text class='fg' font-size='15' font-weight='700' x='72.8' y='144.6' text-anchor='middle'>3</text><g><title>b–c</title><line class='muted' stroke-width='2' x1='120' y1='58' x2='120' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='108' y='105' text-anchor='middle'>4</text><g><title>b–d</title><line class='muted' stroke-width='2' x1='138' y1='40' x2='202' y2='40'/></g><text class='fg' font-size='15' font-weight='700' x='170' y='57' text-anchor='middle'>2</text><g><title>c–d</title><line class='muted' stroke-width='2' x1='131.5' y1='146.2' x2='208.5' y2='53.8'/></g><text class='fg' font-size='15' font-weight='700' x='179.2' y='112.7' text-anchor='middle'>5</text><g><title>c–e</title><line class='muted' stroke-width='2' x1='138' y1='160' x2='202' y2='160'/></g><text class='fg' font-size='15' font-weight='700' x='170' y='177' text-anchor='middle'>7</text><g><title>d–e</title><line class='muted' stroke-width='2' x1='220' y1='58' x2='220' y2='142'/></g><text class='fg' font-size='15' font-weight='700' x='208' y='105' text-anchor='middle'>10</text><g><title>d–f</title><line class='muted' stroke-width='2' x1='235.4' y1='49.3' x2='304.6' y2='90.7'/></g><text class='fg' font-size='15' font-weight='700' x='263.8' y='85.3' text-anchor='middle'>8</text><g><title>e–f</title><line class='muted' stroke-width='2' x1='235.4' y1='150.7' x2='304.6' y2='109.3'/></g><text class='fg' font-size='15' font-weight='700' x='276.2' y='145.3' text-anchor='middle'>9</text><g><title>a</title><circle class='fg fill-bg' stroke-width='2' cx='40' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='40' y='105.8' text-anchor='middle'>a</text></g><g><title>b</title><circle class='fg fill-bg' stroke-width='2' cx='120' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='120' y='45.8' text-anchor='middle'>b</text></g><g><title>c</title><circle class='fg fill-bg' stroke-width='2' cx='120' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='120' y='165.8' text-anchor='middle'>c</text></g><g><title>d</title><circle class='fg fill-bg' stroke-width='2' cx='220' cy='40' r='18'/><text class='fg' font-size='16' font-weight='700' x='220' y='45.8' text-anchor='middle'>d</text></g><g><title>e</title><circle class='fg fill-bg' stroke-width='2' cx='220' cy='160' r='18'/><text class='fg' font-size='16' font-weight='700' x='220' y='165.8' text-anchor='middle'>e</text></g><g><title>f</title><circle class='fg fill-bg' stroke-width='2' cx='320' cy='100' r='18'/><text class='fg' font-size='16' font-weight='700' x='320' y='105.8' text-anchor='middle'>f</text></g></svg>",
+            "alt": {
+              "en": "Graf cu de = 10.",
+              "ro": "Graf cu de = 10."
+            }
+          },
+          "variants": [
+            {
+              "statement": {
+                "en": "Același graf. După ce intră c și b, care este β[d]? Dar β[e]?",
+                "ro": "Același graf. După ce intră c și b, care este β[d]? Dar β[e]?"
+              },
+              "solution": {
+                "en": "β[d] = min(5, bd = 2) = 2. β[e] = 7 (prin c).",
+                "ro": "β[d] = min(5, bd = 2) = 2. β[e] = 7 (prin c)."
+              },
+              "fields": [
+                {
+                  "id": "x",
+                  "formula": "2",
+                  "expected": 2
+                },
+                {
+                  "id": "y",
+                  "formula": "7",
+                  "expected": 7
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s22",
+      "title": {
+        "en": "Costuri egale",
+        "ro": "Costuri egale"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 10",
+        "ro": "Cursul 5 · slide 10"
+      },
+      "blocks": [
+        {
+          "type": "mcq",
+          "id": "ag-l05c-q4",
+          "question": {
+            "en": "Pe pătratul cu toate muchiile de cost 1, Prim din 1 și Prim din 3 dau arbori diferiți. Care este costul lor?",
+            "ro": "Pe pătratul cu toate muchiile de cost 1, Prim din 1 și Prim din 3 dau arbori diferiți. Care este costul lor?"
+          },
+          "options": [
+            {
+              "text": {
+                "en": "același, 3",
+                "ro": "același, 3"
+              },
+              "correct": true,
+              "explain": {
+                "en": "Fiecare are 3 muchii de cost 1; toți cei 4 arbori parțiali costă 3.",
+                "ro": "Fiecare are 3 muchii de cost 1; toți cei 4 arbori parțiali costă 3."
+              }
+            },
+            {
+              "text": {
+                "en": "diferit: depinde de arbore",
+                "ro": "diferit: depinde de arbore"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Toți arborii parțiali ai pătratului au 3 muchii de cost 1.",
+                "ro": "Toți arborii parțiali ai pătratului au 3 muchii de cost 1."
+              },
+              "misconception": "regula-inventata"
+            },
+            {
+              "text": {
+                "en": "4, cu toate muchiile",
+                "ro": "4, cu toate muchiile"
+              },
+              "correct": false,
+              "explain": {
+                "en": "Un arbore cu 4 noduri are 3 muchii; a patra ar închide un circuit.",
+                "ro": "Un arbore cu 4 noduri are 3 muchii; a patra ar închide un circuit."
+              },
+              "misconception": "toate-muchiile-raman"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ag-l05c-s23",
+      "title": {
+        "en": "Complexitate",
+        "ro": "Complexitate"
+      },
+      "kicker": {
+        "en": "Cursul 5 · slide 12",
+        "ro": "Cursul 5 · slide 12"
+      },
+      "blocks": [
+        {
+          "type": "calc-exercise",
+          "id": "ag-l05c-e7",
+          "status": "verified-twice",
+          "statement": {
+            "en": "Un graf are n = 50 de noduri și m = 1225 de muchii. Prim face aproximativ n² pași. Câți?",
+            "ro": "Un graf are n = 50 de noduri și m = 1225 de muchii. Prim face aproximativ n² pași. Câți?"
+          },
+          "fields": [
+            {
+              "id": "p",
+              "kind": "num",
+              "label": {
+                "en": "n²",
+                "ro": "n²"
+              },
+              "formula": "50*50",
+              "expected": 2500
+            }
+          ],
+          "hints": [
+            {
+              "en": "Timpul nu depinde de m, ci de n.",
+              "ro": "Timpul nu depinde de m, ci de n."
+            },
+            {
+              "en": "n² înseamnă n ori n.",
+              "ro": "n² înseamnă n ori n."
+            },
+            {
+              "en": "50 · 50.",
+              "ro": "50 · 50."
+            }
+          ],
+          "solution": {
+            "en": "50² = 2500 (m nu apare în n²).",
+            "ro": "50² = 2500 (m nu apare în n²)."
+          },
+          "detectors": [
+            {
+              "field": "p",
+              "formula": "1225",
+              "message": {
+                "en": "Prim depinde de numărul de noduri la pătrat, nu de numărul de muchii.",
+                "ro": "Prim depinde de numărul de noduri la pătrat, nu de numărul de muchii."
+              }
+            }
+          ],
+          "variants": [
+            {
+              "statement": {
+                "en": "n = 20 de noduri. Câți pași, aproximativ?",
+                "ro": "n = 20 de noduri. Câți pași, aproximativ?"
+              },
+              "solution": {
+                "en": "20² = 400.",
+                "ro": "20² = 400."
+              },
+              "fields": [
+                {
+                  "id": "p",
+                  "formula": "20*20",
+                  "expected": 400
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
