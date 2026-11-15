@@ -1,0 +1,1889 @@
+{
+ "meta": {
+  "id": "ag-l03d",
+  "title": {
+   "en": "Lecția 3d: de ce merge Dijkstra, cât costă, arce negative",
+   "ro": "Lecția 3d: de ce merge Dijkstra, cât costă, arce negative"
+  },
+  "shortTitle": {
+   "en": "L3d: Corectitudine și cost",
+   "ro": "L3d: Corectitudine și cost"
+  },
+  "clarity": 1,
+  "source": {
+   "en": "Algoritmica grafurilor, cursul 3, UAIC FII (agr3.pdf)",
+   "ro": "Algoritmica grafurilor, cursul 3, UAIC FII (agr3.pdf)"
+  }
+ },
+ "steps": [
+  {
+   "id": "ag-l03d-s1",
+   "title": {
+    "en": "De ce nu poate fi mai ieftin",
+    "ro": "De ce nu poate fi mai ieftin"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>G1 cu S = {s, b}</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→a: 4</title><line class=\"muted\" stroke-width=\"2\" x1=\"43.4\" y1=\"43.7\" x2=\"115.7\" y2=\"90.7\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"67\" y=\"67.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"74\" y=\"81.7\" text-anchor=\"middle\">4</text></g><g><title>s→b: 1</title><line class=\"ok\" stroke-width=\"3\" x1=\"30\" y1=\"51\" x2=\"30\" y2=\"148\" marker-end=\"url(#ah-ok)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"12\" y=\"91\" width=\"14\" height=\"18\"/><text class=\"ok\" font-weight=\"700\" font-size=\"15\" x=\"19\" y=\"105\" text-anchor=\"middle\">1</text></g><g><title>s→c: 7</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"35\" x2=\"218\" y2=\"35\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"125.5\" y=\"37\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"132.5\" y=\"51\" text-anchor=\"middle\">7</text></g><g><title>b→a: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"43.4\" y1=\"156.3\" x2=\"115.7\" y2=\"109.3\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"79\" y=\"132.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"86\" y=\"146.7\" text-anchor=\"middle\">2</text></g><g><title>a→c: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"143.6\" y1=\"91.6\" x2=\"220.5\" y2=\"43.9\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"181.3\" y=\"67.9\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"188.3\" y=\"81.9\" text-anchor=\"middle\">2</text></g><g><title>a→d: 6</title><line class=\"muted\" stroke-width=\"2\" x1=\"143.6\" y1=\"108.4\" x2=\"220.5\" y2=\"156.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"169.7\" y=\"132.9\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"176.7\" y=\"146.9\" text-anchor=\"middle\">6</text></g><g><title>b→d: 9</title><line class=\"muted\" stroke-width=\"2\" x1=\"46\" y1=\"165\" x2=\"218\" y2=\"165\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"125.5\" y=\"167\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"132.5\" y=\"181\" text-anchor=\"middle\">9</text></g><g><title>c→d: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"235\" y1=\"51\" x2=\"235\" y2=\"148\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"217\" y=\"91\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"224\" y=\"105\" text-anchor=\"middle\">1</text></g><g><title>c→e: 5</title><line class=\"muted\" stroke-width=\"2\" x1=\"248.4\" y1=\"43.7\" x2=\"320.7\" y2=\"90.7\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"272\" y=\"67.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"279\" y=\"81.7\" text-anchor=\"middle\">5</text></g><g><title>d→e: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"248.4\" y1=\"156.3\" x2=\"320.7\" y2=\"109.3\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"284\" y=\"132.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"291\" y=\"146.7\" text-anchor=\"middle\">2</text></g><g><title>s</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"30\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"40.5\" text-anchor=\"middle\">s</text></g><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"130\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"130\" y=\"105.5\" text-anchor=\"middle\">a</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"130\" y=\"132\" text-anchor=\"middle\">3</text><g><title>b</title><circle class=\"fill-bg ok\" stroke-width=\"3\" cx=\"30\" cy=\"165\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"170.5\" text-anchor=\"middle\">b</text></g><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"235\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"235\" y=\"40.5\" text-anchor=\"middle\">c</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"235\" y=\"14\" text-anchor=\"middle\">7</text><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"235\" cy=\"165\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"235\" y=\"170.5\" text-anchor=\"middle\">d</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"235\" y=\"197\" text-anchor=\"middle\">10</text><g><title>e</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"335\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"335\" y=\"105.5\" text-anchor=\"middle\">e</text></g><text class=\"accent\" font-weight=\"700\" font-size=\"15\" x=\"335\" y=\"132\" text-anchor=\"middle\">∞</text></svg>",
+        "alt": {
+         "en": "G1 cu S = {s, b}; sub noduri: a 3, c 7, d 10, e infinit.",
+         "ro": "G1 cu S = {s, b}; sub noduri: a 3, c 7, d 10, e infinit."
+        },
+        "caption": {
+         "en": "$S=\\{s,b\\}$. Cel mai mic $u$ din afara lui $S$ este $u_a=3$.",
+         "ro": "$S=\\{s,b\\}$. Cel mai mic $u$ din afara lui $S$ este $u_a=3$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Vrem să arătăm că $u_a=3$ e costul final al lui $a$.",
+       "ro": "Vrem să arătăm că $u_a=3$ e costul final al lui $a$."
+      },
+      {
+       "en": "Orice alt drum spre $a$ trebuie să iasă din $S$ undeva, într-un nod din afară.",
+       "ro": "Orice alt drum spre $a$ trebuie să iasă din $S$ undeva, într-un nod din afară."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q1",
+     "question": {
+      "en": "Un alt drum spre $a$ iese din $S$ prin $c$ ($u_c=7$). Poate costa mai puțin de 3?",
+      "ro": "Un alt drum spre $a$ iese din $S$ prin $c$ ($u_c=7$). Poate costa mai puțin de 3?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Da, dacă drumul de la $c$ spre $a$ e foarte ieftin",
+        "ro": "Da, dacă drumul de la $c$ spre $a$ e foarte ieftin"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Restul drumului adaugă cel puțin 0, iar până la $c$ costă deja 7.",
+        "ro": "Restul drumului adaugă cel puțin 0, iar până la $c$ costă deja 7."
+       },
+       "misconception": "arc-negativ-ignorat"
+      },
+      {
+       "text": {
+        "en": "Nu se poate spune",
+        "ro": "Nu se poate spune"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se poate spune cu regula costurilor nenegative.",
+        "ro": "Se poate spune cu regula costurilor nenegative."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Nu: până la $c$ costă deja cel puțin 7, iar restul nu scade",
+        "ro": "Nu: până la $c$ costă deja cel puțin 7, iar restul nu scade"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: costurile sunt $\\ge0$.",
+        "ro": "Corect: costurile sunt $\\ge0$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s2",
+   "title": {
+    "en": "Afirmația 1",
+    "ro": "Afirmația 1"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "definition",
+     "term": {
+      "en": "Afirmația 1",
+      "ro": "Afirmația 1"
+     },
+     "content": {
+      "en": "Dacă $(D)$ e adevărată înainte de o rundă, atunci $u_{j^*}$, cu $j^*$ nodul din afara lui $S$ cu cel mai mic $u$, este costul unui drum de cost minim spre $j^*$.",
+      "ro": "Dacă $(D)$ e adevărată înainte de o rundă, atunci $u_{j^*}$, cu $j^*$ nodul din afara lui $S$ cu cel mai mic $u$, este costul unui drum de cost minim spre $j^*$."
+     }
+    },
+    {
+     "type": "learn",
+     "content": {
+      "en": "Demonstrăm prin reducere la absurd: presupunem că există un drum $P^1$ de la $s$ la $j^*$ cu cost mai mic decât $u_{j^*}$.",
+      "ro": "Demonstrăm prin reducere la absurd: presupunem că există un drum $P^1$ de la $s$ la $j^*$ cu cost mai mic decât $u_{j^*}$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s3",
+   "title": {
+    "en": "Reducerea la absurd, pe G1",
+    "ro": "Reducerea la absurd, pe G1"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ag-l03d-p1",
+     "claim": {
+      "en": "În G1 cu $S=\\{s,b\\}$, $j^*=a$ cu $u_a=3$. Presupunem un drum $P^1$ de la $s$ la $a$ cu $a(P^1)<3$.",
+      "ro": "În G1 cu $S=\\{s,b\\}$, $j^*=a$ cu $u_a=3$. Presupunem un drum $P^1$ de la $s$ la $a$ cu $a(P^1)<3$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "$P^1$ pornește în $S$ și ajunge în $a\\notin S$: iese din $S$ la un prim nod $k$ din afara lui $S$.",
+        "ro": "$P^1$ pornește în $S$ și ajunge în $a\\notin S$: iese din $S$ la un prim nod $k$ din afara lui $S$."
+       },
+       "predict": {
+        "question": {
+         "en": "Care noduri pot fi $k$ în G1?",
+         "ro": "Care noduri pot fi $k$ în G1?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Doar $s$",
+           "ro": "Doar $s$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "$s$ e în $S$, deci nu poate fi primul nod din afară.",
+           "ro": "$s$ e în $S$, deci nu poate fi primul nod din afară."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         },
+         {
+          "text": {
+           "en": "$a$, $c$, $d$ sau $e$: oricare din afara lui $S$",
+           "ro": "$a$, $c$, $d$ sau $e$: oricare din afara lui $S$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: primul nod în afara lui $S$ pe drum.",
+           "ro": "Corect: primul nod în afara lui $S$ pe drum."
+          }
+         },
+         {
+          "text": {
+           "en": "Doar $a$",
+           "ro": "Doar $a$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Poate ieși și prin $c$ sau $d$ înainte de a ajunge la $a$.",
+           "ro": "Poate ieși și prin $c$ sau $d$ înainte de a ajunge la $a$."
+          },
+          "misconception": "nod-lasat-in-afara"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Partea până la $k$ costă cel puțin $u_k$, pentru că $(D)$: $u_k$ e costul minim al drumurilor care ies din $S$ abia în $k$.",
+        "ro": "Partea până la $k$ costă cel puțin $u_k$, pentru că $(D)$: $u_k$ e costul minim al drumurilor care ies din $S$ abia în $k$."
+       }
+      }
+     ],
+     "end": {
+      "en": "Prima jumătate: partea lui $P^1$ până la $k$ costă cel puțin $u_k$.",
+      "ro": "Prima jumătate: partea lui $P^1$ până la $k$ costă cel puțin $u_k$."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s4",
+   "title": {
+    "en": "Reducerea la absurd, sfârșitul",
+    "ro": "Reducerea la absurd, sfârșitul"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ag-l03d-p1b",
+     "claim": {
+      "en": "Continuăm: partea lui $P^1$ până la $k$ costă cel puțin $u_k$.",
+      "ro": "Continuăm: partea lui $P^1$ până la $k$ costă cel puțin $u_k$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Restul drumului, de la $k$ la $a$, costă $\\ge0$ (costuri nenegative). Deci $a(P^1)\\ge u_k$.",
+        "ro": "Restul drumului, de la $k$ la $a$, costă $\\ge0$ (costuri nenegative). Deci $a(P^1)\\ge u_k$."
+       }
+      },
+      {
+       "shown": {
+        "en": "Dar $u_k\\ge u_{j^*}=3$, pentru că $j^*$ are cel mai mic $u$ din afara lui $S$. Atunci $a(P^1)\\ge3$: absurd.",
+        "ro": "Dar $u_k\\ge u_{j^*}=3$, pentru că $j^*$ are cel mai mic $u$ din afara lui $S$. Atunci $a(P^1)\\ge3$: absurd."
+       },
+       "predict": {
+        "question": {
+         "en": "Ce rezultă?",
+         "ro": "Ce rezultă?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Nu există niciun drum mai ieftin: $u_a=3$ e minimul",
+           "ro": "Nu există niciun drum mai ieftin: $u_a=3$ e minimul"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: contradicția respinge presupunerea.",
+           "ro": "Corect: contradicția respinge presupunerea."
+          }
+         },
+         {
+          "text": {
+           "en": "$u_a$ trebuie să scadă",
+           "ro": "$u_a$ trebuie să scadă"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Contradicția arată că niciun drum nu e sub 3, deci $u_a$ nu mai are de ce să scadă.",
+           "ro": "Contradicția arată că niciun drum nu e sub 3, deci $u_a$ nu mai are de ce să scadă."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         },
+         {
+          "text": {
+           "en": "Algoritmul e greșit",
+           "ro": "Algoritmul e greșit"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Contradicția lovește presupunerea $a(P^1)<3$, nu algoritmul.",
+           "ro": "Contradicția lovește presupunerea $a(P^1)<3$, nu algoritmul."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Deci $j^*$ poate intra în $S$ cu $u_{j^*}$ ca cost final.",
+      "ro": "Deci $j^*$ poate intra în $S$ cu $u_{j^*}$ ca cost final."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s5",
+   "title": {
+    "en": "Unde se folosește a ≥ 0",
+    "ro": "Unde se folosește a ≥ 0"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q2",
+     "question": {
+      "en": "În lanțul $u_{j^*}>a(P^1)\\ge u_k+a(P^1_{kj^*})\\ge u_k\\ge u_{j^*}$: unde se folosește că toate costurile sunt $\\ge0$?",
+      "ro": "În lanțul $u_{j^*}>a(P^1)\\ge u_k+a(P^1_{kj^*})\\ge u_k\\ge u_{j^*}$: unde se folosește că toate costurile sunt $\\ge0$?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "La $u_k\\ge u_{j^*}$",
+        "ro": "La $u_k\\ge u_{j^*}$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Acolo se folosește că $j^*$ are cel mai mic $u$.",
+        "ro": "Acolo se folosește că $j^*$ are cel mai mic $u$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "La $u_k+a(P^1_{kj^*})\\ge u_k$: restul drumului nu scade costul",
+        "ro": "La $u_k+a(P^1_{kj^*})\\ge u_k$: restul drumului nu scade costul"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: fără aceasta, restul ar putea fi negativ.",
+        "ro": "Corect: fără aceasta, restul ar putea fi negativ."
+       }
+      },
+      {
+       "text": {
+        "en": "La $a(P^1)\\ge u_k+\\dots$",
+        "ro": "La $a(P^1)\\ge u_k+\\dots$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Acolo se folosește invariantul (D).",
+        "ro": "Acolo se folosește invariantul (D)."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s6",
+   "title": {
+    "en": "Afirmația 2: invariantul rămâne",
+    "ro": "Afirmația 2: invariantul rămâne"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "După $S\\leftarrow S+\\{j^*\\}$, pentru $j\\notin S$ apar drumuri noi: cele care trec prin $j^*$.",
+       "ro": "După $S\\leftarrow S+\\{j^*\\}$, pentru $j\\notin S$ apar drumuri noi: cele care trec prin $j^*$."
+      },
+      {
+       "en": "Drumul cel mai ieftin cu singurul nod din afară $j$, care trece prin $j^*$, costă $u_{j^*}+a_{j^*j}$.",
+       "ro": "Drumul cel mai ieftin cu singurul nod din afară $j$, care trece prin $j^*$, costă $u_{j^*}+a_{j^*j}$."
+      },
+      {
+       "en": "Bucla `for` face exact $u_j\\leftarrow\\min(u_j,\\,u_{j^*}+a_{j^*j})$.",
+       "ro": "Bucla `for` face exact $u_j\\leftarrow\\min(u_j,\\,u_{j^*}+a_{j^*j})$."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q3",
+     "question": {
+      "en": "În G1, după ce $a$ intră în $S$: cât devine $u_d$ (era 10)?",
+      "ro": "În G1, după ce $a$ intră în $S$: cât devine $u_d$ (era 10)?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "10, rămâne",
+        "ro": "10, rămâne"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Drumul prin $a$ costă mai puțin: $3+6=9$.",
+        "ro": "Drumul prin $a$ costă mai puțin: $3+6=9$."
+       },
+       "misconception": "schimbare-fara-scadere"
+      },
+      {
+       "text": {
+        "en": "6",
+        "ro": "6"
+       },
+       "correct": false,
+       "explain": {
+        "en": "6 e costul arcului $a\\rightarrow d$ fără $u_a$.",
+        "ro": "6 e costul arcului $a\\rightarrow d$ fără $u_a$."
+       },
+       "misconception": "cost-arc-fara-u"
+      },
+      {
+       "text": {
+        "en": "9, din $s\\rightarrow b\\rightarrow a\\rightarrow d$: $3+6$",
+        "ro": "9, din $s\\rightarrow b\\rightarrow a\\rightarrow d$: $3+6$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $\\min(10,\\,3+6)=9$.",
+        "ro": "Corect: $\\min(10,\\,3+6)=9$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s7",
+   "title": {
+    "en": "De ce doar arcul j* → j",
+    "ro": "De ce doar arcul j* → j"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Un drum nou spre $j$ ar putea trece prin $j^*$ și apoi prin alt nod $x\\in S$. Dar un drum care trece prin $j^*$ și apoi prin $x\\in S$ ajunge în $x$ cu cost cel puțin $u_{j^*}\\ge u_x$, deci nu e mai ieftin decât drumul deja găsit spre $x$. Rămâne să verifici arcul $j^*\\rightarrow j$.",
+      "ro": "Un drum nou spre $j$ ar putea trece prin $j^*$ și apoi prin alt nod $x\\in S$. Dar un drum care trece prin $j^*$ și apoi prin $x\\in S$ ajunge în $x$ cu cost cel puțin $u_{j^*}\\ge u_x$, deci nu e mai ieftin decât drumul deja găsit spre $x$. Rămâne să verifici arcul $j^*\\rightarrow j$."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q4",
+     "question": {
+      "en": "$x\\in S$ are $u_x=2$; $u_{j^*}=5$. Un drum prin $j^*$, apoi prin $x$, ajunge în $x$ cu cost cel puțin…",
+      "ro": "$x\\in S$ are $u_x=2$; $u_{j^*}=5$. Un drum prin $j^*$, apoi prin $x$, ajunge în $x$ cu cost cel puțin…"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "2",
+        "ro": "2"
+       },
+       "correct": false,
+       "explain": {
+        "en": "2 e $u_x$; drumul trece întâi prin $j^*$, iar până acolo costă deja 5.",
+        "ro": "2 e $u_x$; drumul trece întâi prin $j^*$, iar până acolo costă deja 5."
+       },
+       "misconception": "cost-arc-fara-u"
+      },
+      {
+       "text": {
+        "en": "5: deci nu bate drumul deja găsit spre $x$, de cost 2",
+        "ro": "5: deci nu bate drumul deja găsit spre $x$, de cost 2"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: până la $j^*$ costă cel puțin 5, iar restul adaugă $\\ge0$.",
+        "ro": "Corect: până la $j^*$ costă cel puțin 5, iar restul adaugă $\\ge0$."
+       }
+      },
+      {
+       "text": {
+        "en": "7",
+        "ro": "7"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu se adună $u_x$: până la $x$ drumul costă cel puțin cât până la $j^*$, adică 5.",
+        "ro": "Nu se adună $u_x$: până la $x$ drumul costă cel puțin cât până la $j^*$, adică 5."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s8",
+   "title": {
+    "en": "Începutul și sfârșitul demonstrației",
+    "ro": "Începutul și sfârșitul demonstrației"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ag-l03d-p3",
+     "claim": {
+      "en": "Dijkstra rezolvă P2 dacă toate costurile sunt $\\ge0$.",
+      "ro": "Dijkstra rezolvă P2 dacă toate costurile sunt $\\ge0$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Început: $S=\\{s\\}$, $u_s=0$ și $u_i=a_{si}$. Pentru $i\\notin S$, un drum al cărui singur nod din afara lui $S$ e $i$ este doar arcul $s\\rightarrow i$.",
+        "ro": "Început: $S=\\{s\\}$, $u_s=0$ și $u_i=a_{si}$. Pentru $i\\notin S$, un drum al cărui singur nod din afara lui $S$ e $i$ este doar arcul $s\\rightarrow i$."
+       },
+       "predict": {
+        "question": {
+         "en": "Este $(D)$ adevărat imediat după pasul de început?",
+         "ro": "Este $(D)$ adevărat imediat după pasul de început?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Nu: trebuie întâi o rundă",
+           "ro": "Nu: trebuie întâi o rundă"
+          },
+          "correct": false,
+          "explain": {
+           "en": "(D) cere drumuri care ies din $S=\\{s\\}$ abia în $i$; acestea sunt arcele $s\\rightarrow i$, deja în $u_i$.",
+           "ro": "(D) cere drumuri care ies din $S=\\{s\\}$ abia în $i$; acestea sunt arcele $s\\rightarrow i$, deja în $u_i$."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         },
+         {
+          "text": {
+           "en": "Da: singurul astfel de drum spre $i$ e arcul $s\\rightarrow i$, de cost $a_{si}=u_i$",
+           "ro": "Da: singurul astfel de drum spre $i$ e arcul $s\\rightarrow i$, de cost $a_{si}=u_i$"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: acesta e cazul de bază.",
+           "ro": "Corect: acesta e cazul de bază."
+          }
+         },
+         {
+          "text": {
+           "en": "Doar pentru $s$",
+           "ro": "Doar pentru $s$"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Și pentru $i\\notin S$: $u_i=a_{si}$ e exact minimul cerut.",
+           "ro": "Și pentru $i\\notin S$: $u_i=a_{si}$ e exact minimul cerut."
+          },
+          "misconception": "caz-particular"
+         }
+        ]
+       }
+      },
+      {
+       "shown": {
+        "en": "Fiecare rundă: Afirmația 1 pune $j^*$ în $S$ cu costul final, iar Afirmația 2 păstrează $(D)$.",
+        "ro": "Fiecare rundă: Afirmația 1 pune $j^*$ în $S$ cu costul final, iar Afirmația 2 păstrează $(D)$."
+       }
+      },
+      {
+       "shown": {
+        "en": "Sfârșit: după $n-1$ runde, $S=V$. Prima linie din $(D)$ spune că fiecare $u_i$ e costul minim: P2 e rezolvată.",
+        "ro": "Sfârșit: după $n-1$ runde, $S=V$. Prima linie din $(D)$ spune că fiecare $u_i$ e costul minim: P2 e rezolvată."
+       }
+      }
+     ],
+     "end": {
+      "en": "Bază, pas, sfârșit: o inducție după numărul de runde.",
+      "ro": "Bază, pas, sfârșit: o inducție după numărul de runde."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s9",
+   "title": {
+    "en": "Exercițiul 8: un arc negativ",
+    "ro": "Exercițiul 8: un arc negativ"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Arc negativ</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→a: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"44.3\" y1=\"92.8\" x2=\"134.8\" y2=\"47.6\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"87.9\" y=\"70.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"94.9\" y=\"84.8\" text-anchor=\"middle\">2</text></g><g><title>s→b: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"44.3\" y1=\"107.2\" x2=\"134.8\" y2=\"152.4\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"78.1\" y=\"130.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"85.1\" y=\"144.8\" text-anchor=\"middle\">3</text></g><g><title>b→a: -2</title><line class=\"muted\" stroke-width=\"2\" x1=\"150\" y1=\"144\" x2=\"150\" y2=\"57\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"149.5\" y=\"91\" width=\"23\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"161\" y=\"105\" text-anchor=\"middle\">-2</text></g><g><title>a→c: 4</title><line class=\"muted\" stroke-width=\"2\" x1=\"164.7\" y1=\"46.3\" x2=\"274.4\" y2=\"93.3\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"208.7\" y=\"71.1\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"215.7\" y=\"85.1\" text-anchor=\"middle\">4</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"105.5\" text-anchor=\"middle\">s</text></g><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"40\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"45.5\" text-anchor=\"middle\">a</text></g><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"160\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"165.5\" text-anchor=\"middle\">b</text></g><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"290\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"290\" y=\"105.5\" text-anchor=\"middle\">c</text></g></svg>",
+        "alt": {
+         "en": "Digraful s→a 2, s→b 3, b→a -2, a→c 4.",
+         "ro": "Digraful s→a 2, s→b 3, b→a -2, a→c 4."
+        },
+        "caption": {
+         "en": "Exercițiul 8: Dijkstra eșuează.",
+         "ro": "Exercițiul 8: Dijkstra eșuează."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Dijkstra fixează $a$ cu $u_a=2$ (înaintea lui $b$, cu 3).",
+       "ro": "Dijkstra fixează $a$ cu $u_a=2$ (înaintea lui $b$, cu 3)."
+      },
+      {
+       "en": "Apoi $b$ nu mai poate scădea pe $a$: $a$ e deja în $S$.",
+       "ro": "Apoi $b$ nu mai poate scădea pe $a$: $a$ e deja în $S$."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q5",
+     "question": {
+      "en": "Ce întoarce Dijkstra pentru $u_c$ aici?",
+      "ro": "Ce întoarce Dijkstra pentru $u_c$ aici?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "5, corect",
+        "ro": "5, corect"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Dijkstra nu mai corectează un nod fixat: $a$ rămâne 2, deci $c=2+4$.",
+        "ro": "Dijkstra nu mai corectează un nod fixat: $a$ rămâne 2, deci $c=2+4$."
+       },
+       "misconception": "dijkstra-merge-cu-negative"
+      },
+      {
+       "text": {
+        "en": "6, dar costul real e 5",
+        "ro": "6, dar costul real e 5"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: l-a fixat pe $a$ prea devreme.",
+        "ro": "Corect: l-a fixat pe $a$ prea devreme."
+       }
+      },
+      {
+       "text": {
+        "en": "∞",
+        "ro": "∞"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$c$ se atinge prin $a$, deci primește o valoare finită.",
+        "ro": "$c$ se atinge prin $a$, deci primește o valoare finită."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03d-q6",
+     "status": "ruled",
+     "statement": {
+      "en": "Pe digraful $s\\rightarrow a$ 2, $s\\rightarrow b$ 3, $b\\rightarrow a$ $-2$, $a\\rightarrow c$ 4: cât este costul real al lui $c$?",
+      "ro": "Pe digraful $s\\rightarrow a$ 2, $s\\rightarrow b$ 3, $b\\rightarrow a$ $-2$, $a\\rightarrow c$ 4: cât este costul real al lui $c$?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "costul real",
+        "ro": "costul real"
+       },
+       "formula": "5",
+       "expected": 5
+      }
+     ],
+     "hints": [
+      {
+       "en": "Cel mai ieftin drum spre $a$ trece prin $b$.",
+       "ro": "Cel mai ieftin drum spre $a$ trece prin $b$."
+      },
+      {
+       "en": "$3-2=1$; apoi $a\\rightarrow c$.",
+       "ro": "$3-2=1$; apoi $a\\rightarrow c$."
+      },
+      {
+       "en": "$1+4=5$.",
+       "ro": "$1+4=5$."
+      }
+     ],
+     "solution": {
+      "en": "Drumul $s\\,b\\,a\\,c$: $3-2+4=5$.",
+      "ro": "Drumul $s\\,b\\,a\\,c$: $3-2+4=5$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pe digraful $s\\rightarrow a$ 5, $s\\rightarrow b$ 6, $b\\rightarrow a$ $-3$, $a\\rightarrow c$ 1: cât este costul real al lui $c$?",
+        "ro": "Pe digraful $s\\rightarrow a$ 5, $s\\rightarrow b$ 6, $b\\rightarrow a$ $-3$, $a\\rightarrow c$ 1: cât este costul real al lui $c$?"
+       },
+       "solution": {
+        "en": "$s\\,b\\,a$: $6-3=3<5$; apoi $3+1=4$.",
+        "ro": "$s\\,b\\,a$: $6-3=3<5$; apoi $3+1=4$."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "4",
+         "expected": 4
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s10",
+   "title": {
+    "en": "Unde se rupe demonstrația",
+    "ro": "Unde se rupe demonstrația"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q7",
+     "question": {
+      "en": "În demonstrație, care afirmație cade la exercițiul 8?",
+      "ro": "În demonstrație, care afirmație cade la exercițiul 8?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "$j^*$ are cel mai mic $u$",
+        "ro": "$j^*$ are cel mai mic $u$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Aceasta rămâne adevărată: $a$ avea cel mai mic $u$, 2.",
+        "ro": "Aceasta rămâne adevărată: $a$ avea cel mai mic $u$, 2."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Drumul pornește din $s$",
+        "ro": "Drumul pornește din $s$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Aceasta rămâne adevărată: orice drum din P2 pornește din $s$.",
+        "ro": "Aceasta rămâne adevărată: orice drum din P2 pornește din $s$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Restul drumului $k\\rightarrow j^*$ costă $\\ge0$: arcul $b\\rightarrow a$ costă $-2$",
+        "ro": "Restul drumului $k\\rightarrow j^*$ costă $\\ge0$: arcul $b\\rightarrow a$ costă $-2$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $b$ e $k$, iar restul e negativ.",
+        "ro": "Corect: $b$ e $k$, iar restul e negativ."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s11",
+   "title": {
+    "en": "Arce negative care nu strică",
+    "ro": "Arce negative care nu strică"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Uneori Dijkstra nimerește răspunsul și cu arce negative, dar nu e garantat. Sigur merge doar când arcele negative pleacă din $s$.",
+      "ro": "Uneori Dijkstra nimerește răspunsul și cu arce negative, dar nu e garantat. Sigur merge doar când arcele negative pleacă din $s$."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q8",
+     "question": {
+      "en": "Digraful $s\\rightarrow a$ 1, $s\\rightarrow b$ 3, $a\\rightarrow b$ $-5$. Dijkstra dă $b=-4$. Este corect?",
+      "ro": "Digraful $s\\rightarrow a$ 1, $s\\rightarrow b$ 3, $a\\rightarrow b$ $-5$. Dijkstra dă $b=-4$. Este corect?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Nu: orice arc negativ strică",
+        "ro": "Nu: orice arc negativ strică"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu orice arc negativ strică: aici niciun nod fixat nu mai putea scădea prin $b$.",
+        "ro": "Nu orice arc negativ strică: aici niciun nod fixat nu mai putea scădea prin $b$."
+       },
+       "misconception": "dijkstra-merge-cu-negative"
+      },
+      {
+       "text": {
+        "en": "Nu se poate calcula",
+        "ro": "Nu se poate calcula"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Se calculează: $b=\\min(3,\\,1-5)=-4$, iar singurul alt drum, arcul direct, costă 3.",
+        "ro": "Se calculează: $b=\\min(3,\\,1-5)=-4$, iar singurul alt drum, arcul direct, costă 3."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Da, aici: după $b$ nu mai urmează niciun nod deja fixat",
+        "ro": "Da, aici: după $b$ nu mai urmează niciun nod deja fixat"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $a$ se fixează (1), apoi $b=\\min(3,\\,1-5)=-4$, și nimic fixat nu depinde de $b$.",
+        "ro": "Corect: $a$ se fixează (1), apoi $b=\\min(3,\\,1-5)=-4$, și nimic fixat nu depinde de $b$."
+       }
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q9",
+     "question": {
+      "en": "Digraful $s\\rightarrow b$ $-2$, $s\\rightarrow a$ 5, $b\\rightarrow a$ 1. Dijkstra dă $a=-1$. Este corect?",
+      "ro": "Digraful $s\\rightarrow b$ $-2$, $s\\rightarrow a$ 5, $b\\rightarrow a$ 1. Dijkstra dă $a=-1$. Este corect?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Nu",
+        "ro": "Nu"
+       },
+       "correct": false,
+       "explain": {
+        "en": "E corect: drumurile spre $a$ sunt $s\\,a$ (5) și $s\\,b\\,a$ ($-1$), iar Dijkstra îl dă pe cel mai ieftin.",
+        "ro": "E corect: drumurile spre $a$ sunt $s\\,a$ (5) și $s\\,b\\,a$ ($-1$), iar Dijkstra îl dă pe cel mai ieftin."
+       },
+       "misconception": "dijkstra-merge-cu-negative"
+      },
+      {
+       "text": {
+        "en": "Da: arcul negativ pleacă din $s$ (e în $S$ de la început)",
+        "ro": "Da: arcul negativ pleacă din $s$ (e în $S$ de la început)"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $b=-2$ fixat primul, apoi $a=\\min(5,\\,-2+1)=-1$.",
+        "ro": "Corect: $b=-2$ fixat primul, apoi $a=\\min(5,\\,-2+1)=-1$."
+       }
+      },
+      {
+       "text": {
+        "en": "Dijkstra nu pornește cu arce negative",
+        "ro": "Dijkstra nu pornește cu arce negative"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pornește: pasul de început copiază doar costurile arcelor din $s$, oricare ar fi semnul lor.",
+        "ro": "Pornește: pasul de început copiază doar costurile arcelor din $s$, oricare ar fi semnul lor."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s12",
+   "title": {
+    "en": "Arcul negativ intră într-un nod nefixat, și totuși greșește",
+    "ro": "Arcul negativ intră într-un nod nefixat, și totuși greșește"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Arcul negativ intră într-un nod nefixat</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→a: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"43.4\" y1=\"91.3\" x2=\"115.7\" y2=\"44.3\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"79\" y=\"67.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"86\" y=\"81.7\" text-anchor=\"middle\">3</text></g><g><title>s→c: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"43.4\" y1=\"108.7\" x2=\"115.7\" y2=\"155.7\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"67\" y=\"132.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"74\" y=\"146.7\" text-anchor=\"middle\">1</text></g><g><title>c→d: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"145.2\" y1=\"160.1\" x2=\"313.8\" y2=\"105.3\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"226.4\" y=\"134\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"233.4\" y=\"148\" text-anchor=\"middle\">1</text></g><g><title>a→b: -5</title><line class=\"bad\" stroke-width=\"3\" x1=\"146\" y1=\"35\" x2=\"223\" y2=\"35\" marker-end=\"url(#ah-bad)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173.5\" y=\"37\" width=\"23\" height=\"18\"/><text class=\"bad\" font-weight=\"700\" font-size=\"15\" x=\"185\" y=\"51\" text-anchor=\"middle\">-5</text></g><g><title>b→d: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"253\" y1=\"44.4\" x2=\"316.2\" y2=\"90\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"271.6\" y=\"67.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"278.6\" y=\"81.4\" text-anchor=\"middle\">1</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"105.5\" text-anchor=\"middle\">s</text></g><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"130\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"130\" y=\"40.5\" text-anchor=\"middle\">a</text></g><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"240\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"240\" y=\"40.5\" text-anchor=\"middle\">b</text></g><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"130\" cy=\"165\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"130\" y=\"170.5\" text-anchor=\"middle\">c</text></g><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"330\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"105.5\" text-anchor=\"middle\">d</text></g></svg>",
+        "alt": {
+         "en": "Digraful s→a 3, s→c 1, c→d 1, a→b -5, b→d 1.",
+         "ro": "Digraful s→a 3, s→c 1, c→d 1, a→b -5, b→d 1."
+        },
+        "caption": {
+         "en": "Arcul roșu $a\\rightarrow b$ costă $-5$ și intră în $b$, încă nefixat.",
+         "ro": "Arcul roșu $a\\rightarrow b$ costă $-5$ și intră în $b$, încă nefixat."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Dijkstra fixează pe rând $c$, apoi $d$, apoi $a$, apoi $b$.",
+       "ro": "Dijkstra fixează pe rând $c$, apoi $d$, apoi $a$, apoi $b$."
+      }
+     ]
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03d-q10",
+     "status": "ruled",
+     "statement": {
+      "en": "Ce valoare întoarce Dijkstra pentru $d$ și cât costă de fapt cel mai ieftin drum spre $d$?",
+      "ro": "Ce valoare întoarce Dijkstra pentru $d$ și cât costă de fapt cel mai ieftin drum spre $d$?"
+     },
+     "fields": [
+      {
+       "id": "dij",
+       "kind": "num",
+       "label": {
+        "en": "Dijkstra dă $u_d$",
+        "ro": "Dijkstra dă $u_d$"
+       },
+       "formula": "2",
+       "expected": 2
+      },
+      {
+       "id": "real",
+       "kind": "num",
+       "label": {
+        "en": "costul real",
+        "ro": "costul real"
+       },
+       "formula": "-1",
+       "expected": -1
+      }
+     ],
+     "hints": [
+      {
+       "en": "Urmărește fixările: $c$ (1), $d$, $a$ (3), $b$.",
+       "ro": "Urmărește fixările: $c$ (1), $d$, $a$ (3), $b$."
+      },
+      {
+       "en": "$d$ se fixează cu $1+1=2$; apoi $b=3-5=-2$, dar $d$ e deja fixat. Drumul $s\\,a\\,b\\,d$: $3-5+1$.",
+       "ro": "$d$ se fixează cu $1+1=2$; apoi $b=3-5=-2$, dar $d$ e deja fixat. Drumul $s\\,a\\,b\\,d$: $3-5+1$."
+      },
+      {
+       "en": "Dijkstra: 2. Real: $-1$.",
+       "ro": "Dijkstra: 2. Real: $-1$."
+      }
+     ],
+     "solution": {
+      "en": "Dijkstra fixează $c$ (1), apoi $d$ cu $1+1=2$, apoi $a$ (3), apoi $b=3-5=-2$; arcul $b\\rightarrow d$ nu mai schimbă $d$, fixat deja. Drumul $s\\,a\\,b\\,d$ costă $3-5+1=-1<2$.",
+      "ro": "Dijkstra fixează $c$ (1), apoi $d$ cu $1+1=2$, apoi $a$ (3), apoi $b=3-5=-2$; arcul $b\\rightarrow d$ nu mai schimbă $d$, fixat deja. Drumul $s\\,a\\,b\\,d$ costă $3-5+1=-1<2$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "La fel, dar $b\\rightarrow d$ costă 4. Ce întoarce Dijkstra pentru $d$ și cât e costul real?",
+        "ro": "La fel, dar $b\\rightarrow d$ costă 4. Ce întoarce Dijkstra pentru $d$ și cât e costul real?"
+       },
+       "solution": {
+        "en": "Dijkstra dă tot 2. Acum $s\\,a\\,b\\,d$ costă $3-5+4=2$, la egalitate cu $s\\,c\\,d$: aici nimerește, din noroc.",
+        "ro": "Dijkstra dă tot 2. Acum $s\\,a\\,b\\,d$ costă $3-5+4=2$, la egalitate cu $s\\,c\\,d$: aici nimerește, din noroc."
+       },
+       "fields": [
+        {
+         "id": "dij",
+         "formula": "2",
+         "expected": 2
+        },
+        {
+         "id": "real",
+         "formula": "2",
+         "expected": 2
+        }
+       ],
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Varianta cu b→d = 4</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→a: 3</title><line class=\"muted\" stroke-width=\"2\" x1=\"43.4\" y1=\"91.3\" x2=\"115.7\" y2=\"44.3\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"79\" y=\"67.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"86\" y=\"81.7\" text-anchor=\"middle\">3</text></g><g><title>s→c: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"43.4\" y1=\"108.7\" x2=\"115.7\" y2=\"155.7\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"67\" y=\"132.7\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"74\" y=\"146.7\" text-anchor=\"middle\">1</text></g><g><title>c→d: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"145.2\" y1=\"160.1\" x2=\"313.8\" y2=\"105.3\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"226.4\" y=\"134\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"233.4\" y=\"148\" text-anchor=\"middle\">1</text></g><g><title>a→b: -5</title><line class=\"bad\" stroke-width=\"3\" x1=\"146\" y1=\"35\" x2=\"223\" y2=\"35\" marker-end=\"url(#ah-bad)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"173.5\" y=\"37\" width=\"23\" height=\"18\"/><text class=\"bad\" font-weight=\"700\" font-size=\"15\" x=\"185\" y=\"51\" text-anchor=\"middle\">-5</text></g><g><title>b→d: 4</title><line class=\"muted\" stroke-width=\"2\" x1=\"253\" y1=\"44.4\" x2=\"316.2\" y2=\"90\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"271.6\" y=\"67.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"278.6\" y=\"81.4\" text-anchor=\"middle\">4</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"105.5\" text-anchor=\"middle\">s</text></g><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"130\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"130\" y=\"40.5\" text-anchor=\"middle\">a</text></g><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"240\" cy=\"35\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"240\" y=\"40.5\" text-anchor=\"middle\">b</text></g><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"130\" cy=\"165\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"130\" y=\"170.5\" text-anchor=\"middle\">c</text></g><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"330\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"105.5\" text-anchor=\"middle\">d</text></g></svg>",
+        "alt": {
+         "en": "Digraful s→a 3, s→c 1, c→d 1, a→b -5, b→d 4.",
+         "ro": "Digraful s→a 3, s→c 1, c→d 1, a→b -5, b→d 4."
+        },
+        "caption": {
+         "en": "Varianta: $b\\rightarrow d$ costă 4.",
+         "ro": "Varianta: $b\\rightarrow d$ costă 4."
+        }
+       },
+       "data": {
+        "realv": 2,
+        "dijv": 2
+       }
+      }
+     ],
+     "detectors": [
+      {
+       "field": "dij",
+       "formula": "realv",
+       "message": {
+        "en": "Acesta e costul real. Dijkstra fixează $d$ înaintea lui $b$ și nu-l mai schimbă.",
+        "ro": "Acesta e costul real. Dijkstra fixează $d$ înaintea lui $b$ și nu-l mai schimbă."
+       }
+      },
+      {
+       "field": "real",
+       "formula": "dijv",
+       "message": {
+        "en": "Aceasta e valoarea dată de Dijkstra. Caută drumul prin $a$ și $b$.",
+        "ro": "Aceasta e valoarea dată de Dijkstra. Caută drumul prin $a$ și $b$."
+       }
+      }
+     ],
+     "data": {
+      "realv": -1,
+      "dijv": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s13",
+   "title": {
+    "en": "Costul alegerii minimului",
+    "ro": "Costul alegerii minimului"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "La fiecare rundă cauți minimul printre nodurile din afara lui $S$: $(n-1)+(n-2)+\\dots+1=\\frac{n(n-1)}{2}$ comparații în total, adică $O(n^2)$. Pentru G1, $n=6$: $15$.",
+      "ro": "La fiecare rundă cauți minimul printre nodurile din afara lui $S$: $(n-1)+(n-2)+\\dots+1=\\frac{n(n-1)}{2}$ comparații în total, adică $O(n^2)$. Pentru G1, $n=6$: $15$."
+     }
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03d-q11",
+     "status": "ruled",
+     "statement": {
+      "en": "Câte comparații face căutarea minimului pentru $n=8$?",
+      "ro": "Câte comparații face căutarea minimului pentru $n=8$?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "comparații",
+        "ro": "comparații"
+       },
+       "formula": "28",
+       "expected": 28
+      }
+     ],
+     "hints": [
+      {
+       "en": "Suma $7+6+\\dots+1$.",
+       "ro": "Suma $7+6+\\dots+1$."
+      },
+      {
+       "en": "$\\frac{8\\cdot7}{2}$.",
+       "ro": "$\\frac{8\\cdot7}{2}$."
+      },
+      {
+       "en": "28.",
+       "ro": "28."
+      }
+     ],
+     "solution": {
+      "en": "$7+6+5+4+3+2+1=28=\\frac{8\\cdot 7}{2}$.",
+      "ro": "$7+6+5+4+3+2+1=28=\\frac{8\\cdot 7}{2}$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Câte comparații pentru $n=6$ (digraful G1)?",
+        "ro": "Câte comparații pentru $n=6$ (digraful G1)?"
+       },
+       "solution": {
+        "en": "$5+4+3+2+1=15$.",
+        "ro": "$5+4+3+2+1=15$."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "15",
+         "expected": 15
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s14",
+   "title": {
+    "en": "Costul actualizărilor",
+    "ro": "Costul actualizărilor"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Fiecare arc $j^*\\rightarrow j$ e privit o singură dată, când $j^*$ intră în $S$: $O(m)$. Cum $m\\le n^2$, totalul e $O(n^2)$. G1 are $m=10$ arce.",
+      "ro": "Fiecare arc $j^*\\rightarrow j$ e privit o singură dată, când $j^*$ intră în $S$: $O(m)$. Cum $m\\le n^2$, totalul e $O(n^2)$. G1 are $m=10$ arce."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q12",
+     "question": {
+      "en": "Ce termen domină într-un digraf dens ($m$ aproape $n^2$)?",
+      "ro": "Ce termen domină într-un digraf dens ($m$ aproape $n^2$)?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Doar $m$",
+        "ro": "Doar $m$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Căutarea minimului e tot $n^2$.",
+        "ro": "Căutarea minimului e tot $n^2$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Ambii sunt $O(n^2)$: căutarea minimului și actualizările",
+        "ro": "Ambii sunt $O(n^2)$: căutarea minimului și actualizările"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect.",
+        "ro": "Corect."
+       }
+      },
+      {
+       "text": {
+        "en": "Niciunul: timp liniar",
+        "ro": "Niciunul: timp liniar"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Căutarea minimului singură face deja $n(n-1)/2$ comparații: timpul nu e liniar.",
+        "ro": "Căutarea minimului singură face deja $n(n-1)/2$ comparații: timpul nu e liniar."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s15",
+   "title": {
+    "en": "Cu o coadă de priorități",
+    "ro": "Cu o coadă de priorități"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Cu un heap, minimul se află rapid, dar fiecare scădere a unui $u_j$ costă $\\log n$: $O(m\\log n)$ (Johnson, 1977). Cu un heap Fibonacci: $O(m+n\\log n)$ (Fredman și Tarjan, 1984). Slide-ul spune că extragerea minimului e $O(1)$; în heap-ul binar, găsirea e $O(1)$, dar ștergerea e $O(\\log n)$.",
+      "ro": "Cu un heap, minimul se află rapid, dar fiecare scădere a unui $u_j$ costă $\\log n$: $O(m\\log n)$ (Johnson, 1977). Cu un heap Fibonacci: $O(m+n\\log n)$ (Fredman și Tarjan, 1984). Slide-ul spune că extragerea minimului e $O(1)$; în heap-ul binar, găsirea e $O(1)$, dar ștergerea e $O(\\log n)$."
+     }
+    },
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03d-q13",
+     "status": "ruled",
+     "statement": {
+      "en": "Pentru $n=1000$ și $m=5000$: cât e aproximativ $m\\log_2 n$ (cu $\\log_2 1000\\approx10$)?",
+      "ro": "Pentru $n=1000$ și $m=5000$: cât e aproximativ $m\\log_2 n$ (cu $\\log_2 1000\\approx10$)?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "aproximativ",
+        "ro": "aproximativ"
+       },
+       "formula": "50000",
+       "expected": 50000
+      }
+     ],
+     "hints": [
+      {
+       "en": "$m\\log n$.",
+       "ro": "$m\\log n$."
+      },
+      {
+       "en": "$5000\\times10$.",
+       "ro": "$5000\\times10$."
+      },
+      {
+       "en": "50 000.",
+       "ro": "50 000."
+      }
+     ],
+     "solution": {
+      "en": "$5000\\cdot10=50\\,000$, față de $n^2=1\\,000\\,000$.",
+      "ro": "$5000\\cdot10=50\\,000$, față de $n^2=1\\,000\\,000$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Pentru $n=100$ și $m=300$ ($\\log_2 100\\approx7$): cât e aproximativ $m\\log_2 n$?",
+        "ro": "Pentru $n=100$ și $m=300$ ($\\log_2 100\\approx7$): cât e aproximativ $m\\log_2 n$?"
+       },
+       "solution": {
+        "en": "$300\\cdot7=2100$, față de $n^2=10\\,000$.",
+        "ro": "$300\\cdot7=2100$, față de $n^2=10\\,000$."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "2100",
+         "expected": 2100
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s16",
+   "title": {
+    "en": "Heap sau scanare",
+    "ro": "Heap sau scanare"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q14",
+     "question": {
+      "en": "Când nu merită heap-ul?",
+      "ro": "Când nu merită heap-ul?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Când $m$ e aproape $n^2$: $m\\log n$ ajunge mai mare decât $n^2$",
+        "ro": "Când $m$ e aproape $n^2$: $m\\log n$ ajunge mai mare decât $n^2$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: la grafuri dense scanarea simplă câștigă.",
+        "ro": "Corect: la grafuri dense scanarea simplă câștigă."
+       }
+      },
+      {
+       "text": {
+        "en": "Mereu merită",
+        "ro": "Mereu merită"
+       },
+       "correct": false,
+       "explain": {
+        "en": "La $m\\approx n^2/2$: $\\approx n^2\\log n>n^2$.",
+        "ro": "La $m\\approx n^2/2$: $\\approx n^2\\log n>n^2$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Niciodată",
+        "ro": "Niciodată"
+       },
+       "correct": false,
+       "explain": {
+        "en": "La grafuri rare merită.",
+        "ro": "La grafuri rare merită."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s17",
+   "title": {
+    "en": "Exercițiul 5: costuri mici",
+    "ro": "Exercițiul 5: costuri mici"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "intro": [
+      {
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 200\"><title>Digraf cu costuri 0, 1, 2</title><defs><marker id=\"ah-muted\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-muted\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-ok\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-ok\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-bad\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-bad\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-accent\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-accent\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-fg\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-fg\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker><marker id=\"ah-warn\" viewBox=\"0 0 10 10\" markerWidth=\"11\" markerHeight=\"11\" refX=\"9\" refY=\"5\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path class=\"fill-warn\" stroke=\"none\" d=\"M0 1L9 5L0 9z\"/></marker></defs><g><title>s→a: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"44.3\" y1=\"92.8\" x2=\"134.8\" y2=\"47.6\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"87.9\" y=\"70.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"94.9\" y=\"84.8\" text-anchor=\"middle\">2</text></g><g><title>s→b: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"44.3\" y1=\"107.2\" x2=\"134.8\" y2=\"152.4\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"78.1\" y=\"130.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"85.1\" y=\"144.8\" text-anchor=\"middle\">1</text></g><g><title>b→a: 0</title><line class=\"muted\" stroke-width=\"2\" x1=\"150\" y1=\"144\" x2=\"150\" y2=\"57\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"154\" y=\"91\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"161\" y=\"105\" text-anchor=\"middle\">0</text></g><g><title>a→c: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"166\" y1=\"40\" x2=\"253\" y2=\"40\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"203\" y=\"42\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"210\" y=\"56\" text-anchor=\"middle\">2</text></g><g><title>b→c: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"161.3\" y1=\"148.7\" x2=\"258\" y2=\"52\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"210.8\" y=\"98.8\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"217.8\" y=\"112.8\" text-anchor=\"middle\">2</text></g><g><title>c→d: 1</title><line class=\"muted\" stroke-width=\"2\" x1=\"277.7\" y1=\"54\" x2=\"321.9\" y2=\"135.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"283.3\" y=\"91.3\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"290.3\" y=\"105.3\" text-anchor=\"middle\">1</text></g><g><title>a→d: 2</title><line class=\"muted\" stroke-width=\"2\" x1=\"163.7\" y1=\"48.3\" x2=\"315.5\" y2=\"141.1\" marker-end=\"url(#ah-muted)\"/><rect class=\"fill-bg\" stroke=\"none\" x=\"227.3\" y=\"95.4\" width=\"14\" height=\"18\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"234.3\" y=\"109.4\" text-anchor=\"middle\">2</text></g><g><title>s</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"30\" cy=\"100\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"30\" y=\"105.5\" text-anchor=\"middle\">s</text></g><g><title>a</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"40\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"45.5\" text-anchor=\"middle\">a</text></g><g><title>b</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"150\" cy=\"160\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"150\" y=\"165.5\" text-anchor=\"middle\">b</text></g><g><title>c</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"270\" cy=\"40\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"270\" y=\"45.5\" text-anchor=\"middle\">c</text></g><g><title>d</title><circle class=\"fill-bg fg\" stroke-width=\"2\" cx=\"330\" cy=\"150\" r=\"15\"/><text class=\"fg\" font-weight=\"700\" font-size=\"15\" x=\"330\" y=\"155.5\" text-anchor=\"middle\">d</text></g></svg>",
+        "alt": {
+         "en": "Digraful s→a 2, s→b 1, b→a 0, a→c 2, b→c 2, c→d 1, a→d 2; costuri între 0 și 2.",
+         "ro": "Digraful s→a 2, s→b 1, b→a 0, a→c 2, b→c 2, c→d 1, a→d 2; costuri între 0 și 2."
+        },
+        "caption": {
+         "en": "Costuri întregi din $\\{0,1,2\\}$, deci $C=2$.",
+         "ro": "Costuri întregi din $\\{0,1,2\\}$, deci $C=2$."
+        }
+       }
+      }
+     ],
+     "items": [
+      {
+       "en": "Dacă toate costurile sunt întregi din $\\{0,\\dots,C\\}$ și $C$ e constant, se poate ajunge la $O(n+m)$.",
+       "ro": "Dacă toate costurile sunt întregi din $\\{0,\\dots,C\\}$ și $C$ e constant, se poate ajunge la $O(n+m)$."
+      },
+      {
+       "en": "Idee: în loc de „cel mai mic $u$”, ținem **găleți** după valoarea lui $u$ și le golim în ordine.",
+       "ro": "Idee: în loc de „cel mai mic $u$”, ținem **găleți** după valoarea lui $u$ și le golim în ordine."
+      }
+     ]
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q15",
+     "question": {
+      "en": "Câte valori diferite poate avea un $u$ încă nefixat, la un moment dat?",
+      "ro": "Câte valori diferite poate avea un $u$ încă nefixat, la un moment dat?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Oricâte",
+        "ro": "Oricâte"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Toate $u$ nefixate sunt între $u$-ul curent și $u+C$.",
+        "ro": "Toate $u$ nefixate sunt între $u$-ul curent și $u+C$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Cel mult $C+1$ valori consecutive",
+        "ro": "Cel mult $C+1$ valori consecutive"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: de aceea e nevoie de doar $C+1$ găleți (circular).",
+        "ro": "Corect: de aceea e nevoie de doar $C+1$ găleți (circular)."
+       }
+      },
+      {
+       "text": {
+        "en": "Doar una",
+        "ro": "Doar una"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Pot fi mai multe, dar nu mai mult de $C+1$.",
+        "ro": "Pot fi mai multe, dar nu mai mult de $C+1$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s18",
+   "title": {
+    "en": "Găleți: golirea lor, în ordine",
+    "ro": "Găleți: golirea lor, în ordine"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ag-l03d-p2",
+     "claim": {
+      "en": "Pe digraful de mai sus ($C=2$). Găleata $k$ conține nodurile cu $u=k$.",
+      "ro": "Pe digraful de mai sus ($C=2$). Găleata $k$ conține nodurile cu $u=k$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Găleata 0: doar $s$. Îl fixăm; $a$ primește 2, $b$ primește 1.",
+        "ro": "Găleata 0: doar $s$. Îl fixăm; $a$ primește 2, $b$ primește 1."
+       },
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 120\"><title>Găleți</title><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"12\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"51\" y=\"28\" text-anchor=\"middle\">u = 0</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"51\" y=\"76\" text-anchor=\"middle\">s</text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"98\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"137\" y=\"28\" text-anchor=\"middle\">u = 1</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"137\" y=\"76\" text-anchor=\"middle\">b</text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"184\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"223\" y=\"28\" text-anchor=\"middle\">u = 2</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"223\" y=\"76\" text-anchor=\"middle\">a</text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"270\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"309\" y=\"28\" text-anchor=\"middle\">u = 3</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"309\" y=\"76\" text-anchor=\"middle\"></text></svg>",
+        "alt": {
+         "en": "Găleți: 0: s; 1: b; 2: a.",
+         "ro": "Găleți: 0: s; 1: b; 2: a."
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "Găleata 1: $b$. Îl fixăm. Arcul $b\\rightarrow a$ costă 0: $a$ scade la 1 și intră în aceeași găleată. $b\\rightarrow c$: $c=3$.",
+        "ro": "Găleata 1: $b$. Îl fixăm. Arcul $b\\rightarrow a$ costă 0: $a$ scade la 1 și intră în aceeași găleată. $b\\rightarrow c$: $c=3$."
+       },
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 120\"><title>Găleți</title><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"12\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"51\" y=\"28\" text-anchor=\"middle\">u = 0</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"51\" y=\"76\" text-anchor=\"middle\"></text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"98\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"137\" y=\"28\" text-anchor=\"middle\">u = 1</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"137\" y=\"76\" text-anchor=\"middle\">a</text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"184\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"223\" y=\"28\" text-anchor=\"middle\">u = 2</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"223\" y=\"76\" text-anchor=\"middle\">a (vechi)</text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"270\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"309\" y=\"28\" text-anchor=\"middle\">u = 3</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"309\" y=\"76\" text-anchor=\"middle\">c</text></svg>",
+        "alt": {
+         "en": "Găleți: 1: a; 2: a (vechi); 3: c.",
+         "ro": "Găleți: 1: a; 2: a (vechi); 3: c."
+        }
+       },
+       "predict": {
+        "question": {
+         "en": "După fixarea lui $b$, în ce găleată e $a$?",
+         "ro": "După fixarea lui $b$, în ce găleată e $a$?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "În găleata 1 (cu $u_a=1$)",
+           "ro": "În găleata 1 (cu $u_a=1$)"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: $1+0=1$, aceeași găleată.",
+           "ro": "Corect: $1+0=1$, aceeași găleată."
+          }
+         },
+         {
+          "text": {
+           "en": "În găleata 2, ca înainte",
+           "ro": "În găleata 2, ca înainte"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Arcul de cost 0 l-a coborât la 1.",
+           "ro": "Arcul de cost 0 l-a coborât la 1."
+          },
+          "misconception": "schimbare-fara-scadere"
+         },
+         {
+          "text": {
+           "en": "Nu mai e în nicio găleată",
+           "ro": "Nu mai e în nicio găleată"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Încă nu a fost fixat.",
+           "ro": "Încă nu a fost fixat."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Mai rămân $a$ în găleata 1 și intrarea veche a lui $a$ în găleata 2.",
+      "ro": "Mai rămân $a$ în găleata 1 și intrarea veche a lui $a$ în găleata 2."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s19",
+   "title": {
+    "en": "Găleți: sfârșitul",
+    "ro": "Găleți: sfârșitul"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "proof-steps",
+     "id": "ag-l03d-p2b",
+     "claim": {
+      "en": "Continuăm: găleata 1 îl are pe $a$ ($u_a=1$), găleata 2 intrarea veche a lui $a$, găleata 3 pe $c$.",
+      "ro": "Continuăm: găleata 1 îl are pe $a$ ($u_a=1$), găleata 2 intrarea veche a lui $a$, găleata 3 pe $c$."
+     },
+     "steps": [
+      {
+       "shown": {
+        "en": "Încă în găleata 1: fixăm $a$ ($u_a=1$). $a\\rightarrow c$: $1+2=3$ (egal); $a\\rightarrow d$: $1+2=3$. Intră $c$ și $d$ în găleata 3.",
+        "ro": "Încă în găleata 1: fixăm $a$ ($u_a=1$). $a\\rightarrow c$: $1+2=3$ (egal); $a\\rightarrow d$: $1+2=3$. Intră $c$ și $d$ în găleata 3."
+       },
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 120\"><title>Găleți</title><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"12\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"51\" y=\"28\" text-anchor=\"middle\">u = 0</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"51\" y=\"76\" text-anchor=\"middle\"></text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"98\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"137\" y=\"28\" text-anchor=\"middle\">u = 1</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"137\" y=\"76\" text-anchor=\"middle\"></text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"184\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"223\" y=\"28\" text-anchor=\"middle\">u = 2</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"223\" y=\"76\" text-anchor=\"middle\">a (vechi)</text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"270\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"309\" y=\"28\" text-anchor=\"middle\">u = 3</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"309\" y=\"76\" text-anchor=\"middle\">c, d</text></svg>",
+        "alt": {
+         "en": "Găleți: 2: a (vechi); 3: c, d.",
+         "ro": "Găleți: 2: a (vechi); 3: c, d."
+        }
+       }
+      },
+      {
+       "shown": {
+        "en": "Găleata 2: intrarea veche a lui $a$ ($u_a$ e acum 1, nu 2) se sare. Găleata 3: fixăm $c$ și $d$.",
+        "ro": "Găleata 2: intrarea veche a lui $a$ ($u_a$ e acum 1, nu 2) se sare. Găleata 3: fixăm $c$ și $d$."
+       },
+       "figure": {
+        "svg": "<svg viewBox=\"0 0 360 120\"><title>Găleți</title><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"12\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"51\" y=\"28\" text-anchor=\"middle\">u = 0</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"51\" y=\"76\" text-anchor=\"middle\"></text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"98\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"137\" y=\"28\" text-anchor=\"middle\">u = 1</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"137\" y=\"76\" text-anchor=\"middle\"></text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"184\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"223\" y=\"28\" text-anchor=\"middle\">u = 2</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"223\" y=\"76\" text-anchor=\"middle\"></text><rect class=\"fill-soft muted\" stroke-width=\"1.5\" x=\"270\" y=\"40\" width=\"78\" height=\"60\" rx=\"6\"/><text class=\"muted\" font-weight=\"700\" font-size=\"15\" x=\"309\" y=\"28\" text-anchor=\"middle\">u = 3</text><text class=\"fg\" font-weight=\"700\" font-size=\"16\" x=\"309\" y=\"76\" text-anchor=\"middle\">c, d</text></svg>",
+        "alt": {
+         "en": "Găleți: 3: c, d.",
+         "ro": "Găleți: 3: c, d."
+        }
+       },
+       "predict": {
+        "question": {
+         "en": "Ce faci cu intrarea veche a lui $a$ din găleata 2?",
+         "ro": "Ce faci cu intrarea veche a lui $a$ din găleata 2?"
+        },
+        "options": [
+         {
+          "text": {
+           "en": "Îl fixezi din nou pe $a$, cu 2",
+           "ro": "Îl fixezi din nou pe $a$, cu 2"
+          },
+          "correct": false,
+          "explain": {
+           "en": "Un nod fixat nu se mai fixează; valoarea lui finală e 1.",
+           "ro": "Un nod fixat nu se mai fixează; valoarea lui finală e 1."
+          },
+          "misconception": "schimbare-fara-scadere"
+         },
+         {
+          "text": {
+           "en": "O sari: $a$ e deja fixat, cu 1",
+           "ro": "O sari: $a$ e deja fixat, cu 1"
+          },
+          "correct": true,
+          "explain": {
+           "en": "Corect: o intrare învechită nu mai fixează nimic.",
+           "ro": "Corect: o intrare învechită nu mai fixează nimic."
+          }
+         },
+         {
+          "text": {
+           "en": "Mută $a$ în găleata 3",
+           "ro": "Mută $a$ în găleata 3"
+          },
+          "correct": false,
+          "explain": {
+           "en": "$a$ e deja fixat; găleata 3 îi are pe $c$ și $d$.",
+           "ro": "$a$ e deja fixat; găleata 3 îi are pe $c$ și $d$."
+          },
+          "misconception": "presupunerea-luata-drept-regula-generala"
+         }
+        ]
+       }
+      }
+     ],
+     "end": {
+      "en": "Rezultat: $a=1$, $b=1$, $c=3$, $d=3$. Intrările învechite se sar.",
+      "ro": "Rezultat: $a=1$, $b=1$, $c=3$, $d=3$. Intrările învechite se sar."
+     }
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s20",
+   "title": {
+    "en": "De ce e liniar",
+    "ro": "De ce e liniar"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "learn",
+     "content": {
+      "en": "Cel mai mare $u$ e cel mult $C(n-1)$: parcurgi $O(nC)$ găleți, iar fiecare arc e privit o dată: timp $O(nC+m)$. Cu $C$ constant: $O(n+m)$.",
+      "ro": "Cel mai mare $u$ e cel mult $C(n-1)$: parcurgi $O(nC)$ găleți, iar fiecare arc e privit o dată: timp $O(nC+m)$. Cu $C$ constant: $O(n+m)$."
+     }
+    },
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q16",
+     "question": {
+      "en": "Dacă $C$ crește cât $n$ (de exemplu $C=n$), ce se întâmplă cu timpul?",
+      "ro": "Dacă $C$ crește cât $n$ (de exemplu $C=n$), ce se întâmplă cu timpul?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Rămâne $O(n+m)$",
+        "ro": "Rămâne $O(n+m)$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "$nC$ nu mai e constant.",
+        "ro": "$nC$ nu mai e constant."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Devine $O(\\log n)$",
+        "ro": "Devine $O(\\log n)$"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Fiecare arc e privit măcar o dată, deci timpul nu scade sub $m$.",
+        "ro": "Fiecare arc e privit măcar o dată, deci timpul nu scade sub $m$."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Devine $O(n^2+m)$: avantajul dispare",
+        "ro": "Devine $O(n^2+m)$: avantajul dispare"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: $nC=n^2$.",
+        "ro": "Corect: $nC=n^2$."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s21",
+   "title": {
+    "en": "Pe scurt",
+    "ro": "Pe scurt"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "steps",
+     "items": [
+      {
+       "en": "Dijkstra e corect pentru costuri $\\ge0$: nodul cu cel mai mic $u$ are costul final.",
+       "ro": "Dijkstra e corect pentru costuri $\\ge0$: nodul cu cel mai mic $u$ are costul final."
+      },
+      {
+       "en": "Cu un arc negativ care poate îmbunătăți un nod fixat, eșuează.",
+       "ro": "Cu un arc negativ care poate îmbunătăți un nod fixat, eșuează."
+      },
+      {
+       "en": "Timp: $O(n^2)$; cu heap $O(m\\log n)$; cu heap Fibonacci $O(m+n\\log n)$.",
+       "ro": "Timp: $O(n^2)$; cu heap $O(m\\log n)$; cu heap Fibonacci $O(m+n\\log n)$."
+      },
+      {
+       "en": "Costuri întregi mici: găleți, $O(nC+m)$.",
+       "ro": "Costuri întregi mici: găleți, $O(nC+m)$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s22",
+   "title": {
+    "en": "Verificare: ce spune demonstrația",
+    "ro": "Verificare: ce spune demonstrația"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q17",
+     "question": {
+      "en": "Care din aceste elemente e **ipoteză** a demonstrației corectitudinii lui Dijkstra?",
+      "ro": "Care din aceste elemente e **ipoteză** a demonstrației corectitudinii lui Dijkstra?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Digraful e un dag",
+        "ro": "Digraful e un dag"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Demonstrația nu folosește lipsa circuitelor: G1 are circuite și Dijkstra merge.",
+        "ro": "Demonstrația nu folosește lipsa circuitelor: G1 are circuite și Dijkstra merge."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Toate costurile arcelor sunt $\\ge0$",
+        "ro": "Toate costurile arcelor sunt $\\ge0$"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect.",
+        "ro": "Corect."
+       }
+      },
+      {
+       "text": {
+        "en": "Toate costurile sunt distincte",
+        "ro": "Toate costurile sunt distincte"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Egalitățile nu strică.",
+        "ro": "Egalitățile nu strică."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s23",
+   "title": {
+    "en": "Verificare: comparații",
+    "ro": "Verificare: comparații"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "calc-exercise",
+     "id": "ag-l03d-q18",
+     "status": "ruled",
+     "statement": {
+      "en": "Câte comparații cere căutarea minimului pentru $n=10$?",
+      "ro": "Câte comparații cere căutarea minimului pentru $n=10$?"
+     },
+     "fields": [
+      {
+       "id": "c",
+       "kind": "num",
+       "label": {
+        "en": "comparații",
+        "ro": "comparații"
+       },
+       "formula": "45",
+       "expected": 45
+      }
+     ],
+     "hints": [
+      {
+       "en": "$9+8+\\dots+1$.",
+       "ro": "$9+8+\\dots+1$."
+      },
+      {
+       "en": "$\\frac{10\\cdot9}{2}$.",
+       "ro": "$\\frac{10\\cdot9}{2}$."
+      },
+      {
+       "en": "45.",
+       "ro": "45."
+      }
+     ],
+     "solution": {
+      "en": "$\\frac{10\\cdot 9}{2}=45$.",
+      "ro": "$\\frac{10\\cdot 9}{2}=45$."
+     },
+     "variants": [
+      {
+       "statement": {
+        "en": "Câte pentru $n=5$?",
+        "ro": "Câte pentru $n=5$?"
+       },
+       "solution": {
+        "en": "$4+3+2+1=10$.",
+        "ro": "$4+3+2+1=10$."
+       },
+       "fields": [
+        {
+         "id": "c",
+         "formula": "10",
+         "expected": 10
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ag-l03d-s24",
+   "title": {
+    "en": "Verificare: ce valoare are o găleată",
+    "ro": "Verificare: ce valoare are o găleată"
+   },
+   "kicker": {
+    "en": "Lecția 3d",
+    "ro": "Lecția 3d"
+   },
+   "blocks": [
+    {
+     "type": "mcq",
+     "id": "ag-l03d-q19",
+     "question": {
+      "en": "Un nod are $u=4$ și un arc de cost 0 îl scade la 3 când sosește $j^*$. Ce se face cu intrarea veche din găleata 4?",
+      "ro": "Un nod are $u=4$ și un arc de cost 0 îl scade la 3 când sosește $j^*$. Ce se face cu intrarea veche din găleata 4?"
+     },
+     "options": [
+      {
+       "text": {
+        "en": "Se mută imediat",
+        "ro": "Se mută imediat"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Nu e nevoie: se sare când se întâlnește.",
+        "ro": "Nu e nevoie: se sare când se întâlnește."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Se fixează nodul din nou",
+        "ro": "Se fixează nodul din nou"
+       },
+       "correct": false,
+       "explain": {
+        "en": "Un nod fixat nu mai e fixat.",
+        "ro": "Un nod fixat nu mai e fixat."
+       },
+       "misconception": "presupunerea-luata-drept-regula-generala"
+      },
+      {
+       "text": {
+        "en": "Rămâne acolo și se sare când ajungem la ea",
+        "ro": "Rămâne acolo și se sare când ajungem la ea"
+       },
+       "correct": true,
+       "explain": {
+        "en": "Corect: nodul e deja fixat, intrarea e învechită.",
+        "ro": "Corect: nodul e deja fixat, intrarea e învechită."
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
