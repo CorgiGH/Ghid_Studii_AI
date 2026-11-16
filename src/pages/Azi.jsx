@@ -4,7 +4,7 @@ import { useApp } from '../contexts/AppContext';
 import { useLessonStore } from '../lesson/useLessonStore';
 import schedule from '../content/schedule-y2s1.json';
 import {
-  courseInfo, buildTargets, isPassed, openingIndex, nextIndexAfter, moveIndex, markDone, unmarkDone,
+  courseInfo, buildTargets, buildRoute, isPassed, openingIndex, nextIndexAfter, moveIndex, markDone, unmarkDone,
 } from './aziLogic';
 
 const STORE_KEY = 'azi.v1';
@@ -116,6 +116,7 @@ export default function Azi() {
 
   const targets = step ? buildTargets(step) : [];
   const hasLesson = targets.some(x => x.kind === 'lesson');
+  const route = step ? buildRoute(step) : [];
   const progressOf = (target) => {
     const info = target.courseId ? courseInfo(target.subject, target.courseId) : null;
     if (!info || !info.src || !info.total || !store.hasPosition(info.src)) return null;
@@ -173,6 +174,30 @@ export default function Azi() {
               {t('Why it matters', 'De ce contează')}
             </h4>
             <p className="text-lg leading-relaxed mb-6">{step.why[lang]}</p>
+
+            {route.length > 0 && (
+              <div className="mb-6" data-testid="azi-route">
+                <h4 className="text-xs font-bold uppercase tracking-wide mb-2" style={muted}>
+                  {step.routeTitle ? step.routeTitle[lang] : t('In this order', 'În ordinea asta')}
+                </h4>
+                <ol className="flex flex-col gap-2">
+                  {route.map((r, i) => (
+                    <li key={r.key}>
+                      <Link to={r.href} className="flex items-start gap-3 rounded-xl px-4 py-3 min-h-[48px] active:scale-[0.99] transition-all"
+                        style={{ ...card, borderWidth: 2, borderColor: '#3b82f6' }} data-testid="azi-route-item">
+                        <span aria-hidden="true" className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold"
+                          style={{ backgroundColor: '#3b82f6', color: '#fff' }}>{i + 1}</span>
+                        <span className="flex-1 min-w-0">
+                          <span className="block text-lg font-bold leading-snug break-words">{r.label[lang]}</span>
+                          {r.then && <span className="block text-sm mt-0.5" style={muted}>{r.then[lang]}</span>}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ol>
+                {step.routeNote && <p className="text-base leading-relaxed mt-3">{step.routeNote[lang]}</p>}
+              </div>
+            )}
 
             <div className="flex flex-col gap-3">
               {targets.map((target) => (

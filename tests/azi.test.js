@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'fs';
 import schedule from '../src/content/schedule-y2s1.json';
 import {
-  buildTargets, openingIndex, nextIndexAfter, moveIndex, markDone, unmarkDone, resolveCourse,
+  buildTargets, buildRoute, courseInfo, openingIndex, nextIndexAfter, moveIndex, markDone, unmarkDone, resolveCourse,
 } from '../src/pages/aziLogic.js';
 
 const steps = [...schedule.steps].sort((a, b) => new Date(a.due) - new Date(b.due));
@@ -95,5 +96,36 @@ describe('azi real schedule', () => {
   it('ml-tema-6 has only its lesson (no crash pack in the schedule)', () => {
     const t = buildTargets(byId('ml-tema-6'));
     expect(t.map(x => x.kind)).toEqual(['lesson']);
+  });
+});
+
+describe('azi study route', () => {
+  it('every route entry opens an existing course, at the screen its stepId names', () => {
+    let seen = 0;
+    for (const step of steps) {
+      const built = buildRoute(step);
+      expect(built).toHaveLength((step.route || []).length);
+      for (const r of step.route || []) {
+        seen++;
+        const info = courseInfo(r.subject, r.course);
+        expect(info, `${step.id}: ${r.course}`).not.toBeNull();
+        const s = r.s || 1;
+        expect(s).toBeLessThanOrEqual(info.total);
+        expect(r.label.ro && r.label.en).toBeTruthy();
+        if (r.stepId) {
+          const lesson = JSON.parse(readFileSync(`src/content/${info.src}`, 'utf8'));
+          expect(lesson.steps[s - 1].id, `${step.id}: ${r.course} screen ${s}`).toBe(r.stepId);
+        }
+      }
+    }
+    expect(seen).toBeGreaterThan(0);
+  });
+  it('ml-p1 starts with ID3 and deep-links into the pack; a route-less step gives no route', () => {
+    const r = buildRoute(byId('ml-p1'));
+    expect(r[0].courseId).toBe('ml-crash-p1');
+    expect(r[0].href).toMatch(/course_\d+\?s=\d+$/);
+    expect(new Set(r.map(x => x.href)).size).toBe(r.length);
+    expect(buildRoute(byId('ml-tema-6'))).toEqual([]);
+    expect(buildRoute({ id: 'x', route: [{ label: { en: 'a', ro: 'a' }, subject: 'ia', course: 'nope' }] })).toEqual([]);
   });
 });

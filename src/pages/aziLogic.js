@@ -90,3 +90,22 @@ export function buildTargets(step, resolve = resolveCourse) {
   crashOnly.forEach((t, i) => { t.part = i + 1; t.parts = crashOnly.length; });
   return out;
 }
+
+// The ordered study route of a step: where to study first, second, ... (deep links into lessons).
+// Schedule entry: route: [{ label: {en, ro}, subject, course, s?, stepId?, then?: {en, ro} }].
+// `s` is the 1-based screen to open; `stepId` names that screen so a test catches a pack that shifted.
+// Entries whose course does not exist are dropped. -> [{ key, href, label, then, courseId, subject, s }]
+export function buildRoute(step, resolve = resolveCourse) {
+  const list = step && Array.isArray(step.route) ? step.route : [];
+  const out = [];
+  for (const r of list) {
+    const base = resolve(r.subject, r.course);
+    if (!base) continue;
+    const s = Number.isInteger(r.s) && r.s > 1 ? r.s : 1;
+    out.push({
+      key: `${r.course}:${s}`, href: s > 1 ? `${base}?s=${s}` : base,
+      label: r.label, then: r.then || null, courseId: r.course, subject: r.subject, s,
+    });
+  }
+  return out;
+}
