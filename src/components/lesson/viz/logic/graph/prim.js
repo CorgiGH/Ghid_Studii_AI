@@ -57,7 +57,9 @@ export function prim(props) {
       key: `f${k}-add`, kind: 'single', answer: next,
       prompt: { en: 'Which node joins the tree now?', ro: 'Care nod intră acum în arbore?' },
       options: out.map((i) => ({ id: i, label: i })),
-      fb: (p, ok) => both((lang) => (lang === 'en'
+      fb: (p, ok) => both((lang) => (!ok && f.beta[p] === f.beta[next]
+        ? (lang === 'en' ? `Tie: β[${p}] = β[${next}] = ${B(f.beta[next])}. Both are valid picks; here a tie goes to the first node in order, ${next}.` : `Egalitate: β[${p}] = β[${next}] = ${B(f.beta[next])}. Ambele alegeri sunt corecte; aici, la egalitate luăm primul nod în ordine, ${next}.`)
+        : lang === 'en'
         ? (ok ? `β[${next}] = ${B(f.beta[next])} is the smallest outside V_s.` : `β[${p}] = ${B(f.beta[p])}, but β[${next}] = ${B(f.beta[next])} is smaller: take the smallest β outside V_s.`)
         : (ok ? `β[${next}] = ${B(f.beta[next])} e cel mai mic din afara lui V_s.` : `β[${p}] = ${B(f.beta[p])}, dar β[${next}] = ${B(f.beta[next])} e mai mic: luăm cel mai mic β din afara lui V_s.`))),
     }] };

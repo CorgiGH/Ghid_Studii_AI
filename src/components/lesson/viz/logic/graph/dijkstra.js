@@ -86,7 +86,9 @@ export function dijkstra(props) {
         options: out.map((i) => ({ id: i, label: i })),
         fb: (p, ok) => both((lang) => (ok
           ? (lang === 'en' ? `u_${next} = ${U(f.u[next])} is the smallest outside S.` : `u_${next} = ${U(f.u[next])} e cel mai mic din afara lui S.`)
-          : (lang === 'en' ? `u_${p} = ${U(f.u[p])}, but u_${next} = ${U(f.u[next])} is smaller: fix the smallest u outside S.` : `u_${p} = ${U(f.u[p])}, dar u_${next} = ${U(f.u[next])} e mai mic: fixăm cel mai mic u din afara lui S.`))),
+          : f.u[p] === f.u[next]
+            ? (lang === 'en' ? `Tie: u_${p} = u_${next} = ${U(f.u[next])}. Both are valid picks; here a tie goes to the first node in order, ${next}.` : `Egalitate: u_${p} = u_${next} = ${U(f.u[next])}. Ambele alegeri sunt corecte; aici, la egalitate luăm primul nod în ordine, ${next}.`)
+            : (lang === 'en' ? `u_${p} = ${U(f.u[p])}, but u_${next} = ${U(f.u[next])} is smaller: fix the smallest u outside S.` : `u_${p} = ${U(f.u[p])}, dar u_${next} = ${U(f.u[next])} e mai mic: fixăm cel mai mic u din afara lui S.`))),
       }] };
     }
     if (f.kind === 'round' && target !== undefined) {
